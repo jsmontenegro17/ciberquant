@@ -1,0 +1,2 @@
+# Sessions
+Purpose: snapshot and constrain a trading session. Table: `trading_sessions`; API `/api/v1/sessions`. Rules: OPEN/CLOSED/STOPPED, max loss and max operations checked before a trade. Limit: close endpoint and aggregate metrics pending.

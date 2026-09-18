@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ciberquant
+      POSTGRES_USER: ciberquant
+      POSTGRES_PASSWORD: ciberquant
+    ports: ['5432:5432']
+    healthcheck: {test: ['CMD-SHELL', 'pg_isready -U ciberquant -d ciberquant'], interval: 5s, timeout: 5s, retries: 10}
+    volumes: [ciberquant_pg:/var/lib/postgresql/data]
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://ciberquant:ciberquant@db:5432/ciberquant
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-development}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-change-me-now}
+    ports: ['8000:8000']
+    depends_on: {db: {condition: service_healthy}}
+    command: sh -c 'alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000'
+  frontend:
+    build: ./frontend
+    environment: {VITE_API_URL: http://localhost:8000/api/v1}
+    ports: ['5173:5173']
+    depends_on: [backend]
+volumes: {ciberquant_pg: {}}

@@ -1,0 +1,8 @@
+modules:
+  auth: {docs: [docs/modules/AUTH.md], backend: [backend/app/api/auth.py], tests: [backend/tests/test_auth.py]}
+  users: {docs: [docs/modules/USERS.md], backend: [backend/app/models.py]}
+  trading_accounts: {docs: [docs/modules/TRADING_ACCOUNTS.md], backend: [backend/app/services/finance.py], dependencies: [users]}
+  risk: {docs: [docs/modules/RISK_ENGINE.md], backend: [backend/app/services/finance.py], dependencies: [trading_accounts]}
+  sessions: {docs: [docs/modules/SESSIONS.md], backend: [backend/app/api/trading.py], dependencies: [risk, trades]}
+  trades: {docs: [docs/modules/TRADES.md], backend: [backend/app/api/trading.py], dependencies: [sessions, trading_accounts]}
+  market_data: {docs: [docs/modules/MARKET_DATA.md], backend: [backend/app/services/market_data.py], tests: [backend/tests/test_market_data.py]}
