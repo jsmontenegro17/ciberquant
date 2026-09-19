@@ -292,6 +292,11 @@ def test_history_tracker_revisions_exact_identity_and_safe_projection():
         other = META.model_copy(update={"broker": "OTHER"})
         tracker.observe(other, [normalize_candle(raw(1), other, 42)], {"provider_time": BASE + timedelta(minutes=3)})
         assert len(tracker.conflicts) == 1
+        from dataclasses import replace
+
+        same = replace(normalize_candle(raw(1), other, 42), close=Decimal("1.1000200000"))
+        tracker.observe(other, [same], {"provider_time": BASE + timedelta(minutes=3)})
+        assert len(tracker.conflicts) == 1  # Decimal equality, not display-scale equality.
     finally:
         p.close()
 

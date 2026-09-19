@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime, timezone
+from decimal import Decimal
 
 
 def emit(value):
@@ -37,14 +38,15 @@ class HistoryTracker:
             )
             key = (*dataset.model_dump().values(), c.open_time)
             previous = self.records.setdefault(key, [])
-            if previous and previous[-1]["ohlc"] != rec["ohlc"]:
+            changed = [k for k in rec["ohlc"] if previous and Decimal(previous[-1]["ohlc"][k]) != Decimal(rec["ohlc"][k])]
+            if changed:
                 conflict = dict(
                     stage="CLOSED_REVISION",
                     detection_layer="LOCAL_HISTORY_OBSERVER",
                     first=previous[0],
                     previous=previous[-1],
                     revised=rec,
-                    changed_fields=[k for k in rec["ohlc"] if previous[-1]["ohlc"][k] != rec["ohlc"][k]],
+                    changed_fields=changed,
                     orders_sent=0,
                 )
                 self.conflicts.append(conflict)
