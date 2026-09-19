@@ -18,7 +18,7 @@ Statistical validation remains future scope. Strategies and in-sample binary bac
 Validation/walk-forward, live data/scanning and integrated research workspace.
 
 ## Modules in development
-REQ-005 — Strategy Lab & Binary Backtesting Engine: IN_PROGRESS. Private immutable versions, typed DSL, causal next-open execution, exact unit outcomes/metrics, snapshots/hashes, owned APIs and UI. IN-SAMPLE / NOT VALIDATED. REQ-001/002/003/004 remain DONE; cq-features-v1 source unchanged.
+REQ-005 — Strategy Lab & Binary Backtesting Engine: QA, Human Acceptance PENDING. Private immutable versions, typed DSL, causal next-open execution, exact unit outcomes/metrics, snapshots/hashes, owned APIs and UI. IN-SAMPLE / NOT VALIDATED. [PR #4](https://github.com/jsmontenegro17/ciberquant/pull/4) OPEN; Backend131 PASS/2 intentional SQLite skips, Frontend27 PASS, E2E4 PASS, Docker PASS. REQ-001/002/003/004 remain DONE; cq-features-v1 source unchanged.
 
 ## Experimental / disabled
 Auto-trading, broker integrations, ML and live streaming are disabled.
@@ -36,7 +36,7 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-[REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md): IN_PROGRESS. No statistical validation, money management, automatic trading or strategy recommendation. REQ-001 through REQ-004: DONE.
+[REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md): QA; Human Acceptance PENDING. No statistical validation, money management, automatic trading or strategy recommendation. REQ-001 through REQ-004: DONE.
 
 ## Next milestones
 REQ-005 Strategy Lab & Binary Backtesting Engine.

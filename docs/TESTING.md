@@ -12,6 +12,8 @@ Frontend tests cover creation, indicator/condition builder, typed constants, fie
 
 Benchmark: `cd backend; python scripts/benchmark_backtest.py`.100,000 synthetic candles, STANDARD, rule rsi14>=50 CALL,94,243 trades. Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14, one process. Features3.696s, signal evaluation0.391s, execution2.375s, total6.738s (includes generation and metrics, excludes SQL/JSON). Pure-engine trade cap explicitly100000 for benchmark; API default remains10000. Measurement, not SLA. Final local/CI evidence is in REQ-005.
 
+Local126 backend PASS/7 environment-specific skips;27 frontend PASS;4 E2E PASS. Remote CI35461839133:131 backend PASS/2 intentional SQLite concurrency skips,27 frontend PASS,4 E2E PASS, Docker PASS. PostgreSQL tests execute rather than skip. Final-head evidence follows PR #4/REQ-005; cq-features-v1 source matches v0.4.0 exactly.
+
 ## REQ-004
 
 `test_features.py` freezes manual SMA/EMA/RSI/ATR/population-Bollinger fixtures, null warmups, zero-range ratios, RSI100/0/50, gap continuity without resets, Decimal context isolation, serialized rounding, strict identities/specs, prefix100/200 and future-mutation invariance. Fixture closes1..100: EMA20 seed10.5 at index19; serialized EMA20=90.5 at index99; RSI14=100 from index14. Recurrence uses50-digit Decimal, no intermediate quantization; compare canonical18-fractional-digit strings at API boundaries.

@@ -1,6 +1,6 @@
 # REQ-005 — Strategy Lab & Binary Backtesting Engine
 
-Status: IN_PROGRESS
+Status: QA
 Priority: P1
 Classification: CRITICAL
 Target: 0.5.0-dev
@@ -16,7 +16,7 @@ Immutable private strategy versions and canonical hashes; cq-strategy-dsl-v1 typ
 
 Freeze DSL and execution semantics → models/migration → pure evaluator/outcome/event engine → transactional repositories/APIs → frontend → deterministic regression/ownership/PostgreSQL/migration tests → E2E preserving REQ-002/003/004 →100k benchmark → docs → PR/CI → QA. No merge without Human Acceptance. No REQ-006, auto-trading, money management, martingale, feature-math changes, statistical validation or strategy rankings.
 
-Acceptance A–H: exact execution; bearish candle != PUT win;83.5%→0.835; no execution across gaps; bars_ago/warmup/availability; backfill replay; overlap policies; real UI→backtest→inspector. Validation pending.
+Acceptance A–H: exact execution; bearish candle != PUT win;83.5%→0.835; no execution across gaps; bars_ago/warmup/availability; backfill replay; overlap policies; real UI→backtest→inspector. Automated/agent QA PASS; Human Acceptance PENDING.
 
 ## Implemented contracts
 
@@ -24,7 +24,7 @@ Versions: cq-features-v1 (source unchanged from v0.4.0), cq-strategy-dsl-v1, cq-
 
 ## Local validation — 2026-09-19
 
-- Backend126 PASS/7 skips: PostgreSQL opt-in plus nonapplicable SQLite concurrency cases. PostgreSQL/Docker evidence pending remote CI.
+- Backend126 PASS/7 skips: PostgreSQL opt-in plus nonapplicable SQLite concurrency cases. Remote PostgreSQL/Docker PASS; evidence below.
 - Frontend27 PASS; lint/typecheck/build PASS; all4 E2E PASS, preserving REQ-002/003/004.
 - Manual browser fixture: RSI2/BB2 rule,3 trades DRAW/LOSS/WIN, unit P&L0/-1/+0.835,total-0.165, unavailable2. Desktop/tablet screenshots reviewed; no page errors or horizontal viewport overflow.
 -100k STANDARD benchmark: features3.696s, signal0.391s, execution2.375s,total6.738s;94,243 trades; Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14. Pure engine cap100000 explicitly for benchmark; no SQL/JSON; no SLA.
@@ -38,8 +38,17 @@ Versions: cq-features-v1 (source unchanged from v0.4.0), cq-strategy-dsl-v1, cq-
 | C payout |83.5→0.835 exact; unit metrics manually verified | PASS |
 | D gaps | entry/expiry gaps skip without fabricated trade | PASS |
 | E causal DSL | bars_ago/CCC/warmup/tri-state/future mutation tests | PASS |
-| F replay | backfill same ceiling and same config/definition hash, version history retained | PASS (PostgreSQL pending CI) |
+| F replay | backfill same ceiling and same config/definition hash, version history retained | PASS including PostgreSQL |
 | G overlap | expiry5, ALLOW15 vs SKIP3, deterministic settlement-before-signal | PASS |
 | H UI | real USER→DRAFT→version→backtest→trade context E2E | PASS |
 
-P0/P1: none identified in local validation. P2: BACKTEST-001 stale run recovery, BACKTEST-002 execution realism, existing QUANT-001/DATA-001/SEC-001, dependency warnings and frontend bundle warning(~539kB minified). UI intentionally supports flat groups, nested AST supported through API. No statistical validation claim. Remote CI and PR evidence to follow; no merge or REQ-006 authorization.
+P0/P1: none identified in automated/local visual validation. P2: BACKTEST-001 stale run recovery, BACKTEST-002 execution realism, existing QUANT-001/DATA-001/SEC-001, dependency warnings and frontend bundle warning(~539kB minified). UI intentionally supports flat groups, nested AST supported through API. No statistical validation claim; no merge or REQ-006 authorization.
+
+## Remote CI / handoff
+
+[PR #4 — REQ-005 Strategy Lab & Binary Backtesting Engine](https://github.com/jsmontenegro17/ciberquant/pull/4): OPEN, base main, head codex/req-005-strategy-backtesting.
+
+Implementation SHA: `b7612005681903010547d56082a7ee9386e09359`.
+CI PR [35461839133](https://github.com/jsmontenegro17/ciberquant/actions/runs/35461839133) and push [35461837203](https://github.com/jsmontenegro17/ciberquant/actions/runs/35461837203): Backend PASS, Frontend/E2E PASS, Docker PASS on2026-09-19. Backend131 PASS/2 intentional SQLite-only concurrency skips; PostgreSQL migration004, version locking/uniqueness, ownership, JSONB, causality, persistence and replay executed. Frontend27 PASS; E2E4 PASS. Existing migrations and idempotent seed PASS.
+
+The final documentation-only QA handoff also requires green CI. Its exact SHA and run links are recorded in PR #4 and the delivery report to avoid a self-referential commit. Work stops at QA; no merge, tag or REQ-006.
