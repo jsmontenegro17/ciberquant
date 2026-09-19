@@ -31,6 +31,7 @@ jobs:
       - run: ruff check app tests
       - run: alembic upgrade head
       - run: python -m app.seed
+      - run: python -m app.seed
       - run: python -c "from app.main import app; assert app.title == 'CiberQuant API'"
       - run: pytest
   frontend:

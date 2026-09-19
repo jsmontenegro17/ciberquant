@@ -83,9 +83,9 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | UNVERIFIED | Workflow now includes `workflow_dispatch`; repository currently reports 0 workflow runs. Admin may need to enable Actions and run it manually |
+| GitHub CI workflow | Remote | PASS (partial) | Run `35414871692` / commit `8387e2e`; Frontend and Docker passed, Backend failed at `alembic upgrade head` with `KeyError: 'formatters'`. |
 
-Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job and Docker CI job. Commit evidence is recorded in Git.
+Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration and double-seed CI verification. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation QA corrections implemented. Status remains QA until the remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.
+Foundation QA corrections implemented. Status remains QA until the corrected remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.
