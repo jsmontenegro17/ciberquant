@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0] - 2026-09-19
+### Acceptance
+- REQ-005 DONE; Human Acceptance PASS on approved HEAD40981e0f25c1cda0d987c23eba0922f35d90db99. No P0/P1 within the accepted scope.
+- cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 are frozen. QUANT-002 tracks future historical version replay; no dispatcher implemented in this release.
+### Added
+- REQ-005 private strategies, immutable version numbering/hashes and cq-strategy-dsl-v1 typed bounded AST with three-state evaluation.
+- cq-binary-backtest-v1 causal NEXT_CANDLE_OPEN execution, expiry bars, strict gaps/ranges, overlap policies, exact Decimal unit outcomes and metrics, no financial ledger/stake management.
+- Frozen as-of/definition/config evidence, atomic completion/failure audits, owner-scoped paginated APIs, migration004 with PostgreSQL/JSONB constraints and indexes.
+- Strategy Lab, immutable version builder/history, run setup, in-sample results, fixed payout warnings, unit equity and trade context inspector.
+- Quant, ownership, snapshot, concurrency/migration and frontend/E2E regressions;100k benchmark; DSL/execution semantics and BACKTEST-001/002 debt.
+### Boundaries
+- cq-features-v1 unchanged. No statistical validation, ranking, martingale, live trading, historical payout/latency model or REQ-006 work. Human Acceptance PASS; results remain IN-SAMPLE / NOT VALIDATED.
+
 ## [0.4.0] - 2026-09-19
 ### Acceptance
 - REQ-004 DONE; Human Acceptance PASS on approved HEAD9f670a922ffc1ad7f1de913337a0f5b0374b0487. cq-features-v1 is frozen for this release.

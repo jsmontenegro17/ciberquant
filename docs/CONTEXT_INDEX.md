@@ -9,13 +9,16 @@
 | Market data | [MARKET_DATA](modules/MARKET_DATA.md), [CSV format](MARKET_DATA_CSV_FORMAT.md) | `backend/app/market_data/`, `backend/app/api/market_data.py` |
 | Cataloger | [CATALOGER](modules/CATALOGER.md) | `backend/app/cataloger/` |
 | Features / indicators | [INDICATORS](modules/INDICATORS.md), [Definitions](INDICATOR_DEFINITIONS.md) | `backend/app/features/`, `backend/app/api/features.py`, `frontend/src/features/features/` |
-| Strategies | [STRATEGIES](modules/STRATEGIES.md) | future REQ-005 |
-| Backtesting / validation | [BACKTESTING](modules/BACKTESTING.md), [VALIDATION](modules/VALIDATION.md) | planned |
+| Strategies | [STRATEGIES](modules/STRATEGIES.md), [DSL](STRATEGY_DSL.md) | `backend/app/strategies/`, `backend/app/api/research.py`, `frontend/src/features/research/` |
+| Backtesting | [BACKTESTING](modules/BACKTESTING.md), [Semantics](BINARY_BACKTEST_SEMANTICS.md) | `backend/app/backtesting/`, migration004 |
+| Validation | [VALIDATION](modules/VALIDATION.md) | future REQ-006 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted delivery: [REQ-004](requirements/REQ-004-feature-indicator-engine.md), DONE / Human Acceptance PASS, version0.4.0; REQ-001/002/003 remain DONE. Next roadmap: REQ-005 Strategy Lab & Binary Backtesting, REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: [REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md), version0.5.0, DONE / Human Acceptance PASS. REQ-001/002/003/004 remain DONE / Human Acceptance PASS. Integrated main SHA, CI and tag evidence: [PR #4](https://github.com/jsmontenegro17/ciberquant/pull/4). Next: REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None authorized or started.
 
-P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md). Official cq-features-v1 is frozen; full-candle features become available at close_time only.
+Research regressions: `backend/tests/test_backtest_engine.py`, `test_research_api.py`, `test_research_migration.py`; manual fixture `backtest_fixture.py`; UI/E2E `frontend/src/features/research/research.test.tsx`, `frontend/e2e/research.spec.ts`; benchmark `backend/scripts/benchmark_backtest.py`. Debt: [BACKTEST-001](debt/BACKTEST-001-stale-run-recovery.md), [BACKTEST-002](debt/BACKTEST-002-execution-realism.md).
+
+P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md), [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md). Official cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 are frozen; full-candle features become available at close_time only. No multi-version dispatcher is implemented in REQ-005.
 
 Future security debt: [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
 

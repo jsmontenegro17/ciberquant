@@ -11,5 +11,7 @@ class Settings(BaseSettings):
     feature_api_max_return_rows: int = Field(default=10000, ge=1, le=50000)
     feature_engine_max_source_candles: int = Field(default=250000, ge=1, le=1000000)
     feature_api_max_indicator_specs: int = Field(default=12, ge=1, le=50)
+    backtest_max_source_candles: int = Field(default=250000, ge=1, le=1000000)
+    backtest_max_trades: int = Field(default=10000, ge=1, le=100000)
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 settings = Settings()

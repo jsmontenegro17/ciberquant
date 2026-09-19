@@ -1,0 +1,104 @@
+// @vitest-environment jsdom
+import {beforeEach,afterEach,it,expect,vi} from 'vitest';
+import {render,screen,fireEvent,cleanup,waitFor} from '@testing-library/react';
+import {QueryClient,QueryClientProvider} from '@tanstack/react-query';
+import {MemoryRouter,Routes,Route} from 'react-router-dom';
+import type {ReactNode} from 'react';
+import {researchApi,type Version,type BacktestRun,type DslDefinitions,type BacktestTrade} from '../../api/research';
+import {featureApi} from '../../api/features';
+import {marketApi} from '../../api/marketData';
+import {StrategyLab} from './StrategyLab';
+import {VersionBuilder} from './VersionBuilder';
+import {RunSetup} from './RunSetup';
+import {BacktestResult} from './Backtests';
+vi.mock('../../api/research',()=>({researchApi:{definitions:vi.fn(),fields:vi.fn(),strategies:vi.fn(),create:vi.fn(),version:vi.fn(),run:vi.fn(),result:vi.fn(),trades:vi.fn()}}));
+vi.mock('../../api/features',()=>({featureApi:{definitions:vi.fn()}}));
+vi.mock('../../api/marketData',async original=>({...await original<typeof import('../../api/marketData')>(),marketApi:{coverage:vi.fn()}}));
+const dataset={source:'BINARY_FIXTURE',broker:'DEMO',symbol:'EURUSD',market_type:'REGULAR',timeframe:'1m'};
+const version:Version={id:1,strategy_id:1,version:1,trade_direction:'CALL',indicator_specs:[],condition_tree:{left:{type:'FIELD',field:'close',bars_ago:0},operator:'GT',right:{type:'NUMBER',value:'0'}},strategy_dsl_version:'cq-strategy-dsl-v1',feature_engine_version:'cq-features-v1',definition_sha256:'abc',created_at:'2026-01-01T00:00:00Z'};
+const dsl:DslDefinitions={strategy_dsl_version:'cq-strategy-dsl-v1',feature_engine_version:'cq-features-v1',backtest_engine_version:'cq-binary-backtest-v1',operators:['GT','GTE','LT','LTE','EQ','NE'],group_operators:['AND','OR'],base_fields:{close:'NUMBER',direction:'STRING',gap_before:'BOOLEAN'},max_bars_ago:50,max_depth:4,max_nodes:50,entry_model:'NEXT_CANDLE_OPEN',statuses:['DRAFT','TESTING','DISABLED']};
+const run:BacktestRun={id:7,status:'COMPLETED',strategy_version_id:1,dataset,signal_start:'2026-01-01T00:00:00Z',signal_end:'2026-01-02T00:00:00Z',as_of_candle_id:100,payout_percent:'83.5',expiry_bars:1,overlap_policy:'ALLOW',entry_model:'NEXT_CANDLE_OPEN',backtest_engine_version:'cq-binary-backtest-v1',strategy_dsl_version:'cq-strategy-dsl-v1',feature_engine_version:'cq-features-v1',config_sha256:'cfg',strategy_snapshot:{...version,name:'Research Example'},config_snapshot:{},metrics:{trades_executed:1,total_unit_pnl:'0.835',win_rate_percent:'100',skipped_overlap:0},equity_curve:[{sequence_no:0,time:null,equity:'0'},{sequence_no:1,time:'2026-01-01T00:02:00Z',equity:'0.835'}],error_summary:null};
+const trade:BacktestTrade={id:1,sequence_no:1,signal_time:'2026-01-01T00:01:00Z',entry_time:'2026-01-01T00:01:00Z',expiry_time:'2026-01-01T00:02:00Z',direction:'CALL',entry_price:'105',expiry_price:'106',result:'WIN',unit_pnl:'0.835',signal_context:{'close@0':'100'}};
+beforeEach(()=>{
+  vi.resetAllMocks();
+  vi.mocked(researchApi.definitions).mockResolvedValue(dsl);
+  vi.mocked(researchApi.fields).mockImplementation(async specs=>({...dsl.base_fields,...Object.fromEntries(specs.map(s=>[`${s.type.toLowerCase()}_${s.period}`,'NUMBER' as const]))}));
+  vi.mocked(featureApi.definitions).mockResolvedValue({calculation_version:'cq-features-v1',max_indicator_specs:12,defaults:{STANDARD:[]},supported_indicators:[{type:'RSI',parameters:{period:14},constraints:{period:{min:2,max:500}},warmup_definition:'period+1',generated_feature_keys:['rsi_14']},{type:'EMA',parameters:{period:20},constraints:{period:{min:2,max:500}},warmup_definition:'period',generated_feature_keys:['ema_20']}]});
+  vi.mocked(researchApi.strategies).mockResolvedValue({items:[],total:0,limit:20,offset:0});
+  vi.mocked(researchApi.create).mockResolvedValue({id:1,name:'Research Example',description:'Manual',status:'DRAFT'});
+  vi.mocked(researchApi.version).mockResolvedValue(version);
+  vi.mocked(researchApi.run).mockResolvedValue(run);
+  vi.mocked(researchApi.result).mockResolvedValue(run);
+  vi.mocked(researchApi.trades).mockResolvedValue({items:[trade],total:1,limit:20,offset:0});
+  vi.mocked(marketApi.coverage).mockResolvedValue({items:[{...dataset,candle_count:6,first_candle:'2026-01-01T00:00:00Z',last_candle:'2026-01-01T00:05:00Z'}],total:1,limit:100,offset:0});
+});
+afterEach(cleanup);
+function mount(ui:ReactNode,path='/'){
+  return render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})}><MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter></QueryClientProvider>);
+}
+it('creates a private draft without a profitability claim',async()=>{
+  mount(<StrategyLab/>);
+  fireEvent.change(screen.getByLabelText('Name'),{target:{value:'Research Example'}});
+  fireEvent.change(screen.getByLabelText('Description'),{target:{value:'Manual'}});
+  fireEvent.click(screen.getByRole('button',{name:'Create strategy'}));
+  await screen.findByRole('link',{name:'Research Example'});
+  expect(researchApi.create).toHaveBeenCalledWith('Research Example','Manual');
+  expect(screen.getByText(/IN-SAMPLE · NOT VALIDATED/)).toBeTruthy();
+});
+it('builds declared indicators, numeric and field-to-field conditions, direction and bars_ago as a new version',async()=>{
+  const saved=vi.fn();mount(<VersionBuilder strategyId={1} onSaved={saved}/>);
+  await waitFor(()=>expect(researchApi.fields).toHaveBeenCalled());
+  await waitFor(()=>expect((screen.getByRole('button',{name:'Add indicator'}) as HTMLButtonElement).disabled).toBe(false));
+  fireEvent.click(screen.getByRole('button',{name:'Add indicator'}));
+  await screen.findByRole('combobox',{name:'Indicator 1'});
+  fireEvent.click(screen.getByRole('button',{name:'Add indicator'}));
+  fireEvent.change(screen.getByRole('combobox',{name:'Indicator 2'}),{target:{value:'EMA'}});
+  fireEvent.click(screen.getByRole('button',{name:'Add indicator'}));
+  fireEvent.change(screen.getByRole('combobox',{name:'Indicator 3'}),{target:{value:'EMA'}});
+  fireEvent.change(screen.getByLabelText('Period 3'),{target:{value:'50'}});
+  await screen.findByRole('option',{name:'rsi_14'});
+  fireEvent.change(screen.getByRole('combobox',{name:'Field 1'}),{target:{value:'rsi_14'}});
+  fireEvent.change(screen.getByRole('combobox',{name:'Operator 1'}),{target:{value:'GTE'}});
+  fireEvent.change(screen.getByLabelText('Value 1'),{target:{value:'70'}});
+  fireEvent.click(screen.getByRole('button',{name:'Add condition'}));
+  fireEvent.change(screen.getByRole('combobox',{name:'Field 2'}),{target:{value:'ema_20'}});
+  fireEvent.change(screen.getByRole('combobox',{name:'Operand type 2'}),{target:{value:'FIELD'}});
+  fireEvent.change(screen.getByRole('combobox',{name:'Right field 2'}),{target:{value:'ema_50'}});
+  fireEvent.click(screen.getByRole('button',{name:'Add condition'}));
+  fireEvent.change(screen.getByRole('combobox',{name:'Field 3'}),{target:{value:'direction'}});
+  fireEvent.change(screen.getByLabelText('Bars ago 3'),{target:{value:'2'}});
+  await waitFor(()=>expect((screen.getByRole('button',{name:'Create version'}) as HTMLButtonElement).disabled).toBe(false));
+  fireEvent.click(screen.getByRole('button',{name:'Create version'}));
+  await waitFor(()=>expect(saved).toHaveBeenCalled());
+  const body=vi.mocked(researchApi.version).mock.calls[0][1];
+  expect(body.indicator_specs).toEqual([{type:'RSI',period:14},{type:'EMA',period:20},{type:'EMA',period:50}]);
+  expect(body.condition_tree).toMatchObject({operator:'AND',conditions:[{right:{type:'NUMBER',value:'70'}},{right:{type:'FIELD',field:'ema_50'}},{left:{field:'direction',bars_ago:2},right:{type:'STRING',value:'C'}}]});
+});
+it('runs only explicitly with fixed payout/snapshot/expiry config and navigates',async()=>{
+  mount(<Routes><Route path="/" element={<RunSetup version={version}/>}/><Route path="/backtests/:id" element={<p>Result route</p>}/></Routes>);
+  await screen.findByRole('option',{name:'BINARY_FIXTURE / DEMO / EURUSD / REGULAR / 1m'});
+  fireEvent.change(screen.getByRole('combobox',{name:'Dataset'}),{target:{value:JSON.stringify(dataset)}});
+  fireEvent.change(screen.getByLabelText('Payout %'),{target:{value:'83.5'}});
+  fireEvent.change(screen.getByLabelText('As-of candle ID'),{target:{value:'100'}});
+  expect(researchApi.run).not.toHaveBeenCalled();
+  expect(screen.getByText(/Fixed payout assumption: 83.5%/)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button',{name:'Start backtest'}));
+  await screen.findByText('Result route');
+  expect(vi.mocked(researchApi.run).mock.calls[0][0]).toMatchObject({strategy_version_id:1,dataset,as_of_candle_id:100,payout_percent:'83.5',expiry_bars:1});
+});
+it('renders in-sample result, exact unit evidence, equity and trade inspector',async()=>{
+  mount(<Routes><Route path="/backtests/:id" element={<BacktestResult/>}/></Routes>,'/backtests/7');
+  await screen.findByText(/Fixed payout assumption: 83.5%/);
+  expect(screen.getByText(/IN-SAMPLE · NOT VALIDATED/)).toBeTruthy();
+  expect(screen.getByRole('img',{name:'Unit Equity Curve'})).toBeTruthy();
+  expect(screen.getByText('As-of Candle ID')).toBeTruthy();
+  fireEvent.click(await screen.findByRole('button',{name:'Inspect #1'}));
+  expect(screen.getByRole('region',{name:'Signal context'}).textContent).toContain('close@0');
+});
+it('shows API errors without inventing completed results',async()=>{
+  vi.mocked(researchApi.create).mockRejectedValue(new Error('Create rejected'));
+  mount(<StrategyLab/>);
+  fireEvent.change(screen.getByLabelText('Name'),{target:{value:'Research'}});
+  fireEvent.click(screen.getByRole('button',{name:'Create strategy'}));
+  expect((await screen.findByRole('alert')).textContent).toContain('Create rejected');
+});

@@ -52,6 +52,8 @@ export function Layout() {
           ["Market Data", "/market-data"],
           ["Cataloger", "/cataloger"],
           ["Feature Lab", "/features"],
+          ["Strategy Lab", "/strategies"],
+          ["Backtests", "/backtests"],
         ].map(([x, p]) => (
           <NavLink
             className={({ isActive }) => `nav ${isActive ? "active" : ""}`}

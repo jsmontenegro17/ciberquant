@@ -9,4 +9,4 @@ Every computation captures a dataset ID ceiling and calculates from that snapsho
 
 `/features` exposes Feature Lab: coverage selector, editable specs, explicit Analyze, real candlesticks, SMA/EMA/Bollinger overlays, RSI/ATR panes, UTC hover strings, gap markers, metadata and20-row table pages. Decimal-to-number conversion occurs only for chart rendering. No signals or outcome predictions. Lightweight Charts5.2.1 is pinned; attribution is retained.
 
-Future REQ-005 consumes these keys without reimplementing indicator formulas. Incompatible formula changes require a new engine version and deterministic regression fixtures.
+REQ-005 consumes these keys without reimplementing indicator formulas; cq-features-v1 source is unchanged from v0.4.0. Incompatible formula changes require a new engine version and deterministic regression fixtures. Backtest evaluations use full internal Decimal values; persisted signal context displays the documented18-place serialization, not a recomputation of the decision.

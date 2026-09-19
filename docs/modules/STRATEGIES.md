@@ -1,4 +1,8 @@
 # Strategies
-Purpose: versioned strategy definitions and templates. Status: planned. No strategy is presumed profitable; states will include DRAFT, TESTING, VALIDATED, DEGRADED and DISABLED.
+REQ-005 implements private strategies and immutable versions. States: DRAFT, TESTING, DISABLED. VALIDATED/DEGRADED are reserved for REQ-006 and rejected here. No strategy is presumed profitable and no examples are seeded.
 
-REQ-005 (not implemented) will express conditions on Feature Engine keys, for example rsi_14>=70 or ema_20>ema_50. These examples are not strategies or recommendations implemented by REQ-004. Use registry specs and versioned snapshots; do not duplicate indicator calculations.
+Conditions reference Feature Engine fields/specs, without duplicating indicator formulas. [STRATEGY_DSL](../STRATEGY_DSL.md) freezes the typed AST, three-valued evaluation and canonical hashes. Versions are numbered under a PostgreSQL strategy row lock and protected by a unique constraint. No version update/delete APIs; ORM mutation guards protect normal application writes (database operators remain a trusted boundary).
+
+APIs: GET/POST `/strategies`, GET/PATCH `/strategies/{id}` (PATCH accepts status only), GET/POST `/strategies/{id}/versions`. Lists are paginated, limits1–100/default20. GET `/strategies/definitions` provides DSL limits/operators/types/versions; POST `/strategies/fields` accepts up to12 typed specs and resolves legal fields from the Feature registry. All routes require authentication and all private resources enforce ownership, including ADMIN.
+
+Frontend Strategy Lab creates DRAFT metadata, adds indicators through backend definitions, creates immutable conditions/versions and displays history/hash/direction/latest run without performance ranking. Initial UI supports flat AND/OR groups and field-to-field/typed-constant/bars_ago operands; backend supports bounded nesting. Nested versions remain inspectable/runnable but cannot be silently flattened through the copy editor. Saving an edited definition always creates a new version.
