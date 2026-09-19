@@ -1,5 +1,7 @@
 # cq-live-data-v1
 
+Frozen by REQ-007 Human Acceptance PASS on2026-09-19. Incompatible semantic changes require a new engine identifier.
+
 IQ-specific normalization/clock/stream/payout contract and upstream pin: [IQ provider](providers/IQOPTION_EXPERIMENTAL.md). Real PRACTICE/OTC evidence: [dated smoke](providers/IQOPTION_SMOKE_2026-09-19.md). Raw IQ quantity is not tick volume; keep tick_volume/spread null. Missing real provider clock fails closed. Streaming forming is ephemeral; closed values are confirmed against history before persistence/evaluation.
 
 Read-only providers expose assets, canonical bootstrap and normalized ProviderFrame (closed candles, optional ephemeral forming candle, payout, market status, clock/status). No order API. Full identity source/broker/symbol/market_type/timeframe is mandatory. No fallback/substitution between providers or OTC/REGULAR. Replay carries REPLAY mode and frozen logical timestamps, never pretends to be a live broker. Initial replay prefix is bootstrap only, not retroactive events; subsequent candles emitted one by one at1x/10x/MAX development speeds.

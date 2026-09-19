@@ -23,4 +23,4 @@ This deliberately trivial positive-price research condition exercises the live p
 
 An earlier attempt passed data checks but failed Windows temporary SQLite cleanup and exited1. It was not accepted as the final smoke; NullPool/explicit cleanup were added and the full run above repeated successfully. No real order was submitted in either attempt.
 
-Human Acceptance: PENDING. REQ-007 remains subject to final automated CI and human review; no merge/tag/REQ-008 authorized.
+Human Acceptance: PASS on2026-09-19. Real smoke accepted for REQ-007/v0.7.0; release integration/tag authorized after green final feature and main CI. REQ-008 not authorized.

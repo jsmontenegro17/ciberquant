@@ -1,6 +1,6 @@
 # IQ Option — unofficial community integration / read-only
 
-REQ-007 includes a working real IQ provider, not an unavailable placeholder. `ENABLE_IQOPTION_EXPERIMENTAL=false` by default. **UNOFFICIAL COMMUNITY INTEGRATION — protocol may change without notice.** Human acceptance remains pending; this is not an official SDK or execution system.
+REQ-007 includes a working real IQ provider, not an unavailable placeholder. `ENABLE_IQOPTION_EXPERIMENTAL=false` by default. **UNOFFICIAL COMMUNITY INTEGRATION — protocol may change without notice.** Human Acceptance PASS on2026-09-19; this is not an official SDK or execution system.
 
 ## Pinned dependency and isolation
 

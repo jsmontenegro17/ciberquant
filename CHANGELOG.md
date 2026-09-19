@@ -1,6 +1,9 @@
 # Changelog
 
-## [0.7.0-dev] - Unreleased
+## [0.7.0] - 2026-09-19
+### Acceptance
+- REQ-007 DONE; Human Acceptance PASS on approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5. No P0/P1 within accepted scope. cq-live-data-v1 / cq-scanner-v1 frozen; existing four quant engines remain frozen.
+- Real IQ PRACTICE binary REGULAR/OTC smoke accepted:85% provider payout, real LIVE scanner MATCH, zero orders and zero ledger modifications. No auto-trading, REAL fallback or digital substitution. REQ-008 not started.
 ### Fixed
 - REQ-007 human QA: explicit mode-aware paper-config precedence. Research uses its own expiry/payout fallback; normal mode retains compatible validation assumptions; current provider payout overrides either fallback with auditable source labels. UI distinguishes active paper settings, research fallback and historical reference. No frozen engine/version change.
 ### Added
