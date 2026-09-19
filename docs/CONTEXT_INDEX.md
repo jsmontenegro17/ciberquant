@@ -10,6 +10,6 @@
 | Cataloger | [CATALOGER](modules/CATALOGER.md) | planned |
 | Indicators / strategies | [INDICATORS](modules/INDICATORS.md), [STRATEGIES](modules/STRATEGIES.md) | planned |
 | Backtesting / validation | [BACKTESTING](modules/BACKTESTING.md), [VALIDATION](modules/VALIDATION.md) | planned |
-| Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/health.py` |
+| Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
 Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Current delivery: [REQ-001](requirements/REQ-001-foundation.md).

@@ -10,3 +10,8 @@
 
 ### QA
 - Remote CI run 35415290649 validated backend, PostgreSQL migrations, idempotent seed, tests, frontend and Docker.
+
+## [0.2.0] - Unreleased
+### Added
+- REQ-002 frontend API client, protected routes, account dashboard, session workspace, trade recording and journal workflow.
+- Session summary, analytics overview, account ledger and session trade endpoints.

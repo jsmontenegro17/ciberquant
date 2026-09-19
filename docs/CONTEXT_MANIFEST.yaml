@@ -6,3 +6,4 @@ modules:
   sessions: {docs: [docs/modules/SESSIONS.md], backend: [backend/app/api/trading.py], dependencies: [risk, trades]}
   trades: {docs: [docs/modules/TRADES.md], backend: [backend/app/api/trading.py], dependencies: [sessions, trading_accounts]}
   market_data: {docs: [docs/modules/MARKET_DATA.md], backend: [backend/app/services/market_data.py], tests: [backend/tests/test_market_data.py]}
+  analytics: {docs: [docs/modules/ANALYTICS.md], backend: [backend/app/api/trading.py], dependencies: [accounts, sessions, trades]}

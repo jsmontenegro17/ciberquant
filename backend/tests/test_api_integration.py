@@ -34,6 +34,7 @@ def test_ledger_session_close_and_idempotency():
     assert Decimal(trade['profit_loss'])==Decimal('16.80')
     closed=client.post(f"/api/v1/sessions/{session['id']}/close"); assert closed.status_code==200 and closed.json()['status']=='CLOSED'
     assert client.post(f"/api/v1/sessions/{session['id']}/close").status_code==200
+    summary=client.get(f"/api/v1/sessions/{session['id']}/summary"); assert summary.status_code==200 and summary.json()['wins']==1 and summary.json()['net_pnl']=='16.80000000'
     assert client.post('/api/v1/trades',json={'trading_account_id':account['id'],'trading_session_id':session['id'],'symbol':'EURUSD','market_type':'REGULAR','timeframe':'1m','direction':'CALL','stake':'20','payout_percent':'84','result':'LOSS'}).status_code==409
     with TestingSession() as s:
         account_row=s.scalar(select(TradingAccount).where(TradingAccount.name=='C'))

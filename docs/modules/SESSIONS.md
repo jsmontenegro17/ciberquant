@@ -1,2 +1,2 @@
 # Sessions
-Purpose: snapshot and constrain a trading session. Table: `trading_sessions`; API `/api/v1/sessions` and `/api/v1/sessions/{id}/close`. Rules: OPEN/CLOSED/STOPPED, max loss and max operations checked before a trade; close is idempotent and audited. Aggregate metrics pending.
+Purpose: snapshot and constrain a trading session. Table: `trading_sessions`; API `/api/v1/sessions`, `/api/v1/sessions/{id}/close`, `/api/v1/sessions/{id}/summary` and `/api/v1/sessions/{id}/trades`. Rules: OPEN/CLOSED/STOPPED, max loss/operations/payout checked before a trade, one OPEN session per account, close is idempotent and audited. Summary exposes W/L/D, P&L, win rate and streaks.
