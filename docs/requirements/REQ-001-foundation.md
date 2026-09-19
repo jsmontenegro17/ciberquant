@@ -88,4 +88,4 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job and Docker CI job. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation QA corrections implemented. Status remains QA because backend, migration, seed, PostgreSQL and Docker evidence is still UNVERIFIED in the available environment.
+Foundation QA corrections implemented. Status remains QA until the remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.

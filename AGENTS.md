@@ -13,7 +13,8 @@ CiberQuant es una plataforma multiusuario de investigación cuantitativa. Backen
 1. Leer este archivo, [CONTEXT_INDEX.md](docs/CONTEXT_INDEX.md), [PROJECT_STATE.md](docs/PROJECT_STATE.md) y sólo los módulos afectados.
 2. Crear o actualizar un REQ en `docs/requirements/` antes de cambios significativos.
 3. Revisar ADRs aplicables, implementar en una rama `codex/req-XXX-nombre`, probar, actualizar documentación y usar Conventional Commits.
-4. No mezclar OTC con regular, no usar floats para dinero, no introducir lookahead bias, martingala ni auto-trading.
+4. `main` representa el estado integrado estable. Desde REQ-002, todo cambio debe seguir `main → feature branch → push → Pull Request → CI → QA → merge`; no desarrollar directamente sobre `main`. REQ-001 es la excepción bootstrap del repositorio.
+5. No mezclar OTC con regular, no usar floats para dinero, no introducir lookahead bias, martingala ni auto-trading.
 
 ## Validación
 
