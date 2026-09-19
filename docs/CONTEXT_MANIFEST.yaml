@@ -6,3 +6,6 @@ modules:
   sessions: {docs: [docs/modules/SESSIONS.md], backend: [backend/app/api/trading.py], dependencies: [risk, trades]}
   trades: {docs: [docs/modules/TRADES.md], backend: [backend/app/api/trading.py], dependencies: [sessions, trading_accounts]}
   market_data: {docs: [docs/modules/MARKET_DATA.md], backend: [backend/app/services/market_data.py], tests: [backend/tests/test_market_data.py]}
+  analytics: {docs: [docs/modules/ANALYTICS.md], backend: [backend/app/api/trading.py], dependencies: [trading_accounts, sessions, trades]}
+  journal: {docs: [docs/modules/JOURNAL.md], backend: [backend/app/api/trading.py], frontend: [frontend/src/features/journal/Journal.tsx]}
+  frontend: {docs: [docs/requirements/REQ-002-session-manager-trading-journal.md], frontend: [frontend/src/app/router.tsx, frontend/src/api/client.ts, frontend/src/features/], tests: [frontend/src/features/sessions/workflow.test.tsx, frontend/e2e/session.spec.ts]}

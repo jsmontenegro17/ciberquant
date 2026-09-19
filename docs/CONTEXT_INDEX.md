@@ -10,6 +10,10 @@
 | Cataloger | [CATALOGER](modules/CATALOGER.md) | planned |
 | Indicators / strategies | [INDICATORS](modules/INDICATORS.md), [STRATEGIES](modules/STRATEGIES.md) | planned |
 | Backtesting / validation | [BACKTESTING](modules/BACKTESTING.md), [VALIDATION](modules/VALIDATION.md) | planned |
-| Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/health.py` |
+| Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Current delivery: [REQ-001](requirements/REQ-001-foundation.md).
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Current delivery: [REQ-002](requirements/REQ-002-session-manager-trading-journal.md).
+
+Future security debt: [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
+
+Frontend entry: `frontend/src/app/router.tsx`; HTTP client: `frontend/src/api/client.ts`; feature screens: `frontend/src/features/`; regression tests: `frontend/src/features/sessions/workflow.test.tsx`; real API browser QA: `frontend/e2e/session.spec.ts`.

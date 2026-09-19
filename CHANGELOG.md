@@ -10,3 +10,18 @@
 
 ### QA
 - Remote CI run 35415290649 validated backend, PostgreSQL migrations, idempotent seed, tests, frontend and Docker.
+
+## [0.2.0] - 2026-09-19
+### Acceptance
+- REQ-002 DONE; final Human Acceptance PASS verifies all four financial QA findings. No functional P0/P1 remains in scope.
+- Production cookie/CORS/HTTPS configuration is tracked as SEC-001 future security debt, not a blocker for local development.
+### Added
+- REQ-002 frontend API client, protected routes, account dashboard, session workspace, trade recording and journal workflow.
+- Session summary, analytics overview, account ledger and session trade endpoints.
+- Backend-authoritative risk preview, session capacity, account selection, filtered history/journal, and recent trades.
+- Component workflow tests and real API Chromium QA at desktop/tablet widths, included in CI.
+### Fixed
+- REQ-002 human financial review: enforce per-trade percentage; calculate session capacity from net P&L; avoid zero-value DRAW/CANCELLED ledger entries; accept account-only session start and require backend RiskProfile.
+- Cross-account trade references and cross-user journal links are rejected.
+- Serialized PostgreSQL financial writes; fresh risk snapshot on session start and authoritative balance refresh.
+- Reproducible frontend Docker dependencies, API environment variable and Compose startup smoke checks.

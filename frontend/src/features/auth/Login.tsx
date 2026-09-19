@@ -1,0 +1,63 @@
+import { FormEvent, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../api/auth";
+export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const nav = useNavigate();
+  const qc = useQueryClient();
+  const login = useMutation({
+    mutationFn: () => authApi.login(email, password),
+    onSuccess: (u) => {
+      qc.setQueryData(["me"], u);
+      nav("/dashboard");
+    },
+    onError: (e) => setError((e as Error).message),
+  });
+  return (
+    <div className="auth">
+      <div className="authCard">
+        <div className="brand">
+          CQ<span>•</span>
+        </div>
+        <div className="eyebrow">QUANTITATIVE RESEARCH WORKSPACE</div>
+        <h1>Sign in</h1>
+        <p className="muted">
+          Access your accounts, sessions and trading journal.
+        </p>
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            setError("");
+            login.mutate();
+          }}
+        >
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+          {error && <div className="state error">{error}</div>}
+          <button disabled={login.isPending}>
+            {login.isPending ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
