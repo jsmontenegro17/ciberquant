@@ -96,4 +96,4 @@ Docker: `docker compose config` — PASS; `docker compose build` — PASS.
 Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin, explicit pytest package path and deterministic duplicate fixture. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation QA corrections implemented and validated by remote CI run `35415290649`. This requirement is ready for DONE; `main` must be created from the final documentation commit after its CI rerun, preserving the validated branch history.
+Foundation QA corrections implemented and validated by remote CI run `35415392532`. `main` now points to the same validated SHA `729ddc694468daedefbea8f163125aac12695f76` and is the repository default branch. REQ-001 is DONE.
