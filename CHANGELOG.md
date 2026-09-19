@@ -1,6 +1,9 @@
 # Changelog
 
-## [0.3.0-dev] - Unreleased
+## [0.3.0] - 2026-09-19
+### Acceptance
+- REQ-003 DONE; Human Acceptance PASS includes final semantic contract correction. Candle direction is not binary trade outcome.
+- DATA-001 records import recovery as separate P2 debt, not a release blocker; no recovery implementation added.
 ### Fixed
 - Human semantic QA: catalog statistics use bullish/bearish candle-direction fields without legacy aliases; distinguish candle color from future binary trade outcomes. Mathematical results unchanged.
 ### Added
@@ -10,7 +13,7 @@
 - Deterministic C/P/D cataloger for lengths 2–5, gap/doji exclusion and descriptive next-candle distributions.
 - Connected Market Data/Cataloger UI, synthetic fixtures, backend/frontend/E2E and PostgreSQL concurrency/migration regressions.
 ### Boundaries
-- No trading recommendations, strategies, indicators, backtesting or live integration. Human acceptance required before merge.
+- No trading recommendations, strategies, indicators, backtesting or live integration. Human acceptance completed PASS; REQ-004 not started.
 
 ## [0.1.0] - 2026-09-18
 ### Added
