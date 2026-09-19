@@ -8,6 +8,12 @@ Base: main / v0.6.0 / a7a304981b50c6d30261d3460f6e547383e09e8d
 Branch: codex/req-007-live-scanner
 Human Acceptance: PENDING
 
+## Final human QA correction — research configuration precedence
+
+Human review requested an explicit pure paper-config resolver: normal mode uses validation expiry and provider payout with validation fallback; research mode uses research expiry and provider payout with research fallback. Historical validation remains reference metadata, never hidden research execution configuration. Add payout/expiry source evidence and truthful UI labels; regress all four cases and actual paper outcomes. Status remains QA; no merge, tag, engine version change or REQ-008. Corrected-head CI evidence will be recorded in PR #6 and the handoff report.
+
+Implemented `resolve_paper_config`, immutable event `payout_source`/`expiry_source`, historical/reference and research input metadata; PaperObservation consumes the exact resolved config without modifying next-open/consecutive-expiry/binary semantics. Four pure precedence tests, two no-cross-mode-fallback tests and four real validated Replay integrations verify actual expiry and Decimal P&L. Two UI regressions verify research90%/3 bars versus historical84%/1 bar, with and without provider87%. Local: Backend172 PASS/13 PostgreSQL-dependent skips; Frontend46 PASS; E2E6 PASS; lint/typecheck/build PASS. Automated A–J remain green. IQ Option stays experimental/disabled/unavailable; no provider or frozen engine changes.
+
 ## Scope
 
 cq-live-data-v1 and cq-scanner-v1: read-only provider contract, Replay/Mock, isolated optional MT5 and experimental disabled IQ Option; exact incremental frozen features/DSL, dataset-compatible validation, private watchlists/events, immutable live provenance and paper observations, dedicated worker, APIs/live UI, migration006, tests/E2E/benchmark/CI/PR. No order sending, money/session/ledger mutation, silent feed substitution, retroactive LIVE matches, checkpoint implementation or REQ-008.

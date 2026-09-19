@@ -16,6 +16,7 @@ from .features import IncrementalFeatures
 from .persistence import persist_closed
 from .policy import compatibility
 from .paper import PaperObservation
+from .paper_config import resolve_paper_config
 from . import LIVE_DATA_ENGINE_VERSION, SCANNER_ENGINE_VERSION
 
 
@@ -256,14 +257,15 @@ class ScannerRuntime:
                 row = state.rows[-1]
                 truth, context = evaluate(definition.condition_tree, state.rows, row["close_time"])
                 result = "MATCH" if truth == Truth.TRUE else "NO_MATCH" if truth == Truth.FALSE else "INSUFFICIENT_HISTORY"
-                payout = (
-                    frame.payout
-                    if frame.payout is not None
-                    else policy["validation_payout"]
-                    if policy["validation_payout"] is not None
-                    else item.research_payout
+                paper_config = resolve_paper_config(
+                    research_mode=item.research_mode,
+                    provider_payout=frame.payout,
+                    validation_payout=policy["validation_payout"],
+                    validation_expiry=policy["expiry_bars"],
+                    research_payout=item.research_payout,
+                    research_expiry=item.research_expiry,
                 )
-                expiry = policy["expiry_bars"] or item.research_expiry
+                payout, expiry = paper_config.payout, paper_config.expiry_bars
                 with localcontext(CALC_CONTEXT):
                     breakeven = 100 / (1 + frame.payout / 100) if frame.payout else None
                 evidence = serialize(
@@ -283,8 +285,12 @@ class ScannerRuntime:
                             and frame.payout < policy["validation_payout"]
                         ),
                         payout_snapshot=payout,
-                        payout_source="PROVIDER" if frame.payout is not None else "FIXED_ASSUMPTION",
+                        payout_source=paper_config.payout_source,
                         expiry_bars=expiry,
+                        expiry_source=paper_config.expiry_source,
+                        validation_expiry=policy["expiry_bars"],
+                        research_payout=item.research_payout,
+                        research_expiry=item.research_expiry,
                         expected_entry_model="NEXT_CANDLE_OPEN",
                         next_entry_boundary=last.open_time + duration(dataset.timeframe),
                         entry_price=None,

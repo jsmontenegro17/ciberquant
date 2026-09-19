@@ -20,6 +20,7 @@ Historical validation is human-accepted in REQ-006. REQ-007 adds read-only live/
 Integrated research workspace (REQ-008, not started).
 
 ## Modules in development
+REQ-007 final human QA correction: research-mode explicit payout fallback/expiry now take precedence over historical reference assumptions. Pure paper-config resolver and source evidence; truthful research/provider UI; four-case integration regressions verify actual next-open/expiry/Decimal outcomes. Status remains QA, Human Acceptance PENDING; no merge or REQ-008.
 REQ-007 Live Data & Strategy Scanner: cq-live-data-v1 / cq-scanner-v1; dedicated singleton worker, canonical incremental feature state, private watchlists, exact dataset validation compatibility, payout warning, immutable events and paper outcomes, migration006, SSE/snapshot UI, deterministic Replay/Mock, isolated optional MT5. Evidence and current gates: [REQ-007](requirements/REQ-007-live-scanner.md).
 
 ## Experimental / disabled

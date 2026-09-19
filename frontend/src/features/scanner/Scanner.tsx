@@ -15,7 +15,13 @@ export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  <h4>{e?.strategy_name??`Version #${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {e?.state==='MATCH'?'CONDITIONS MATCHED':e?.state??'Waiting for closed candles'}</h4>
  <p>Research direction: {e?.research_direction??'—'} · Research signal — no order sent.</p>
  <p>Validation: {e?.validation_state??'Checking'} · Dataset: {e?.dataset_validation_state??'Checking'}</p>
- <p>Current payout %: {e?.current_payout??'Unavailable'} · Validation assumption %: {e?.validation_payout??'Unavailable'} · Break-even %: {e?.current_break_even??'Unavailable'}</p>
+ <p>Current provider payout: {e?.current_payout!=null?`${e.current_payout}%`:'Unavailable'} · Break-even %: {e?.current_break_even??'Unavailable'}</p>
+ <p>Historical validation payout: {e?.validation_payout!=null?`${e.validation_payout}%`:'Unavailable'} · Historical validation expiry: {e?.validation_expiry??'Unavailable'} bars{item.research_mode?' — reference only, not research execution configuration.':'.'}</p>
+ {item.research_mode&&<>
+ <p>Research expiry assumption: {item.research_expiry??'Unavailable'} bars</p>
+ {e?.current_payout!=null?<p>Research fallback assumption: {item.research_payout??'Unavailable'}% — not used while provider payout is active.</p>:<p>Research payout assumption: {item.research_payout??'Unavailable'}%</p>}
+ </>}
+ {e?.payout_source&&<p>Paper payout snapshot: {e.payout_snapshot??'Unavailable'}% · {e.payout_source}. Paper expiry: {e.expiry_bars??'Unavailable'} bars · {e.expiry_source??'Unavailable'}.</p>}
  {e?.payout_warning&&<p role="alert" className="researchWarning">PAYOUT BELOW VALIDATION ASSUMPTION</p>}
  {item.state==='SUSPENDED_DEGRADED'&&<p role="alert">DEGRADED — normal scanning suspended.</p>}
  <p>Signal available: {e?.signal_time??'—'} · NEXT_CANDLE_OPEN boundary: {e?.next_entry_boundary??'—'}. Future entry price unknown.</p>

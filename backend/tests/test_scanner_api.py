@@ -193,3 +193,62 @@ def test_real_validation_payout_dataset_isolation_and_degraded_suspension(harnes
     runtime.cycle()
     assert client.get("/api/v1/scanner/items").json()["items"][0]["state"] == "SUSPENDED_DEGRADED"
     assert client.get("/api/v1/scanner/events").json()["total"] == 1
+
+
+@pytest.mark.parametrize(
+    "research,provider,payout,source,expiry,expiry_source",
+    [
+        (True, None, "90", "RESEARCH_ASSUMPTION", 3, "RESEARCH_ASSUMPTION"),
+        (True, "87", "87", "PROVIDER", 3, "RESEARCH_ASSUMPTION"),
+        (False, None, "84", "VALIDATION_ASSUMPTION", 1, "VALIDATION_ASSUMPTION"),
+        (False, "79", "79", "PROVIDER", 1, "VALIDATION_ASSUMPTION"),
+    ],
+)
+def test_paper_precedence_with_real_validation_and_observed_outcome(harness, research, provider, payout, source, expiry, expiry_source):
+    from validation_fixture import data
+    from test_validation_api import create
+
+    client, factory, _ = harness
+    rows = data()
+    seed(factory, rows)
+    _, vid = create_strategy(client)
+    plan = create(client, vid, payout_percent="84")
+    assert client.post(f"/api/v1/validations/{plan['id']}/reveal-test").json()["verdict"] == "PASS"
+    watch = client.post("/api/v1/scanner/watchlists", json={"name": "Precedence"}).json()
+    response = client.post(
+        f"/api/v1/scanner/watchlists/{watch['id']}/items",
+        json=dict(
+            provider="REPLAY",
+            dataset={**META, "timeframe": "1h"},
+            strategy_version_id=vid,
+            research_mode=research,
+            research_payout="90",
+            research_expiry=3,
+        ),
+    )
+    assert response.status_code == 200, response.text
+    replay = ReplayLiveProvider(rows, initial=1490, payout=Decimal(provider) if provider else None)
+    if provider is None:
+        replay.capabilities["payout"] = False
+    runtime = ScannerRuntime(factory, lambda *args: replay)
+    runtime.cycle()
+    first = client.get("/api/v1/scanner/events").json()["items"][0]
+    evidence = first["evidence"]
+    assert Decimal(evidence["payout_snapshot"]) == Decimal(payout)
+    assert evidence["payout_source"] == source
+    assert (evidence["expiry_bars"], evidence["expiry_source"]) == (expiry, expiry_source)
+    assert Decimal(evidence["validation_payout"]) == 84 and evidence["validation_expiry"] == 1
+    assert evidence["payout_warning"] == (provider == "79")
+    assert first["paper_outcome"] is None
+    for i in range(expiry):
+        runtime.cycle()
+        event = next(e for e in client.get("/api/v1/scanner/events").json()["items"] if e["id"] == first["id"])
+        if i < expiry - 1:
+            assert event["paper_outcome"] is None
+    paper = event["paper_outcome"]["evidence"]
+    assert paper["result"] == "WIN"
+    assert Decimal(paper["entry_price"]) == rows[1491].open
+    assert paper["entry_time"] == rows[1491].open_time.isoformat()
+    assert paper["expiry_time"] == rows[1490 + expiry].close_time.isoformat()
+    assert Decimal(paper["unit_pnl"]) == Decimal(payout) / 100
+    assert paper["payout_source"] == source

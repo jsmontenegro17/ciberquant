@@ -1,6 +1,8 @@
 # Changelog
 
 ## [0.7.0-dev] - Unreleased
+### Fixed
+- REQ-007 human QA: explicit mode-aware paper-config precedence. Research uses its own expiry/payout fallback; normal mode retains compatible validation assumptions; current provider payout overrides either fallback with auditable source labels. UI distinguishes active paper settings, research fallback and historical reference. No frozen engine/version change.
 ### Added
 - REQ-007 cq-live-data-v1 / cq-scanner-v1 read-only providers, Replay/Mock, optional terminal-local MT5 and disabled experimental IQ Option.
 - Dedicated worker and shared full-identity subscriptions, canonical exact incremental frozen features/DSL, configurable stale/heartbeat/drift and bounded reconnect.

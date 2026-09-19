@@ -2,6 +2,8 @@
 
 ## REQ-007 live scanner
 
+Final human QA: `test_paper_config.py` covers the four mode/provider combinations and prevents cross-mode fallback for missing assumptions. `test_paper_precedence_with_real_validation_and_observed_outcome` repeats all four cases against actual persisted historical84%/1-bar PASS, research90%/3-bar inputs and provider87%/79%/unavailable, verifying immutable evidence sources, no premature result, exact next-open/expiry and Decimal P&L. Frontend tests distinguish active provider payout from unused research fallback and label historical84%/1-bar evidence as reference only.
+
 `python -m pytest` covers exact 10000-candle incremental/batch feature equality, Replay DSL timestamps and frozen binary paper equality, forming/duplicate/stale/disconnect/conflict, private ownership, five-axis dataset rejection, real persisted PASS→FAIL degradation, payout warning, shared subscriptions/reconnect, optional read-only MT5 fake SDK and migration006 provenance/constraints/round-trip. PostgreSQL cases require `CI_MARKET_DATA_POSTGRES_TESTS=true`; local SQLite skips are explicit, not PostgreSQL acceptance.
 
 Frontend: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; `npx playwright test` now includes Replay worker-backed scanner acceptance with an actually computed historical PASS fixture. Isolated temporary DB/users/worker process; no production sample strategy seeded. Screenshots `req007-scanner-desktop.png` / `req007-scanner-tablet.png` in ignored test-results.

@@ -8,6 +8,20 @@ import {marketApi} from '../../api/marketData';
 import {researchApi} from '../../api/research';
 import type {WatchItem} from '../../api/scanner';
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
+it.each([null,'87'])('truthfully displays research90/3 vs validation84/1 with provider payout %s',provider=>{
+ render(<ScannerCard item={{...item,research_mode:true,research_payout:'90',research_expiry:3,latest:{...item.latest,current_payout:provider,validation_payout:'84',validation_expiry:1,payout_snapshot:provider??'90',payout_source:provider?'PROVIDER':'RESEARCH_ASSUMPTION',expiry_bars:3,expiry_source:'RESEARCH_ASSUMPTION'}}} onToggle={()=>{}}/>);
+ expect(screen.getByText('Research expiry assumption: 3 bars')).toBeTruthy();
+ expect(screen.getByText(/Historical validation payout: 84% · Historical validation expiry: 1 bars — reference only/)).toBeTruthy();
+ if(provider){
+  expect(screen.getByText(/Current provider payout: 87%/)).toBeTruthy();
+  expect(screen.getByText('Research fallback assumption: 90% — not used while provider payout is active.')).toBeTruthy();
+  expect(screen.queryByText('Research payout assumption: 90%')).toBeNull();
+ }else{
+  expect(screen.getByText('Research payout assumption: 90%')).toBeTruthy();
+  expect(screen.queryByText(/not used while provider/)).toBeNull();
+ }
+ expect(screen.getByText(/Paper expiry: 3 bars · RESEARCH_ASSUMPTION/)).toBeTruthy();
+});
 const item:WatchItem={id:1,watchlist_id:1,provider:'REPLAY',dataset:{source:'FIXTURE',broker:'DEMO',symbol:'EURUSD',market_type:'REGULAR',timeframe:'1m'},strategy_version_id:1,research_mode:false,enabled:true,state:'ACTIVE',latest:{state:'MATCH',mode:'REPLAY',research_direction:'PUT',validation_state:'HISTORICALLY_VALIDATED',dataset_validation_state:'HISTORICALLY_VALIDATED',current_payout:'79',validation_payout:'84',current_break_even:'55.8',payout_warning:true,signal_context:{rsi_14:'73.14'},health:{status:'CONNECTED',clock_delta_seconds:0}}};
 it('renders neutral MATCH, private dataset, payout mismatch, Replay and exact context',()=>{
  const toggle=vi.fn();render(<ScannerCard item={item} onToggle={toggle}/>);
