@@ -1,5 +1,17 @@
 # Testing
 
+## REQ-004
+
+`test_features.py` freezes manual SMA/EMA/RSI/ATR/population-Bollinger fixtures, null warmups, zero-range ratios, RSI100/0/50, gap continuity without resets, Decimal context isolation, serialized rounding, strict identities/specs, prefix100/200 and future-mutation invariance. Fixture closes1..100: EMA20 seed10.5 at index19; serialized EMA20=90.5 at index99; RSI14=100 from index14. Recurrence uses50-digit Decimal, no intermediate quantization; compare canonical18-fractional-digit strings at API boundaries.
+
+`test_feature_api.py` verifies USER access, definitions, range independence(start50/80), no raw writes, snapshot replay after earlier backfill and later candles, all five dataset dimensions, exact caps, empty data and invalid input. Snapshot replay runs on migrated SQLite locally and PostgreSQL in CI using the existing disposable harness; no new migration.
+
+Feature frontend tests cover definitions, dataset/preset/custom parameters, explicit computation, metadata, null versus zero, errors and actual API-row mapping into chart series. `features.spec.ts` signs in as USER, uses an already-seeded100-candle fixture (no import), checks EMA/RSI exact values, real canvas panes, UTC hover and desktop/tablet overflow. The REQ-003 Inspect selector is scoped to its dataset because coverage now has multiple datasets; its assertions are preserved. REQ-002 remains unchanged.
+
+Local2026-09-19:87 backend PASS/4 skips (PostgreSQL opt-in and intentional SQLite concurrency skip);22 frontend PASS;3 E2E PASS; build/lint/typecheck PASS. Remote counts and final CI evidence live in REQ-004.
+
+Benchmark: `cd backend; python scripts/benchmark_features.py`:100,000 synthetic candles, STANDARD(EMA9/20/50,RSI14,ATR14,BB20/2),2.996seconds; Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14. Single process, Decimal50, generation included, no SQL/JSON rendering. Development observation, not an SLA. Script prints current environment and timing on every run.
+
 ## REQ-003
 
 Semantic human QA regression: `test_catalog_api_direction_contract_without_legacy_aliases` asserts the exact API field set (bullish/bearish/doji counts and probabilities, no legacy aliases), CCC=(6 samples,0 bullish,6 bearish,0 doji) with probabilities0/1/0, and CC=(12,6,6,0) with probabilities0.5/0.5/0. Engine, dataset/gap rules and database schema are unchanged. Frontend fixtures/types use the corrected direction fields.

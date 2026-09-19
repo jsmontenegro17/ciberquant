@@ -1,7 +1,7 @@
 # Project State
 
 ## Current version
-0.3.0
+0.4.0-dev on REQ-004 branch; stable main/tag v0.3.0.
 
 ## Functional
 REQ-003 — DONE, Human Acceptance PASS on 2026-09-19. CiberQuant provides Authentication, Trading Accounts, Risk Engine, Session Manager, Trading Journal, Market Data Ingestion, Dataset Provenance, Data Quality and Candle Cataloger. The accepted catalog contract describes bullish/bearish/doji candles, never binary trade results.
@@ -11,13 +11,13 @@ REQ-002 is DONE with Human Acceptance PASS. Functional flow: login → account �
 Behavioural analytics remain future scope. RiskProfile retains the user-scoped Foundation model; profile editing/account-specific assignments are not part of this delivery. Import recovery/background ingestion is separate P2 debt DATA-001.
 
 ## Foundation only
-Indicators, strategies, validation and backtesting have documentation/contracts but no production implementation.
+Strategies, validation and backtesting remain future contracts. REQ-004 now implements indicators on its feature branch, not stable main.
 
 ## Planned
-Indicators, strategies, validation and backtesting.
+Strategies, validation, backtesting and live scanning.
 
 ## Modules in development
-None. REQ-003 — Market Data Ingestion & Candle Cataloger: DONE, Human Acceptance PASS; release delivery tracked in [PR #2](https://github.com/jsmontenegro17/ciberquant/pull/2). REQ-002 remains DONE, integrated in PR #1.
+REQ-004 — Feature & Indicator Engine: IN_PROGRESS. Pure cq-features-v1, reproducible snapshot APIs and Feature Lab. No schema change or new migration. REQ-003 remains DONE / Human Acceptance PASS in PR #2; REQ-002 remains DONE in PR #1.
 
 ## Experimental / disabled
 Auto-trading, broker integrations, ML and live streaming are disabled.
@@ -33,7 +33,12 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-None. REQ-001/REQ-002/REQ-003: DONE. Human Acceptance PASS includes the semantic correction at b460d3ed9fc21011fff44398b6c202aa0f1f276f. Release/main CI and tag evidence are linked from REQ-003. No trading recommendations or binary outcome engine implemented.
+[REQ-004](requirements/REQ-004-feature-indicator-engine.md): IN_PROGRESS, human acceptance pending. REQ-001/REQ-002/REQ-003: DONE. No strategies, trading recommendations, binary outcome engine or backtesting implemented.
 
 ## Next milestones
-REQ-004 Strategy Lab & Backtesting requires a separate authorization and is not started.
+REQ-004 Feature & Indicator Engine (IN_PROGRESS).
+REQ-005 Strategy Lab & Binary Backtesting Engine.
+REQ-006 Validation & Walk-Forward Engine.
+REQ-007 Live Data & Scanner.
+REQ-008 Integrated Research Workspace / v1.0.
+Only REQ-004 is authorized; subsequent requirements are not started.

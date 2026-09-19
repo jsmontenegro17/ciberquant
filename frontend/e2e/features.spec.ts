@@ -1,0 +1,34 @@
+import { test, expect } from '@playwright/test';
+
+test('USER researches existing fixture with exact EMA/RSI and snapshot metadata', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/features');
+  await page.getByLabel('Email').fill('qa@example.com');
+  await page.getByLabel('Password').fill('browser-test-only');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByRole('link', { name: 'Feature Lab', exact: true }).click();
+  await page.getByLabel('Dataset', { exact: true }).selectOption({ label: 'FEATURE_FIXTURE / DEMO / EURUSD / REGULAR / 1m' });
+  await page.getByRole('button', { name: 'Load Standard Set' }).click();
+  const response = page.waitForResponse(r => r.url().endsWith('/features/compute'));
+  await page.getByRole('button', { name: 'Analyze', exact: true }).click();
+  const result = await (await response).json();
+  expect(result.rows[19].features.ema_20).toBe('10.5');
+  expect(result.rows[99].features.ema_20).toBe('90.5');
+  expect(result.rows[14].features.rsi_14).toBe('100');
+  const results = page.getByRole('region', { name: 'Feature results' });
+  await expect(results.getByText('cq-features-v1', { exact: true })).toBeVisible();
+  await expect(results.getByText('As-of candle ID', { exact: true })).toBeVisible();
+  await expect(results.getByRole('cell', { name: '10.5', exact: true }).first()).toBeVisible();
+  await expect(results.getByRole('cell', { name: '—', exact: true }).first()).toBeVisible();
+  const chart = page.getByLabel('Feature candlestick chart');
+  await expect(chart.locator('canvas').first()).toBeVisible();
+  expect(await chart.locator('canvas').count()).toBeGreaterThanOrEqual(6);
+  await chart.hover();
+  await expect(page.getByLabel('Candle details')).toContainText('UTC');
+  await page.screenshot({ path: 'test-results/req004-features-desktop.png', fullPage: true });
+  await page.setViewportSize({ width: 768, height: 1024 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/req004-features-tablet.png', fullPage: true });
+  expect(errors).toEqual([]);
+});

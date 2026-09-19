@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0-dev] - Unreleased
+### Added
+- REQ-004 cq-features-v1: pure Decimal candle features, SMA, SMA-seeded EMA, Wilder RSI/ATR and population Bollinger; registry and convenience STANDARD preset.
+- Origin-anchored calculations, immutable candle-ID snapshots, authenticated definitions/compute APIs and exact-or-reject configurable caps.
+- Feature Lab with real candlesticks, overlays, RSI/ATR panes, UTC hover, null warmups, gap metadata and bounded table; Lightweight Charts5.2.1 pinned with attribution.
+- Deterministic formula, range/snapshot/no-lookahead regressions, USER E2E and100k benchmark; official indicator definitions.
+### Boundaries
+- No raw-data mutation, derived persistence or migration; no strategies, binary outcomes, backtesting or automatic signals.
+- Corrected roadmap: REQ-005 Strategy Lab/Backtesting,006 Validation,007 Live Data/Scanner,008 Integrated Workspace. Human acceptance and merge remain pending.
+
 ## [0.3.0] - 2026-09-19
 ### Acceptance
 - REQ-003 DONE; Human Acceptance PASS includes final semantic contract correction. Candle direction is not binary trade outcome.

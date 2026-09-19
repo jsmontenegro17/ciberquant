@@ -8,5 +8,8 @@ class Settings(BaseSettings):
     market_data_max_upload_mb: int = Field(default=20, ge=1, le=100)
     market_data_max_rows: int = Field(default=100000, ge=1, le=1000000)
     market_data_max_catalog_candles: int = Field(default=250000, ge=1, le=1000000)
+    feature_api_max_return_rows: int = Field(default=10000, ge=1, le=50000)
+    feature_engine_max_source_candles: int = Field(default=250000, ge=1, le=1000000)
+    feature_api_max_indicator_specs: int = Field(default=12, ge=1, le=50)
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 settings = Settings()

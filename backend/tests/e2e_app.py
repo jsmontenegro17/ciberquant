@@ -11,12 +11,19 @@ from app.db import Base
 from app.api.deps import db
 from app.api.auth import pwd
 from app.models import User, TradingAccount, RiskProfile, LedgerEntry
+from dataclasses import asdict
+from app.models import Candle
+from feature_fixture import series
 
 test_directory = TemporaryDirectory(prefix="ciberquant-e2e-")
 engine = create_engine("sqlite:///" + str(Path(test_directory.name) / "qa.db"), connect_args={"check_same_thread": False})
 Base.metadata.create_all(engine)
 factory = sessionmaker(bind=engine)
 with factory() as s:
+    for candle in series(size=100):
+        values = asdict(candle)
+        values.pop('candle_id')
+        s.add(Candle(**values))
     s.add(User(email="market-admin@example.com", name="Market Admin", password_hash=pwd.hash("browser-test-only"), role="ADMIN"))
     user = User(email="qa@example.com", name="Browser QA", password_hash=pwd.hash("browser-test-only"))
     s.add(user)
