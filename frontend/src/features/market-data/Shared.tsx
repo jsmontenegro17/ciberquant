@@ -5,9 +5,9 @@ export function DatasetLabel({ dataset }: { dataset: Dataset }) {
 }
 export function Paging({ offset, limit, total, change }: { offset: number; limit: number; total: number; change: (n: number) => void }) {
   return <div className="actions">
-    <button className="secondary" disabled={offset === 0} onClick={() => change(Math.max(0, offset - limit))}>Previous</button>
+    <button type="button" className="secondary" disabled={offset === 0} onClick={() => change(Math.max(0, offset - limit))}>Previous</button>
     <span>{total === 0 ? 0 : offset + 1}–{Math.min(total, offset + limit)} of {total}</span>
-    <button className="secondary" disabled={offset + limit >= total} onClick={() => change(offset + limit)}>Next</button>
+    <button type="button" className="secondary" disabled={offset + limit >= total} onClick={() => change(offset + limit)}>Next</button>
   </div>;
 }
 export function Failure({ error }: { error: Error | null }) {

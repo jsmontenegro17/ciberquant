@@ -1,5 +1,13 @@
 # Testing
 
+## REQ-007 live scanner
+
+`python -m pytest` covers exact 10000-candle incremental/batch feature equality, Replay DSL timestamps and frozen binary paper equality, forming/duplicate/stale/disconnect/conflict, private ownership, five-axis dataset rejection, real persisted PASS→FAIL degradation, payout warning, shared subscriptions/reconnect, optional read-only MT5 fake SDK and migration006 provenance/constraints/round-trip. PostgreSQL cases require `CI_MARKET_DATA_POSTGRES_TESTS=true`; local SQLite skips are explicit, not PostgreSQL acceptance.
+
+Frontend: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; `npx playwright test` now includes Replay worker-backed scanner acceptance with an actually computed historical PASS fixture. Isolated temporary DB/users/worker process; no production sample strategy seeded. Screenshots `req007-scanner-desktop.png` / `req007-scanner-tablet.png` in ignored test-results.
+
+Benchmark: `PYTHONPATH=.` then `python scripts/benchmark_live.py` from backend. Three datasets ×10000 closed candles ×4 strategies; event decisions and evaluations/sec plus mean feature-update latency. Excludes persistence/network/JSON; not an SLA. Optional real MT5/IQ smoke is explicitly separate and NOT RUN without safe local terminal setup. CI requires no broker credentials/feed internet.
+
 ## REQ-006 validation
 
 Protocol/API/migration tests cover candle-based cuts, four folds, computational seal spy and null TEST child, explicit single reveal, atomic failure, exact v0.5.0 simulation golden hashes (expiry1/5/60, both overlaps), deterministic manual-block interval, PASS/FAIL/INCONCLUSIVE fixtures, real persisted degradation, backfill replay, reuse refreshed at reveal, immutability and private ownership. Migration005 runs on PostgreSQL in CI with JSONB/FK/constraints/uniqueness and concurrent reveal (one succeeds, one409). SQLite is not locking evidence.

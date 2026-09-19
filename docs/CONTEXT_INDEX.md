@@ -2,6 +2,7 @@
 
 | Área | Documento | Código principal |
 |---|---|---|
+| Live / Scanner | [Protocol](LIVE_DATA_PROTOCOL.md), [Semantics](SCANNER_SEMANTICS.md), [REQ-007](requirements/REQ-007-live-scanner.md) | `backend/app/live/`, `backend/app/api/scanner.py`, `frontend/src/features/scanner/`, migration006 |
 | Auth / users | [AUTH](modules/AUTH.md), [USERS](modules/USERS.md) | `backend/app/api/auth.py`, `models.py` |
 | Accounts / ledger | [TRADING_ACCOUNTS](modules/TRADING_ACCOUNTS.md) | `backend/app/services/finance.py` |
 | Risk / sessions | [RISK_ENGINE](modules/RISK_ENGINE.md), [SESSIONS](modules/SESSIONS.md) | `backend/app/services/finance.py` |
@@ -14,7 +15,9 @@
 | Validation | [VALIDATION](modules/VALIDATION.md), [Protocol](VALIDATION_PROTOCOL.md), [REQ-006](requirements/REQ-006-validation-walk-forward.md) | `backend/app/validation/`, `backend/app/api/validation.py`, `frontend/src/features/validation/`, migration005 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: REQ-006, version0.6.0, DONE / Human Acceptance PASS. REQ-001–005 remain DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #5](https://github.com/jsmontenegro17/ciberquant/pull/5). Next: REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0, neither authorized nor started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: REQ-006, version0.6.0, DONE / Human Acceptance PASS. REQ-001–005 remain DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #5](https://github.com/jsmontenegro17/ciberquant/pull/5). Active: REQ-007 Live Data & Scanner, version0.7.0-dev. REQ-008 Integrated Research Workspace/v1.0 is not authorized or started.
+
+Provider docs: [MT5](providers/MT5.md), [IQ experimental](providers/IQOPTION_EXPERIMENTAL.md), [Replay](providers/REPLAY.md). Scanner regressions: `test_live_engine.py`, `test_scanner_api.py`, `test_live_migration.py`, `test_mt5_provider.py`, `scanner.test.tsx`, `e2e/scanner.spec.ts`. Benchmark `backend/scripts/benchmark_live.py`; operations debt [LIVE-001](debt/LIVE-001-provider-operations.md).
 
 Validation regressions: `backend/tests/test_validation_protocol.py`, `test_validation_api.py`, `test_validation_migration.py`, `validation_fixture.py`; frontend `validation.test.tsx`, `e2e/validation.spec.ts`; performance `backend/scripts/benchmark_validation.py`. P2 [VALIDATION-001](debt/VALIDATION-001-stale-validation-run-recovery.md), [VALIDATION-002](debt/VALIDATION-002-multiple-testing-research-lineage.md).
 

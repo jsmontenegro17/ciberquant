@@ -1,5 +1,7 @@
 # Market Data
 
+REQ-007 adds a separate read-only live worker: closed candles reuse immutable raw identity/Decimal validation; `live_observations` stores LIVE/REPLAY + BOOTSTRAP/OBSERVED provenance without rewriting CSV provenance. Conflicts stop the dataset, exact duplicates are idempotent. FORMING exists only in the replaceable current snapshot cache, is heartbeat-expired on reads and never enters raw candles/features. See [live protocol](../LIVE_DATA_PROTOCOL.md).
+
 REQ-003 introduces auditable append-only ingestion. Source, broker, symbol, market_type and timeframe identify one dataset; UTC open_time completes candle identity. Text labels are trimmed/uppercased; blank broker becomes UNSPECIFIED. Timeframe aliases use one backend parser (1m/5m/15m/30m/1h; M1/M5/M15/M30/H1 accepted).
 
 ## Architecture

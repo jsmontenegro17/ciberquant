@@ -23,9 +23,29 @@ services:
       FEATURE_API_MAX_INDICATOR_SPECS: ${FEATURE_API_MAX_INDICATOR_SPECS:-12}
       BACKTEST_MAX_SOURCE_CANDLES: ${BACKTEST_MAX_SOURCE_CANDLES:-250000}
       BACKTEST_MAX_TRADES: ${BACKTEST_MAX_TRADES:-10000}
+      ENABLE_REPLAY_PROVIDER: ${ENABLE_REPLAY_PROVIDER:-false}
+      ENABLE_MT5_PROVIDER: ${ENABLE_MT5_PROVIDER:-false}
+      ENABLE_IQOPTION_EXPERIMENTAL: ${ENABLE_IQOPTION_EXPERIMENTAL:-false}
     ports: ['8000:8000']
     depends_on: {db: {condition: service_healthy}}
     command: sh -c 'alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port 8000'
+    healthcheck: {test: ['CMD', 'python', '-c', 'import urllib.request; urllib.request.urlopen("http://localhost:8000/health")'], interval: 5s, timeout: 5s, retries: 20}
+  scanner-worker:
+    profiles: ['scanner']
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://ciberquant:ciberquant@db:5432/ciberquant
+      ENABLE_REPLAY_PROVIDER: ${ENABLE_REPLAY_PROVIDER:-false}
+      ENABLE_IQOPTION_EXPERIMENTAL: ${ENABLE_IQOPTION_EXPERIMENTAL:-false}
+      REPLAY_PREFIX_CANDLES: ${REPLAY_PREFIX_CANDLES:-100}
+      REPLAY_SPEED: ${REPLAY_SPEED:-MAX}
+      REPLAY_PAYOUT: ${REPLAY_PAYOUT:-}
+      LIVE_STALE_FACTOR: ${LIVE_STALE_FACTOR:-2}
+      LIVE_CLOCK_DRIFT_SECONDS: ${LIVE_CLOCK_DRIFT_SECONDS:-30}
+      LIVE_HEARTBEAT_SECONDS: ${LIVE_HEARTBEAT_SECONDS:-15}
+      LIVE_POLL_SECONDS: ${LIVE_POLL_SECONDS:-1}
+    depends_on: {backend: {condition: service_healthy}}
+    command: python -m app.live.worker
   frontend:
     build: ./frontend
     environment: {VITE_API_BASE_URL: http://localhost:8000/api/v1}

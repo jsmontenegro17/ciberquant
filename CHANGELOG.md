@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0-dev] - Unreleased
+### Added
+- REQ-007 cq-live-data-v1 / cq-scanner-v1 read-only providers, Replay/Mock, optional terminal-local MT5 and disabled experimental IQ Option.
+- Dedicated worker and shared full-identity subscriptions, canonical exact incremental frozen features/DSL, configurable stale/heartbeat/drift and bounded reconnect.
+- Exact-dataset historical compatibility, DEGRADED suspension, independent live payout warning, private watchlists, immutable events and next-open paper outcomes without financial writes.
+- Migration006 live provenance/idempotence/conflict protection, scanner APIs/SSE and `/scanner` workspace with REPLAY labels, health/context and paper history.
+- Replay quant regressions, optional SDK isolation, migration and browser acceptance, synthetic multi-dataset benchmark. Real broker smoke separate; LIVE-001 records future operations scope.
+- Existing pagination buttons explicitly avoid form submission when used inside scanner configuration.
+
 ## [0.6.0] - 2026-09-19
 ### Acceptance
 - REQ-006 DONE; Human Acceptance PASS on approved HEAD3e48ad684cfc471010c690c6820ef9dcc469c664. No P0/P1 within the accepted scope.
