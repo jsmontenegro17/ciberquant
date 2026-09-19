@@ -83,3 +83,44 @@ def test_consumed_reveal_recovery_never_reseals_or_reexecutes(operations_db):
         with pytest.raises(HTTPException) as caught:
             reveal(s, uid, rid)
         assert caught.value.status_code == 409
+
+
+def test_abandoned_manual_run_preserves_completed_evidence(operations_db):
+    require_pg(operations_db)
+    from app.models import BacktestRun, BacktestTrade
+
+    factory, uid, rid = setup(operations_db)
+    with factory() as s:
+        completed = s.scalar(select(BacktestRun).where(BacktestRun.status == "COMPLETED"))
+        original_id = completed.id
+        values = {c.name: getattr(completed, c.name) for c in BacktestRun.__table__.columns if c.name != "id"}
+        values.update(status="RUNNING", purpose="MANUAL", metrics=None, equity_curve=None, completed_at=None)
+        abandoned = BacktestRun(**values)
+        s.add(abandoned)
+        s.commit()
+        aid = abandoned.id
+    with ownership(operations_db, "backtest"):
+        assert recover(operations_db, "backtest", 0)["recovered"] == []
+    assert recover(operations_db, "backtest", 0)["recovered"] == [aid]
+    with factory() as s:
+        assert s.get(BacktestRun, aid).status == "FAILED"
+        assert s.get(BacktestRun, original_id).status == "COMPLETED"
+        assert s.scalar(select(func.count()).select_from(BacktestTrade).where(BacktestTrade.backtest_run_id == aid)) == 0
+
+
+def test_workspace_json_identity_on_migrated_database(operations_db):
+    from app.api.workspace import overview, history, paper
+    from app.market_data.normalization import Dataset
+
+    factory, uid, rid = setup(operations_db)
+    with factory() as session:
+        run = session.get(ValidationRun, rid)
+        user = session.get(User, uid)
+        ctx = (run.strategy_version_id, Dataset(**run.dataset))
+        result = overview(ctx, user, session)
+        assert result["evidence"]["manual"] is None
+        assert result["evidence"]["validation"]["id"] == rid
+        assert history("validation", ctx, 20, 0, user, session)["total"] == 1
+        assert paper(ctx, 20, 0, user, session)["total"] == 0
+        mismatch = (ctx[0], ctx[1].model_copy(update={"broker": "OTHER"}))
+        assert overview(mismatch, user, session)["evidence"]["validation"] is None

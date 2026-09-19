@@ -17,7 +17,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from app.config import settings
 from app.db import Base
-from app.models import User, Strategy, ScannerWatchlist, ScannerWatchItem, ScannerEvent, LedgerEntry
+from app.models import User, Strategy, ScannerWatchlist, ScannerWatchItem, ScannerEvent, LedgerEntry, Candle
 from app.strategies.schemas import VersionCreate
 from app.strategies.repository import create_version
 from app.strategies.dsl import digest
@@ -33,6 +33,7 @@ def main(soak=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--product", choices=["turbo", "binary"], default=settings.iqoption_product)
     parser.add_argument("--seconds", type=int, default=420 if soak else 150)
+    parser.add_argument("--regular-symbol", default=None, help="Explicit discovered open REGULAR symbol for reproducible diagnostics")
     args = parser.parse_args()
     if not 65 <= args.seconds <= (900 if soak else 300):
         raise SystemExit("Invalid bounded test duration")
@@ -80,6 +81,10 @@ def main(soak=False):
                     return 2
                 continue
             chosen = next((a for a in candidates if a["symbol"] in ("EURUSD", "EURUSD-OTC")), candidates[0])
+            if market == "REGULAR" and args.regular_symbol:
+                chosen = next((a for a in candidates if a["symbol"] == args.regular_symbol), None)
+                if chosen is None:
+                    raise ValueError("IQ_REQUESTED_REGULAR_NOT_OPEN")
             dataset = next(d for d in datasets if d.symbol == chosen["symbol"])
             rows = provider.recent_closed(dataset, 20)
             if len(rows) < 20:
@@ -88,7 +93,17 @@ def main(soak=False):
             provider._origin = rows[0].open_time
             history = provider.bootstrap(dataset)
             selected.append(
-                dict(dataset=dataset, last=history[-1].open_time, forming=False, closed=False, seen={}, new_closes=set(), gaps=0)
+                dict(
+                    dataset=dataset,
+                    last=history[-1].open_time,
+                    forming=False,
+                    closed=False,
+                    seen={},
+                    new_closes=set(),
+                    gaps=0,
+                    payouts=set(),
+                    clock=None,
+                )
             )
             emit(
                 {
@@ -142,6 +157,7 @@ def main(soak=False):
             runtime = ScannerRuntime(factory, lambda *args: provider)
             reconnected = False
             observations = 0
+            stale_observations = 0
             last_emitted = None
             # Runtime bootstraps once from the same frozen OTC origin, then evaluates actual new closes.
             start = time.monotonic()
@@ -149,6 +165,7 @@ def main(soak=False):
                 runtime.cycle()
                 with factory() as session:
                     current_item = session.scalar(select(ScannerWatchItem))
+                    stale_observations += int(current_item.state == "STALE")
                     if soak and provider._closed:
                         code = (current_item.latest or {}).get("error", "PROVIDER_UNAVAILABLE")
                         raise ValueError("IQ_SOAK_" + code)
@@ -172,11 +189,29 @@ def main(soak=False):
                         )
                 for item in selected:
                     frame = provider.poll(item["dataset"])
+                    if item["clock"] is not None and frame.server_time < item["clock"]:
+                        raise ValueError("IQ_SOAK_CLOCK_REGRESSION")
+                    item["clock"] = frame.server_time
+                    if frame.payout is not None:
+                        item["payouts"].add(str(frame.payout))
                     item["forming"] |= frame.forming is not None
                     for candle in frame.closed:
                         key = candle.open_time
                         prices = (candle.open, candle.high, candle.low, candle.close)
                         if key in item["seen"] and item["seen"][key] != prices:
+                            emit(
+                                {
+                                    "stage": "DATA_CONFLICT",
+                                    "symbol": item["dataset"].symbol,
+                                    "market_type": item["dataset"].market_type,
+                                    "candle_open": key,
+                                    "provider_clock": frame.server_time,
+                                    "changed_fields": [
+                                        name for name, a, b in zip(("open", "high", "low", "close"), item["seen"][key], prices) if a != b
+                                    ],
+                                    "orders_sent": 0,
+                                }
+                            )
                             raise ValueError("IQ_SOAK_DATA_CONFLICT")
                         if key not in item["seen"]:
                             if item["seen"] and (key - max(item["seen"])).total_seconds() != 60:
@@ -230,18 +265,28 @@ def main(soak=False):
                 success = success and reconnected and all(len(x["new_closes"]) >= 3 and x["gaps"] == 0 for x in selected)
                 with factory() as session:
                     counts = dict(session.execute(select(ScannerEvent.state, func.count()).group_by(ScannerEvent.state)).all())
+                    duplicate_candles = session.scalar(select(func.count(Candle.id) - func.count(func.distinct(Candle.open_time))))
+                    duplicate_events = session.scalar(
+                        select(func.count(ScannerEvent.id) - func.count(func.distinct(ScannerEvent.signal_time)))
+                    )
+                    success = success and duplicate_candles == 0 and duplicate_events == 0
                 emit(
                     {
                         "stage": "SOAK",
                         "observations": observations,
                         "reconnect": reconnected,
                         "scanner_counts": counts,
+                        "duplicate_closed_count": duplicate_candles,
+                        "duplicate_event_count": duplicate_events,
+                        "stale_observations": stale_observations,
                         "datasets": [
                             dict(
                                 symbol=x["dataset"].symbol,
                                 market_type=x["dataset"].market_type,
                                 closed_count=len(x["new_closes"]),
                                 gaps=x["gaps"],
+                                payout_snapshots=sorted(x["payouts"]),
+                                last_provider_clock=x["clock"],
                             )
                             for x in selected
                         ],

@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import Settings
 from app.security_boundary import SecurityBoundary
+from test_req003 import harness  # noqa: F401
 
 
 def production(**kwargs):
@@ -60,3 +61,37 @@ def test_development_and_production_https_cors_proxy_boundary():
         bad = client.options("/probe", headers={"Origin": "https://evil.example.invalid", "Access-Control-Request-Method": "POST"})
         assert bad.status_code == 400
         assert "access-control-allow-origin" not in bad.headers
+
+
+def test_login_logout_cookie_flags(harness, monkeypatch):
+    from app.api import auth
+    from app.config import settings
+
+    client, _, _ = harness
+    monkeypatch.setattr(auth.pwd, "verify", lambda *args: True)
+    monkeypatch.setattr(settings, "cookie_secure", True)
+    monkeypatch.setattr(settings, "cookie_samesite", "strict")
+    response = client.post("/api/v1/auth/login", json={"email": "market@example.com", "password": "synthetic-only"})
+    assert response.status_code == 200
+    cookie = response.headers["set-cookie"]
+    assert "HttpOnly" in cookie and "Secure" in cookie and "SameSite=strict" in cookie
+    assert "access_token" not in response.json()
+    logout = client.post("/api/v1/auth/logout").headers["set-cookie"]
+    assert "Max-Age=0" in logout and "Secure" in logout and "SameSite=strict" in logout
+
+
+def test_only_explicit_trusted_proxy_can_supply_https_scheme():
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+    app = FastAPI()
+    app.add_api_route("/probe", lambda: {"ok": True})
+    secured = SecurityBoundary(app, production())
+    proxied = ProxyHeadersMiddleware(secured, trusted_hosts=["10.20.0.2"])
+    for ip, status in [("10.20.0.2", 200), ("10.20.0.3", 400)]:
+
+        async def transport(scope, receive, send):
+            scope = {**scope, "client": (ip, 1234)}
+            await proxied(scope, receive, send)
+
+        with TestClient(transport, base_url="http://backend") as client:
+            assert client.get("/probe", headers={"X-Forwarded-Proto": "https"}).status_code == status

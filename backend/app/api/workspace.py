@@ -37,7 +37,10 @@ def context(
     market_type: str = Query(pattern="^(REGULAR|OTC)$"),
     timeframe: str = Query(min_length=1),
 ):
-    return strategy_version_id, Dataset(source=source, broker=broker, symbol=symbol, market_type=market_type, timeframe=timeframe)
+    try:
+        return strategy_version_id, Dataset(source=source, broker=broker, symbol=symbol, market_type=market_type, timeframe=timeframe)
+    except ValueError:
+        raise HTTPException(422, "Invalid dataset context") from None
 
 
 def identity(model, dataset):
@@ -57,7 +60,7 @@ def scoped(model, uid, vid, dataset):
     return [model.user_id == uid, model.strategy_version_id == vid, *identity(model, dataset)]
 
 
-def compact(run):
+def compact(run, direction=None):
     # Avoid loading equity curves/full frozen snapshots in summaries.
     keys = (
         "id",
@@ -75,6 +78,7 @@ def compact(run):
         "error_summary",
     )
     data = {k: getattr(run, k) for k in keys}
+    data["trade_direction"] = direction
     if isinstance(run, BacktestRun):
         data.update(
             kind="MANUAL_BACKTEST",
@@ -113,7 +117,30 @@ def light(model):
 
 
 def stage(name, status, href, evidence=None, date=None):
-    return dict(name=name, status=status, href=href, evidence=evidence, date=date)
+    summary = "No matching evidence"
+    if evidence:
+        if name == "DATA":
+            summary = f"{evidence['candle_count']} closed candles"
+        elif name == "FEATURES":
+            summary = evidence["engine"]
+        elif name == "STRATEGY":
+            summary = f"StrategyVersion #{evidence['id']} · v{evidence['version']}"
+        elif name == "BACKTEST":
+            summary = f"Manual #{evidence['id']} · {evidence['status']} · resolved {(evidence.get('metrics') or {}).get('resolved_trades', 'unavailable')}"
+        elif name == "VALIDATION":
+            summary = f"Validation #{evidence['id']} · {evidence['status']} · {evidence['verdict']}"
+        elif name == "SCANNER":
+            summary = " / ".join(f"#{i['id']} {i['state']} {'RESEARCH' if i['research_mode'] else 'NORMAL'}" for i in evidence["items"])
+        elif name == "PAPER":
+            summary = f"Outcome #{evidence['id']} · {evidence['result']}"
+    return dict(
+        name=name,
+        status=status,
+        href=href,
+        evidence=evidence,
+        date=stored_utc(date) if isinstance(date, datetime) else date,
+        summary=summary,
+    )
 
 
 @router.get("/overview")
@@ -126,7 +153,7 @@ def overview(ctx=Depends(context), user=Depends(current_user), session=Depends(d
         if model is BacktestRun:
             conditions.append(model.purpose == "MANUAL")
         run = session.scalar(light(model).where(*conditions).order_by(model.id.desc()).limit(1))
-        latest[key] = compact(run) if run else None
+        latest[key] = compact(run, version.trade_direction) if run else None
     items = list(
         session.scalars(
             select(ScannerWatchItem)
@@ -186,6 +213,7 @@ def overview(ctx=Depends(context), user=Depends(current_user), session=Depends(d
                 specs=version.indicator_specs,
                 note="Specs alone do not prove feature calculation; inspect linked run/event evidence.",
             ),
+            date=last.signal_time if last else manual["completed_at"] if manual and manual["status"] == "COMPLETED" else None,
         ),
         stage(
             "STRATEGY",
@@ -347,7 +375,10 @@ def history(
         where.append(model.purpose == "MANUAL")
     total = session.scalar(select(func.count()).select_from(model).where(*where))
     return dict(
-        items=[compact(r) for r in session.scalars(light(model).where(*where).order_by(model.id.desc()).limit(limit).offset(offset))],
+        items=[
+            compact(r, version.trade_direction)
+            for r in session.scalars(light(model).where(*where).order_by(model.id.desc()).limit(limit).offset(offset))
+        ],
         total=total,
         limit=limit,
         offset=offset,
@@ -359,6 +390,13 @@ def comparison(backtest_id: int, validation_id: int, ctx=Depends(context), user=
     version, _, dataset = authorize(session, user.id, ctx)
     a = owned(session, BacktestRun, backtest_id, user.id)
     b = owned(session, ValidationRun, validation_id, user.id)
+    directions = dict(
+        session.execute(
+            select(StrategyVersion.id, StrategyVersion.trade_direction).where(
+                StrategyVersion.id.in_([a.strategy_version_id, b.strategy_version_id])
+            )
+        ).all()
+    )
     differences = []
     for label, run in (("manual", a), ("validation", b)):
         for k, value in dataset.model_dump().items():
@@ -378,6 +416,8 @@ def comparison(backtest_id: int, validation_id: int, ctx=Depends(context), user=
             differences.append(field)
     if a.purpose != "MANUAL":
         differences.append("validation child is not a manual backtest")
+    if directions[a.strategy_version_id] != directions[b.strategy_version_id]:
+        differences.append("trade_direction")
     if a.status != "COMPLETED" or b.status != "COMPLETED":
         differences.append("incomplete evidence")
     segments = list(
@@ -386,8 +426,8 @@ def comparison(backtest_id: int, validation_id: int, ctx=Depends(context), user=
     return dict(
         status="INCOMPATIBLE" if differences else "CONTEXT_ALIGNED_NOT_POOLED",
         differences=differences,
-        manual=compact(a),
-        validation=compact(b),
+        manual=compact(a, directions[a.strategy_version_id]),
+        validation=compact(b, directions[b.strategy_version_id]),
         validation_children=[record(s) for s in segments],
         note="Different date ranges and sample roles remain separate; validation TEST is not manual in-sample evidence. No ranking.",
     )

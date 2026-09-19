@@ -123,3 +123,40 @@ def test_manual_validation_lineage_comparison_and_paper(harness):
     assert paper["total"] > 0 and all(r["mode"] == "REPLAY" for r in paper["items"])
     assert all(r["payout_source"] == "PROVIDER" for r in paper["items"])
     assert client.get("/api/v1/operations/status").status_code == 200
+
+
+def test_stale_health_and_query_bound(harness):
+    from app.models import WorkerHeartbeat, LiveSubscription, ScannerWatchItem, now
+    from datetime import timedelta
+    from sqlalchemy import event
+
+    client, factory, _ = harness
+    _, _, vid, *_ = setup(client, factory)
+    with factory() as s:
+        item = s.scalar(select(ScannerWatchItem))
+        s.add(
+            LiveSubscription(
+                key=item.subscription_key,
+                provider="REPLAY",
+                dataset=META,
+                status="CONNECTED",
+                health={},
+                updated_at=now() - timedelta(minutes=10),
+            )
+        )
+        s.add(WorkerHeartbeat(name="scanner", status="RUNNING", updated_at=now() - timedelta(minutes=10)))
+        s.commit()
+    calls = []
+    engine = factory.kw["bind"]
+
+    def counted(*args):
+        calls.append(args[2])
+
+    event.listen(engine, "before_cursor_execute", counted)
+    try:
+        result = client.get("/api/v1/workspace/overview", params={**META, "strategy_version_id": vid}).json()
+    finally:
+        event.remove(engine, "before_cursor_execute", counted)
+    assert len(calls) <= 12
+    assert result["provider_health"][0]["status"] == "STALE"
+    assert client.get("/api/v1/operations/status").json()["worker"]["state"] == "STALE"

@@ -6,17 +6,17 @@ import {marketApi,datasetOnly,params,type Dataset,type Page} from '../../api/mar
 import {researchApi} from '../../api/research';
 import {Failure,Paging} from '../market-data/Shared';
 
-type Stage={name:string;status:string;href:string;date:string|null;evidence:unknown};
+type Stage={name:string;status:string;href:string;date:string|null;evidence:unknown;summary?:string};
 export type Overview={dataset:Dataset;version:{id:number};pipeline:Stage[];provider_health:unknown[];
  evidence:{manual:{id:number;href:string}|null;validation:{id:number;href:string}|null};comparison_note:string};
 type EventRow={id:number;state:string;mode:string;signal_time:string;href:string};
 function Evidence({value}:{value:unknown}){return <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(value,null,2)}</pre>;}
 export function Pipeline({data}:{data:Overview}){
  return <><p>{Object.values(data.dataset).join(' / ')} · StrategyVersion #{data.version.id}</p>
- <ol className="grid compact" aria-label="Research pipeline">{data.pipeline.map(s=><li key={s.name}><Link to={s.href}>{s.name}</Link><p>{s.status}</p><small>{s.date??'No evidence timestamp'}</small><details><summary>{s.name} evidence</summary><Evidence value={s.evidence}/></details></li>)}</ol>
+ <ol className="grid compact" aria-label="Research pipeline">{data.pipeline.map(s=><li key={s.name}><Link to={s.href}>{s.name}</Link><p>{s.status}</p><p>{s.summary}</p><small>{s.date?`${new Date(s.date).toLocaleString('en-GB',{timeZone:'UTC'})} UTC`:'No evidence timestamp'}</small><details><summary>{s.name} evidence</summary><Evidence value={s.evidence}/></details></li>)}</ol>
  <p className="researchWarning">{data.comparison_note}</p></>;
 }
-function Context({dataset,version}:{dataset:Dataset;version:number}){
+export function Context({dataset,version}:{dataset:Dataset;version:number}){
  const [offset,setOffset]=useState(0),[historyOffset,setHistoryOffset]=useState(0),[kind,setKind]=useState('manual');
  const query=params({...dataset,strategy_version_id:version});
  const q=useQuery({queryKey:['workspace',query],queryFn:()=>api<Overview>(`/workspace/overview?${query}`),refetchInterval:5000});
@@ -30,7 +30,7 @@ function Context({dataset,version}:{dataset:Dataset;version:number}){
  return <>{[q,events,history,comparison,paper,ops].map((x,i)=><Failure key={i} error={x.error}/>)}{q.isPending&&<p>Loading research evidence…</p>}
  {q.data&&<><Pipeline data={q.data}/><h3>Historical vs live paper</h3><p>Last manual backtest: {a?<Link to={`/backtests/${a}`}>#{a}</Link>:'MISSING'} · Latest historical validation: {b?<Link to={`/validation/${b}`}>#{b}</Link>:'MISSING'}</p>
  {comparison.data?<details><summary>Comparison · {comparison.data.status}</summary><Evidence value={comparison.data}/></details>:<p>Comparison unavailable until both sources exist.</p>}
- <h3>Provider health</h3>{q.data.provider_health.length?<Evidence value={q.data.provider_health}/>:<p>No provider subscription for this exact context.</p>}</>}
+ <h3>Provider health</h3>{q.data.provider_health.length?<details><summary>Inspect current subscription health ({q.data.provider_health.length})</summary><Evidence value={q.data.provider_health}/></details>:<p>No provider subscription for this exact context.</p>}</>}
  <h3>Evidence history</h3><label>History source<select value={kind} onChange={e=>{setKind(e.target.value);setHistoryOffset(0);}}><option value="manual">Manual backtests</option><option value="validation">Historical validation</option></select></label>
  {history.data?.items.map(r=><p key={r.id}><Link to={r.href}>#{r.id} · {r.status}</Link></p>)}{history.data&&<Paging {...history.data} change={setHistoryOffset}/>}
  <h3>Recent scanner / paper evidence</h3>{events.data?.total===0&&<p>No scanner events for this exact context.</p>}

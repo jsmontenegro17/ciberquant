@@ -17,6 +17,10 @@ test('exact research workspace links manual, validation, Replay and paper eviden
  await expect(page.getByRole('list',{name:'Research pipeline'})).toBeVisible();
  await expect(page.getByText('Last manual backtest:',{exact:false})).toBeVisible();
  await expect(page.getByRole('link',{name:'VALIDATION',exact:true})).toHaveAttribute('href',/\/validation\/\d+/);
+ await page.screenshot({path:'test-results/req008-workspace-desktop.png',fullPage:true});
+ await page.setViewportSize({width:768,height:1024});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.screenshot({path:'test-results/req008-workspace-tablet.png',fullPage:true});
  await expect.poll(async()=> (await (await page.request.get(base+'/workspace/events?'+new URLSearchParams({...dataset,strategy_version_id:String(version)}))).json()).total).toBeGreaterThan(0);
  await page.reload();await page.getByLabel('Workspace dataset').selectOption({label:'SCANNER_FIXTURE / DEMO / EURUSD / REGULAR / 1h'});await page.getByLabel('Workspace strategy').selectOption(String(strategy.id));await page.getByLabel('Workspace version').selectOption(String(version));
  await page.getByRole('link',{name:/Event #/}).first().click();await expect(page.getByRole('heading',{name:/Scanner \/ paper lineage/})).toBeVisible();
