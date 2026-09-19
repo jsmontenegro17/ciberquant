@@ -6,5 +6,5 @@ def c(**kw):
 def test_invalid_ohlc(): assert validate_candle(c(high=Decimal('0.9')))
 def test_valid(): assert validate_candle(c())==[]
 def test_duplicate_and_otc_quality_errors():
-    assert validate_candles([c(),c()])
+    candle=c(); assert validate_candles([candle,candle])
     assert validate_candle(c(symbol='EURUSD-OTC',market_type='REGULAR'))

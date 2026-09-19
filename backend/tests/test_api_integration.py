@@ -31,7 +31,7 @@ def test_ledger_session_close_and_idempotency():
     account=client.post('/api/v1/accounts',json={'name':'C','initial_balance':'2000.00'}).json()
     session=client.post('/api/v1/sessions',json={'trading_account_id':account['id'],'risk_per_trade_percent':'1','max_loss_amount':'40','max_operations':4}).json()
     trade=client.post('/api/v1/trades',json={'trading_account_id':account['id'],'trading_session_id':session['id'],'symbol':'EURUSD','market_type':'REGULAR','timeframe':'1m','direction':'CALL','stake':'20','payout_percent':'84','result':'WIN'}).json()
-    assert trade['profit_loss']=='16.80'
+    assert Decimal(trade['profit_loss'])==Decimal('16.80')
     closed=client.post(f"/api/v1/sessions/{session['id']}/close"); assert closed.status_code==200 and closed.json()['status']=='CLOSED'
     assert client.post(f"/api/v1/sessions/{session['id']}/close").status_code==200
     assert client.post('/api/v1/trades',json={'trading_account_id':account['id'],'trading_session_id':session['id'],'symbol':'EURUSD','market_type':'REGULAR','timeframe':'1m','direction':'CALL','stake':'20','payout_percent':'84','result':'LOSS'}).status_code==409

@@ -83,9 +83,9 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | FAIL (fixed, awaiting rerun) | Run `35415145865` / commit `6bff0f6`; Alembic, both seed runs and smoke passed; Frontend/Docker passed; pytest failed during collection because `app` was not on `sys.path`. |
+| GitHub CI workflow | Remote | FAIL (fixed, awaiting rerun) | Run `35415226319` / commit `62056ce`; Alembic, both seed runs and smoke passed; Frontend/Docker passed; pytest collected 9 tests and failed 2 assertions: NUMERIC scale string and duplicate fixture timestamps. |
 
-Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin and explicit pytest package path. Commit evidence is recorded in Git.
+Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin, explicit pytest package path and deterministic duplicate fixture. Commit evidence is recorded in Git.
 
 ## Final Result
 Foundation QA corrections implemented. Status remains QA until the corrected remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.
