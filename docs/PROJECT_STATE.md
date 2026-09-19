@@ -17,7 +17,7 @@ Strategies, validation and backtesting remain future contracts. REQ-004 now impl
 Strategies, validation, backtesting and live scanning.
 
 ## Modules in development
-REQ-004 — Feature & Indicator Engine: IN_PROGRESS. Pure cq-features-v1, reproducible snapshot APIs and Feature Lab. No schema change or new migration. REQ-003 remains DONE / Human Acceptance PASS in PR #2; REQ-002 remains DONE in PR #1.
+REQ-004 — Feature & Indicator Engine: QA, Human Acceptance PENDING. Pure cq-features-v1, reproducible snapshot APIs and Feature Lab. [PR #3](https://github.com/jsmontenegro17/ciberquant/pull/3) OPEN, Backend/Frontend-E2E/Docker CI PASS;90 backend tests,22 frontend tests,3 E2E pass. No schema change or new migration. REQ-003 remains DONE / Human Acceptance PASS in PR #2; REQ-002 remains DONE in PR #1.
 
 ## Experimental / disabled
 Auto-trading, broker integrations, ML and live streaming are disabled.
@@ -33,10 +33,10 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-[REQ-004](requirements/REQ-004-feature-indicator-engine.md): IN_PROGRESS, human acceptance pending. REQ-001/REQ-002/REQ-003: DONE. No strategies, trading recommendations, binary outcome engine or backtesting implemented.
+[REQ-004](requirements/REQ-004-feature-indicator-engine.md): QA, human acceptance pending. REQ-001/REQ-002/REQ-003: DONE. No strategies, trading recommendations, binary outcome engine or backtesting implemented.
 
 ## Next milestones
-REQ-004 Feature & Indicator Engine (IN_PROGRESS).
+REQ-004 Feature & Indicator Engine (QA; awaiting human acceptance).
 REQ-005 Strategy Lab & Binary Backtesting Engine.
 REQ-006 Validation & Walk-Forward Engine.
 REQ-007 Live Data & Scanner.

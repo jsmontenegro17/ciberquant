@@ -8,7 +8,7 @@
 
 Feature frontend tests cover definitions, dataset/preset/custom parameters, explicit computation, metadata, null versus zero, errors and actual API-row mapping into chart series. `features.spec.ts` signs in as USER, uses an already-seeded100-candle fixture (no import), checks EMA/RSI exact values, real canvas panes, UTC hover and desktop/tablet overflow. The REQ-003 Inspect selector is scoped to its dataset because coverage now has multiple datasets; its assertions are preserved. REQ-002 remains unchanged.
 
-Local2026-09-19:87 backend PASS/4 skips (PostgreSQL opt-in and intentional SQLite concurrency skip);22 frontend PASS;3 E2E PASS; build/lint/typecheck PASS. Remote counts and final CI evidence live in REQ-004.
+Local2026-09-19:87 backend PASS/4 skips (PostgreSQL opt-in and intentional SQLite concurrency skip);22 frontend PASS;3 E2E PASS; build/lint/typecheck PASS. CI35459280520:90 backend PASS/1 intentional SQLite concurrency skip,22 frontend PASS,3 E2E PASS; PostgreSQL snapshot regression and Docker PASS. Final-head evidence lives in REQ-004/PR #3.
 
 Benchmark: `cd backend; python scripts/benchmark_features.py`:100,000 synthetic candles, STANDARD(EMA9/20/50,RSI14,ATR14,BB20/2),2.996seconds; Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14. Single process, Decimal50, generation included, no SQL/JSON rendering. Development observation, not an SLA. Script prints current environment and timing on every run.
 
