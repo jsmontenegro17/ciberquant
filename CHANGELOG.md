@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-dev] - Unreleased
+- REQ-008: explicit dataset/version Research Workspace, bounded pipeline/lineage/history and descriptive separated evidence. Manual backtests no longer show validation children; batched strategy queries.
+- PostgreSQL-owned synchronous lifecycle and audited conservative recovery; consumed validation reveals never resealed. Migration007 adds worker heartbeat only.
+- Validated production cookie/CORS/Origin/HTTPS configuration and trusted proxy boundary; development defaults preserved.
+- Operational health, local PRACTICE multi-close/reconnect tooling, deterministic tests and real sanitized probe evidence. Six engines remain mathematically unchanged, zero orders. Human Acceptance PENDING; no merge/tag.
+
 ## [0.7.0] - 2026-09-19
 ### Acceptance
 - REQ-007 DONE; Human Acceptance PASS on approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5. No P0/P1 within accepted scope. cq-live-data-v1 / cq-scanner-v1 frozen; existing four quant engines remain frozen.

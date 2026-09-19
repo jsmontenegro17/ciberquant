@@ -1,6 +1,6 @@
 # REQ-008 — Integrated Research Workspace / v1.0
 
-Status: IMPLEMENTATION
+Status: BLOCKED
 Human Acceptance: PENDING
 Target: 1.0.0-dev
 Base main/tag: 2f39bdb47d8c44056d905a923d6281246ad8fb43 / v0.7.0
@@ -25,7 +25,15 @@ cq-features-v1, cq-strategy-dsl-v1, cq-binary-backtest-v1, cq-validation-v1, cq-
 
 ## Acceptance A–L
 
-A baseline/regression; B explicit Workspace/pipeline/navigation; C exact ID/version lineage; D descriptive nonpooled comparison/source differences; E safe idempotent concurrent recovery/reveal preservation; F production/development security; G operational diagnostics; H IQ PRACTICE read-only/zero orders and separate soak; I cross-user negatives; J PostgreSQL migration/locks/preservation; K all suites/build/Docker; L human QA checklist. Evidence pending: do not claim PASS before verification.
+A baseline/regression; B explicit Workspace/pipeline/navigation; C exact ID/version lineage; D descriptive nonpooled comparison/source differences; E safe idempotent concurrent recovery/reveal preservation; F production/development security; G operational diagnostics; H IQ PRACTICE read-only/zero orders and separate soak; I cross-user negatives; J PostgreSQL migration/locks/preservation; K all suites/build/Docker; L human QA checklist. Final automated evidence is recorded in the PR #7 handoff; human acceptance remains pending.
+
+## Implementation and acceptance evidence
+
+Workspace/API, pipeline/lineage, paginated histories, descriptive comparisons, manual/validation separation, PostgreSQL guarded recovery, production security validation, heartbeat/diagnostics and local-only soak tooling implemented. See [Workspace semantics and human checklist](../WORKSPACE_SEMANTICS.md), [deployment/recovery](../OPERATIONS_DEPLOYMENT.md), [all real IQ attempts](../providers/IQOPTION_SOAK_2026-09-19.md).
+
+Local regression: backend197 PASS/21 explicit skips, frontend57 PASS, E2E7 PASS. PostgreSQL/concurrency and Docker are validated in CI, not claimed as local executions. Six mathematical engines unchanged; no persisted historical evidence rewritten. PR #7 remains draft, not merged/tagged.
+
+Blocker: real IQ probe observed `IQ_SOAK_DATA_CONFLICT` after two closes and reconnect. Exact affected candle was not recorded in that revision; root cause unresolved. Three other bounded probes passed, including an explicit BTCUSD retest, but cannot erase the failure. Section24 operational acceptance is not satisfied; L human QA readiness FAIL until a resolution/explicit decision. The read-only PRACTICE boundary remains PASS, orders0. No incompatible candle-finality change is authorized. No v1.0 release readiness claimed.
 
 ## Boundaries
 

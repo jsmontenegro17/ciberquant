@@ -1,5 +1,7 @@
 # Context Index
 
+Active: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), 1.0.0-dev / BLOCKED (real IQ DATA_CONFLICT unresolved) / Human Acceptance PENDING. [Workspace semantics](WORKSPACE_SEMANTICS.md), [operations/deployment](OPERATIONS_DEPLOYMENT.md), [real IQ probe](providers/IQOPTION_SOAK_2026-09-19.md). `/workspace` and `/operations/status`; backend api/workspace.py, api/operations.py, operations.py; migration007_operations. REQ-008 is now authorized; historical v0.7.0 statements below remain release context.
+
 REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2026-09-19 real PRACTICE smoke](providers/IQOPTION_SMOKE_2026-09-19.md); `backend/app/live/iqoption.py`, `iq_transport.py`, `backend/tests/test_iqoption.py`, `backend/scripts/smoke_iqoption.py`. Mandatory in this requirement, not deferred to REQ-008.
 
 | Área | Documento | Código principal |
@@ -17,7 +19,7 @@ REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2
 | Validation | [VALIDATION](modules/VALIDATION.md), [Protocol](VALIDATION_PROTOCOL.md), [REQ-006](requirements/REQ-006-validation-walk-forward.md) | `backend/app/validation/`, `backend/app/api/validation.py`, `frontend/src/features/validation/`, migration005 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: REQ-007, version0.7.0, DONE / Human Acceptance PASS. REQ-001–007 DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #6](https://github.com/jsmontenegro17/ciberquant/pull/6). cq-live-data-v1 and cq-scanner-v1 are frozen with their four existing quant dependencies. REQ-008 Integrated Research Workspace/v1.0 is not authorized or started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: REQ-007, version0.7.0, DONE / Human Acceptance PASS. REQ-001–007 DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #6](https://github.com/jsmontenegro17/ciberquant/pull/6). cq-live-data-v1 and cq-scanner-v1 are frozen with their four existing quant dependencies. REQ-008 Integrated Research Workspace/v1.0 is authorized and implemented in PR #7; acceptance remains blocked, not released.
 
 Provider docs: [MT5](providers/MT5.md), [IQ experimental](providers/IQOPTION_EXPERIMENTAL.md), [Replay](providers/REPLAY.md). Scanner regressions: `test_live_engine.py`, `test_scanner_api.py`, `test_live_migration.py`, `test_mt5_provider.py`, `scanner.test.tsx`, `e2e/scanner.spec.ts`. Benchmark `backend/scripts/benchmark_live.py`; operations debt [LIVE-001](debt/LIVE-001-provider-operations.md).
 
