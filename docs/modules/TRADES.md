@@ -1,2 +1,4 @@
 # Trades
+
+REQ-002 uses literal enums for REGULAR/OTC, CALL/PUT and WIN/LOSS/DRAW/CANCELLED. Opening/expiration inputs require timezone-aware timestamps and expiration after opening. Trades must belong to the selected account's session. Payout and remaining loss/balance constraints are enforced before persistence. Ledger, balance and audit updates share the transaction; PostgreSQL row locks serialize concurrent changes. Frontend mutations invalidate balance, ledger, trade, summary and overview queries.
 Purpose: record execution evidence, never send orders. Table: `trades`; API `/api/v1/trades` and `/api/v1/sessions/{id}/trades`. Rules: payout stored historically and cannot be below the session snapshot minimum; results WIN/LOSS/DRAW/CANCELLED, market_type separates REGULAR/OTC. Ledger records realized P&L.

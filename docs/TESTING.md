@@ -1,3 +1,5 @@
 # Testing
 
+REQ-002: `cd frontend; npm test` runs 8 formatter/component tests. `npx playwright install chromium` then `npx playwright test` starts disposable API/frontend servers (ports 8010/5174), seeds two accounts and validates login, selection, WIN/LOSS, limits, closure, journal reload and desktop/tablet overflow. Python must be on PATH or supplied as `CIBERQUANT_TEST_PYTHON`. The test API uses a temporary SQLite database and never accesses the user's trading data. CI additionally validates Alembic/seed against PostgreSQL and builds/starts Compose. Screenshots and failure traces are written to ignored `frontend/test-results/`.
+
 Unit tests cover money formulas, risk limits and market-data quality. API/integration tests use an isolated SQLite test database only as a test harness; CI additionally applies Alembic to a clean PostgreSQL service before running them. Quant regression fixtures are deterministic and must be extended for cataloger/backtesting. Run `cd backend; python -m pytest` and frontend checks with `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`.

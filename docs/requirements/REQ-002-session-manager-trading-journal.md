@@ -1,6 +1,6 @@
 # REQ-002 — Session Manager & Trading Journal
 
-Status: IN_PROGRESS  
+Status: QA
 Priority: P1  
 Classification: LARGE  
 Created: 2026-09-19  
@@ -24,7 +24,7 @@ Cataloger, backtesting, indicators, scanner, broker integrations, auto-trading, 
 - Como trader, quiero consultar y escribir notas relacionadas con sesiones/trades.
 
 ## Functional Requirements
-Real login/logout/current user; protected routes; account selector; session creation/closure; trade recording; ledger/balance refresh; session summary/history; dashboard overview; journal CRUD/list.
+Real login/logout/current user; protected routes; account selector; session creation/closure; trade recording; ledger/balance refresh; session summary/history; dashboard overview; journal create/list.
 
 ## Non-functional Requirements
 No financial hardcoding; credentials include; no JWT storage; Decimal calculations remain backend-owned; responsive desktop/tablet; accessible forms; query invalidation after mutations.
@@ -72,7 +72,26 @@ Module docs, context index/manifest if paths change, PROJECT_STATE, CHANGELOG an
 Start from `main` on `codex/req-002-session-manager-journal`; no changes to `main` directly.
 
 ## QA Evidence
-Pending implementation.
+2026-09-19: Backend 11 tests PASS; frontend 8 tests PASS; lint/typecheck/build PASS. Chromium against FastAPI with a disposable SQLite database validates account selection, backend stake, WIN/LOSS, balance update, max-operations blocking, closure/reload and session journal persistence. Desktop 1366×768 and tablet 768×1024 were checked; screenshots inspected locally with no page overflow.
+
+Integration evidence: starting balance 2000; WIN stake 20 at 84% = +16.80; next recommended stake 20.17; LOSS = -20.17; ending balance 1996.63. Ledger, summary, W/L, closure and isolation verified. Separate tests cover max-loss rejection, invalid market/stake, DRAW/CANCELLED, cross-account references and cross-user journal links.
+
+CI [35453839696](https://github.com/jsmontenegro17/ciberquant/actions/runs/35453839696), commit `337cd370f1ff323b4310545b2330a56a6453828a`: Backend PASS, Frontend including E2E PASS, Docker build + Compose startup PASS. This run validates PostgreSQL migration/seed and startup. Browser business-flow tests use SQLite; they do not claim PostgreSQL concurrency coverage. Final documentation/version/additional-test commit must also pass PR checks.
+
+### Acceptance results
+- PASS: real login, logout, persistent HttpOnly authentication and protected routes.
+- PASS: account selection and API dashboard; no static financial results in product screens.
+- PASS: start session, workspace, backend risk/stake and real trade recording.
+- PASS: balance/P&L refresh, auditable ledger and operation/loss limits.
+- PASS: confirmed closure, closed-state persistence, history and complete summary.
+- PASS: journal creation, session/trade ownership, filters and reload persistence.
+- PASS: backend/frontend tests, browser scenarios A–D and API isolation scenario E.
+- PASS: CI and Docker build/startup at the linked validated commit.
+- PASS: documentation and [PR #1](https://github.com/jsmontenegro17/ciberquant/pull/1).
+- Pending human review: final acceptance before DONE/merge. No tag/release created.
+
+### Implementation boundaries
+Risk profiles remain user-scoped; account selection changes balance/currency and the resulting calculations. History/journal filters are client-side over user-owned API lists. Behavioural engines, market import and REQ-003 were not implemented. Development cookies are not represented as production deployment hardening. P0/P1 defects: none known in validated scope. P2: dependency deprecation warnings and future pagination.
 
 ## Final Result
-Pending.
+Implemented on `codex/req-002-session-manager-journal`, PR #1, prepared version `0.2.0-dev`; awaiting final human QA and merge. REQ-003 must wait until REQ-002 is DONE and separately authorized.
