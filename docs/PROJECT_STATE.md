@@ -1,10 +1,10 @@
 # Project State
 
 ## Current version
-0.2.0-dev
+0.2.0
 
 ## Functional
-Foundation plus REQ-002 frontend auth, account view, real dashboard overview, session start/workspace/close, trade recording, session summary, ledger view and journal UI are implemented on the feature branch. Backend health, authentication, accounts, auditable ledger, risk, sessions, trades, journal API and market-data providers remain functional.
+REQ-002 is DONE with Human Acceptance PASS. Functional flow: login → account → risk → session → trades → ledger → journal → analytics. Real authentication, accounts, auditable ledger, Risk Engine, session manager, trade journal, connected dashboard, analytics and journal are supported by backend/frontend tests, browser E2E, Docker and CI. Backend health and market-data providers remain functional.
 
 ## Partial
 Behavioural analytics and the candle import endpoint remain future scope. RiskProfile retains the user-scoped Foundation model; profile editing/account-specific assignments are not part of this delivery.
@@ -16,7 +16,7 @@ Cataloger, indicators, strategies, validation and backtesting have documentation
 Cataloger, indicators, strategies, validation and backtesting.
 
 ## Modules in development
-REQ-002 — Session Manager & Trading Journal is in QA on its feature branch and [PR #1](https://github.com/jsmontenegro17/ciberquant/pull/1). Backend/frontend tests, browser E2E and Compose startup passed. No merge or release yet.
+None. REQ-002 — Session Manager & Trading Journal is DONE; delivery is tracked in [PR #1](https://github.com/jsmontenegro17/ciberquant/pull/1). REQ-003 has not started.
 
 ## Experimental / disabled
 Auto-trading, broker integrations, ML and live streaming are disabled.
@@ -28,10 +28,10 @@ Alembic 001 + 002 (session minimum payout snapshot); PostgreSQL; Docker Compose.
 REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-Human review found two P0 and two P1 financial issues, corrected on the REQ-002 branch: hard per-trade risk cap, net session loss, no zero-result ledger movements, and backend-only session start requiring RiskProfile. Local financial regressions pass; final human acceptance remains pending. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. Development cookie settings remain local-only; production hardening is not claimed.
+Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-REQ-002 — Session Manager & Trading Journal (QA). Human financial corrections validated by CI run 35454718064 at commit 8f22c626f55a115c8ed48e5055388c06bc6f7680 (backend, frontend/E2E, Docker build/startup PASS). Detailed findings/tests/results in the requirement's Human Review Financial Corrections section; final head checks and acceptance in PR #1.
+None. REQ-002 — Session Manager & Trading Journal: DONE, Human Acceptance PASS. Financial correction evidence remains in the requirement; final release-head CI and integration are tracked in PR #1 and main CI.
 
 ## Next milestones
-After REQ-002 is merged: REQ-003 cataloger; REQ-004 backtesting.
+Future, separately authorized requirements: REQ-003 cataloger; REQ-004 backtesting. Neither is initiated by the REQ-002 closure.

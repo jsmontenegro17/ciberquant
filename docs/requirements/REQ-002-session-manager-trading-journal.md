@@ -1,6 +1,7 @@
 # REQ-002 — Session Manager & Trading Journal
 
-Status: QA
+Status: DONE
+Human Acceptance: PASS
 Priority: P1  
 Classification: LARGE  
 Created: 2026-09-19  
@@ -74,7 +75,7 @@ Start from `main` on `codex/req-002-session-manager-journal`; no changes to `mai
 ## QA Evidence
 
 ### Human Review Financial Corrections
-Status: QA; corrections implemented, no merge authorized. No database migration needed.
+Status: DONE; corrections verified in final human acceptance (PASS) on 2026-09-19. Merge authorized after final CI passes. No database migration needed for these corrections.
 
 | Problem | Correction | Regression / result |
 |---|---|---|
@@ -85,7 +86,7 @@ Status: QA; corrections implemented, no merge authorized. No database migration 
 
 Local validation: backend 19 tests, frontend 10 tests, lint/typecheck/build and real API browser workflow PASS. Browser also verifies over-risk rejection, the net-risk summary and unchanged ledger after DRAW/CANCELLED. Existing ownership tests retained.
 
-Correction CI: [35454718064](https://github.com/jsmontenegro17/ciberquant/actions/runs/35454718064), commit `8f22c626f55a115c8ed48e5055388c06bc6f7680` — Backend PASS, Frontend/E2E PASS, Docker build/startup PASS. PR #1 remains open in QA; final head checks are linked from its description. All four findings are covered by passing regressions. Final human acceptance is still required; no merge performed.
+Correction CI: [35454718064](https://github.com/jsmontenegro17/ciberquant/actions/runs/35454718064), commit `8f22c626f55a115c8ed48e5055388c06bc6f7680` — Backend PASS, Frontend/E2E PASS, Docker build/startup PASS. All four findings are covered by passing regressions and were verified by final human acceptance. Final release-head checks are linked from PR #1.
 
 UI follow-up regression: a 409 preview response disables Start even when TanStack Query still retains a previously valid cached preview. The frontend test asserts this state; submission also explicitly checks preview error status. Local frontend tests remain 10 PASS.
 
@@ -109,10 +110,10 @@ CI [35453839696](https://github.com/jsmontenegro17/ciberquant/actions/runs/35453
 - PASS: backend/frontend tests, browser scenarios A–D and API isolation scenario E.
 - PASS: CI and Docker build/startup at the linked validated commit.
 - PASS: documentation and [PR #1](https://github.com/jsmontenegro17/ciberquant/pull/1).
-- Pending human review: final acceptance before DONE/merge. No tag/release created.
+- PASS: final human acceptance on 2026-09-19; all four financial findings verified, no functional P0/P1 within REQ-002. Merge authorized subject to final green CI; release tag must target the validated integrated main commit.
 
 ### Implementation boundaries
 Risk profiles remain user-scoped; account selection changes balance/currency and the resulting calculations. History/journal filters are client-side over user-owned API lists. Behavioural engines, market import and REQ-003 were not implemented. Development cookies are not represented as production deployment hardening. P0/P1 defects: none known in validated scope. P2: dependency deprecation warnings and future pagination.
 
 ## Final Result
-Implemented on `codex/req-002-session-manager-journal`, PR #1, prepared version `0.2.0-dev`; awaiting final human QA and merge. REQ-003 must wait until REQ-002 is DONE and separately authorized.
+DONE with Human Acceptance PASS. Delivered through `codex/req-002-session-manager-journal` and PR #1 as version `0.2.0`. Production auth configuration is recorded separately as [SEC-001](../debt/SEC-001-production-auth-configuration.md), not a blocker for this local-development delivery. REQ-003 is not started and requires separate authorization.

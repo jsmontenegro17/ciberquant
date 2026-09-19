@@ -11,7 +11,10 @@
 ### QA
 - Remote CI run 35415290649 validated backend, PostgreSQL migrations, idempotent seed, tests, frontend and Docker.
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2026-09-19
+### Acceptance
+- REQ-002 DONE; final Human Acceptance PASS verifies all four financial QA findings. No functional P0/P1 remains in scope.
+- Production cookie/CORS/HTTPS configuration is tracked as SEC-001 future security debt, not a blocker for local development.
 ### Added
 - REQ-002 frontend API client, protected routes, account dashboard, session workspace, trade recording and journal workflow.
 - Session summary, analytics overview, account ledger and session trade endpoints.
