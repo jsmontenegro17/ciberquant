@@ -126,6 +126,29 @@ def test_auth_and_ownership():
     assert client.get("/api/v1/accounts").json() == []
 
 
+def test_loss_limit_draw_cancelled_and_invalid_trade_values():
+    setup_user('limits@example.com');login('limits@example.com')
+    account=client.post('/api/v1/accounts',json={'name':'Limits','initial_balance':'2000'}).json()
+    params={'trading_account_id':account['id'],'risk_per_trade_percent':'1','max_loss_amount':'40','max_operations':10}
+    sess=client.post('/api/v1/sessions',json=params).json()
+    body={'trading_account_id':account['id'],'trading_session_id':sess['id'],'symbol':'EURUSD','market_type':'OTC','timeframe':'1m','direction':'PUT','stake':'40','payout_percent':'84','result':'LOSS'}
+    assert client.post('/api/v1/trades',json={**body,'market_type':'MIXED'}).status_code==422
+    assert client.post('/api/v1/trades',json={**body,'stake':'41'}).status_code==422
+    assert client.post('/api/v1/trades',json=body).status_code==200
+    summary=client.get(f"/api/v1/sessions/{sess['id']}/summary").json()
+    assert summary['limit_reached'] and summary['limit_reason']=='Maximum session loss reached'
+    assert Decimal(summary['remaining_risk'])==0
+    assert client.post('/api/v1/trades',json=body).status_code==409
+    client.post(f"/api/v1/sessions/{sess['id']}/close")
+    second=client.post('/api/v1/sessions',json=params).json()
+    for result in ['DRAW','CANCELLED']:
+        assert client.post('/api/v1/trades',json={**body,'trading_session_id':second['id'],'stake':'20','result':result}).status_code==200
+    summary=client.get(f"/api/v1/sessions/{second['id']}/summary").json()
+    assert summary['draws']==summary['cancelled']==1
+    assert Decimal(summary['net_pnl'])==0 and Decimal(summary['win_rate'])==0
+    client.post('/api/v1/auth/logout')
+
+
 def test_ledger_session_close_and_idempotency():
     setup_user("c@example.com")
     login("c@example.com")

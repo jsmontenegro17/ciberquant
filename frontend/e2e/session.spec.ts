@@ -75,4 +75,19 @@ test("real API: account selection, WIN/LOSS, limits, closure and persistent jour
     path: "test-results/req002-tablet.png",
     fullPage: true,
   });
+  await page.getByRole('link',{name:'Sessions',exact:true}).click();
+  await page.getByRole('combobox',{name:'Status',exact:true}).selectOption('CLOSED');
+  await expect(page.getByRole('cell',{name:'CLOSED',exact:true})).toBeVisible();
+  await page.getByRole('combobox',{name:'Status',exact:true}).selectOption('OPEN');
+  await expect(page.getByText('No sessions for these filters.')).toBeVisible();
+  await page.getByRole('link',{name:'Accounts',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'QA USD',exact:true})).toBeVisible();
+  await expect(page.getByRole('cell',{name:'TRADE_PROFIT',exact:true})).toBeVisible();
+  await expect(page.getByRole('cell',{name:'TRADE_LOSS',exact:true})).toBeVisible();
+  const token=(await page.context().cookies()).find(cookie=>cookie.name==='access_token');
+  expect(token?.httpOnly).toBe(true);
+  await page.getByRole('button',{name:'Sign out',exact:true}).click();
+  await expect(page).toHaveURL(/login/);
+  await page.goto(sessionUrl);
+  await expect(page).toHaveURL(/login/);
 });
