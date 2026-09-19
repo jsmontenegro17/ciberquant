@@ -28,10 +28,10 @@ Alembic 001 + 002 (session minimum payout snapshot); PostgreSQL; Docker Compose.
 REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-P0: none known. P1: none known for REQ-002 acceptance; final human QA/merge remains pending. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. Development cookie settings remain local-only; production hardening is not claimed.
+Human review found two P0 and two P1 financial issues, corrected on the REQ-002 branch: hard per-trade risk cap, net session loss, no zero-result ledger movements, and backend-only session start requiring RiskProfile. Local financial regressions pass; final human acceptance remains pending. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. Development cookie settings remain local-only; production hardening is not claimed.
 
 ## Active requirements
-REQ-002 — Session Manager & Trading Journal (QA). Evidence: requirement document; PR #1. Validated CI run 35453839696 at commit 337cd370f1ff323b4310545b2330a56a6453828a (backend, frontend/E2E, Docker build/startup PASS).
+REQ-002 — Session Manager & Trading Journal (QA). Human financial corrections validated by CI run 35454718064 at commit 8f22c626f55a115c8ed48e5055388c06bc6f7680 (backend, frontend/E2E, Docker build/startup PASS). Detailed findings/tests/results in the requirement's Human Review Financial Corrections section; final head checks and acceptance in PR #1.
 
 ## Next milestones
 After REQ-002 is merged: REQ-003 cataloger; REQ-004 backtesting.

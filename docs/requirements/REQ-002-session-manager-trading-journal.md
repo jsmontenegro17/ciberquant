@@ -83,7 +83,9 @@ Status: QA; corrections implemented, no merge authorized. No database migration 
 | P1: zero-result trades created TRADE_LOSS ledger rows | Persist trade/audit but no monetary entry for zero P&L | DRAW and CANCELLED preserve balance, leave ledger unchanged, each counts toward max_operations. PASS |
 | P1: client controlled risk when profile missing | SessionStartRequest contains only account ID and optional notes; backend requires profile and freezes snapshot | Missing profile: 409; arbitrary fields: 422; profile changes do not alter existing snapshots; OpenAPI and frontend payload assertions. PASS |
 
-Local validation: backend 19 tests, frontend 10 tests, lint/typecheck/build and real API browser workflow PASS. Browser also verifies over-risk rejection, the net-risk summary and unchanged ledger after DRAW/CANCELLED. CI run for these corrections: pending push; will be recorded below after completion. Existing ownership tests retained.
+Local validation: backend 19 tests, frontend 10 tests, lint/typecheck/build and real API browser workflow PASS. Browser also verifies over-risk rejection, the net-risk summary and unchanged ledger after DRAW/CANCELLED. Existing ownership tests retained.
+
+Correction CI: [35454718064](https://github.com/jsmontenegro17/ciberquant/actions/runs/35454718064), commit `8f22c626f55a115c8ed48e5055388c06bc6f7680` — Backend PASS, Frontend/E2E PASS, Docker build/startup PASS. PR #1 remains open in QA; final documentation-only head checks are linked from its description. All four findings are covered by passing regressions. Final human acceptance is still required; no merge performed.
 
 Decisions: retain negative `gross_loss` for contract compatibility. `suggested_stake` is capped by all three limits. The session floor remains starting_balance - max_loss_amount; following the requested formula, positive net P&L does not expand spendable remaining risk above max_loss_amount, although it increases mathematical distance to the floor. Neither risk overrides nor profile editing are introduced.
 
