@@ -1,10 +1,12 @@
 # REQ-004 — Feature & Indicator Engine
 
-Status: QA
+Status: DONE
+Human Acceptance: PASS
+Accepted HEAD: 9f670a922ffc1ad7f1de913337a0f5b0374b0487
 Priority: P1
 Classification: LARGE
 Created: 2026-09-19
-Target version: 0.4.0-dev
+Target version: 0.4.0
 Base: main / v0.3.0
 Branch: codex/req-004-feature-indicator-engine
 
@@ -30,7 +32,7 @@ REQ-004 Feature & Indicator Engine → REQ-005 Strategy Lab & Binary Backtesting
 
 ## Validation and risks
 
-Human Acceptance: PENDING. Local2026-09-19:87 backend PASS/4 skips (PostgreSQL-only opt-in and SQLite concurrency case),22 frontend PASS,3 E2E PASS. Lint/typecheck/build PASS. Snapshots are exercised through the existing migrated-database harness, including PostgreSQL in CI. Desktop/tablet screenshots inspected; E2E checks known EMA20/RSI14 values and no page errors.
+Human Acceptance: PASS on2026-09-19. Local2026-09-19:87 backend PASS/4 skips (PostgreSQL-only opt-in and SQLite concurrency case),22 frontend PASS,3 E2E PASS. Lint/typecheck/build PASS. Snapshots are exercised through the existing migrated-database harness, including PostgreSQL in CI. Desktop/tablet screenshots inspected; E2E checks known EMA20/RSI14 values and no page errors.
 
 100k STANDARD benchmark:2.996seconds, Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14. Single process; Decimal50; generation included, SQL/serialization excluded. Not an SLA. Reproduce: `cd backend; python scripts/benchmark_features.py`.
 
@@ -50,9 +52,11 @@ P0/P1: none identified in automated/local visual validation. P2: synchronous CPU
 
 ## Remote CI and handoff
 
-[PR #3 — REQ-004 Feature & Indicator Engine](https://github.com/jsmontenegro17/ciberquant/pull/3), OPEN; base main, head codex/req-004-feature-indicator-engine. Human Acceptance remains PENDING, not inferred from CI.
+[PR #3 — REQ-004 Feature & Indicator Engine](https://github.com/jsmontenegro17/ciberquant/pull/3); base main, head codex/req-004-feature-indicator-engine. Human Acceptance explicitly supplied PASS for9f670a922ffc1ad7f1de913337a0f5b0374b0487, with no P0/P1 in validated scope.
 
 Implementation SHA: `f31dc989914c2b91e410a2b9a2cfc34330df30e7`.
 CI push [35459261157](https://github.com/jsmontenegro17/ciberquant/actions/runs/35459261157) and PR [35459280520](https://github.com/jsmontenegro17/ciberquant/actions/runs/35459280520): Backend PASS, Frontend/E2E PASS, Docker PASS on2026-09-19. Backend90 PASS/1 intentional SQLite concurrency skip; PostgreSQL snapshot replay executed. Frontend22 PASS, E2E3 PASS. Existing migrations001–003 and seed pass; no migration004.
 
-This documentation-only QA handoff commit must also pass CI; its exact final-head SHA/run links are recorded in PR #3 and the delivery report to avoid a self-referential commit. No merge, tag or REQ-005 work authorized by this handoff.
+Accepted-head CI [35459403253](https://github.com/jsmontenegro17/ciberquant/actions/runs/35459403253): all three jobs PASS. Final acceptance authorizes documentation/version closure, green feature CI, merge, green main CI and tag v0.4.0 on the validated integrated commit. Exact release main SHA and CI run ID are recorded in PR #3 and the final delivery report, avoiding a self-referential commit.
+
+Feature availability is frozen at T.close_time, never T.open_time; future REQ-005 must test this invariant and persist engine version, as-of ID, identity and specs. [QUANT-001](../debt/QUANT-001-feature-checkpoints.md) is separate P2 debt; never approximate recursive warmup to bypass caps. No functional engine change in closure; cq-features-v1 remains unchanged. REQ-005 is not started or authorized.

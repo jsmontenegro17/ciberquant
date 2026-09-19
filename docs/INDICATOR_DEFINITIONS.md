@@ -2,6 +2,8 @@
 
 Official mathematical contract. Derived research features only; never trading signals. Changing seeds, formulas, gap behavior or rounding incompatibly requires a new FEATURE_ENGINE_VERSION.
 
+Human Acceptance PASS: cq-features-v1 is frozen as the official CiberQuant0.4.0 engine, including warmups and indicator behavior. Full-candle features are available only at T.close_time, never T.open_time. Future backtests must enforce and test this timing invariant and store engine version, dataset identity, as_of_candle_id and feature specs; see [BACKTESTING](modules/BACKTESTING.md).
+
 ## Precision and availability
 
 All prices and arithmetic are Decimal, in a dedicated local context: precision50, ROUND_HALF_EVEN. No binary floats in the core and no explicit intermediate quantization. JSON numeric features/OHLC are decimal strings; features rounded HALF_EVEN to18 fractional places only for serialization, trailing zeroes removed. Null means unavailable, never zero. Chart coordinates alone convert strings to JS numbers; exact tooltip/table retain API strings. A candle's OHLC-derived features become knowable only at its close_time; no assumption that they existed at open_time.

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .api import auth,trading,health
 from .api import market_data, features
 from .market_data.upload_limit import UploadLimitMiddleware
-app=FastAPI(title='CiberQuant API',version='0.4.0-dev')
+app=FastAPI(title='CiberQuant API',version='0.4.0')
 app.add_middleware(UploadLimitMiddleware)
 app.include_router(market_data.router, prefix='/api/v1')
 app.include_router(features.router, prefix='/api/v1')

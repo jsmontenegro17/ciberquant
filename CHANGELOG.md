@@ -1,6 +1,9 @@
 # Changelog
 
-## [0.4.0-dev] - Unreleased
+## [0.4.0] - 2026-09-19
+### Acceptance
+- REQ-004 DONE; Human Acceptance PASS on approved HEAD9f670a922ffc1ad7f1de913337a0f5b0374b0487. cq-features-v1 is frozen for this release.
+- Full-candle features become available only at close_time, never retrospectively at open_time. QUANT-001 records future exact, versioned checkpoints without implementing them.
 ### Added
 - REQ-004 cq-features-v1: pure Decimal candle features, SMA, SMA-seeded EMA, Wilder RSI/ATR and population Bollinger; registry and convenience STANDARD preset.
 - Origin-anchored calculations, immutable candle-ID snapshots, authenticated definitions/compute APIs and exact-or-reject configurable caps.
@@ -8,7 +11,7 @@
 - Deterministic formula, range/snapshot/no-lookahead regressions, USER E2E and100k benchmark; official indicator definitions.
 ### Boundaries
 - No raw-data mutation, derived persistence or migration; no strategies, binary outcomes, backtesting or automatic signals.
-- Corrected roadmap: REQ-005 Strategy Lab/Backtesting,006 Validation,007 Live Data/Scanner,008 Integrated Workspace. Human acceptance and merge remain pending.
+- Corrected roadmap: REQ-005 Strategy Lab/Backtesting,006 Validation,007 Live Data/Scanner,008 Integrated Workspace. Human Acceptance PASS; subsequent requirements remain unauthorized.
 
 ## [0.3.0] - 2026-09-19
 ### Acceptance
