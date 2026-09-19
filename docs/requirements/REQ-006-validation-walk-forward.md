@@ -1,6 +1,6 @@
 # REQ-006 — Validation & Walk-Forward Engine
 
-Status: IN_PROGRESS
+Status: QA
 Priority: P1
 Classification: CRITICAL
 Target: 0.6.0-dev
@@ -20,13 +20,13 @@ Protocol and schema → pure chronological/statistical functions → persistence
 
 ## Acceptance A–I
 
-A deterministic 60/20/20; B computational sealing; C four chronological folds; D deterministic bootstrap; E PASS/FAIL/INCONCLUSIVE; F no cross-partition outcomes; G as-of replay after backfill; H historical state/degradation; I full UI reveal workflow. Evidence pending implementation and tests.
+A deterministic 60/20/20; B computational sealing; C four chronological folds; D deterministic bootstrap; E PASS/FAIL/INCONCLUSIVE; F no cross-partition outcomes; G as-of replay after backfill; H historical state/degradation; I full UI reveal workflow. Automated/agent QA PASS; Human Acceptance PENDING.
 
 ## Implemented / local evidence — 2026-09-19
 
 Protocol frozen in [VALIDATION_PROTOCOL](../VALIDATION_PROTOCOL.md). Migration005, private APIs, immutable plans/segments, atomic phase persistence, CAS/version-lock reveal, audit, manual/validation backtest purpose, UI preview and explicit confirmation implemented. Feature/DSL/outcome/metrics source unchanged; `simulate_rows` extraction matches six baseline v0.5.0 golden hashes (expiry1/5/60, both overlaps), plus all prior regression.
 
-Backend148 PASS/10 local skips (PostgreSQL opt-in and nonapplicable SQLite locking cases); frontend36 PASS, lint/typecheck/build PASS; full5 E2E PASS, preserving REQ-002–005. PostgreSQL/Docker/remote CI pending below. No new dependencies; frontend bundle warning~554kB remains P2.
+Backend149 PASS/12 local skips (PostgreSQL opt-in and nonapplicable SQLite locking cases); frontend36 PASS, lint/typecheck/build PASS; full5 E2E PASS, preserving REQ-002–005. PostgreSQL/Docker/remote CI PASS below. No new dependencies; frontend bundle warning~554kB remains P2.
 
 | Acceptance | Evidence | Local result |
 |---|---|---|
@@ -44,4 +44,14 @@ Browser fixture: definition hash `1efbccd7f578c6e43e298eaa8b0e304b53b3e392c48be2
 
 100k benchmark: development features2.020s, train1.565s, validation0.507s, folds0.144/0.148/0.229/0.152s; separate reveal features2.483s, simulation0.583s, bootstrap0.046s. Windows11/Intel64 Family6 Model151/20 logical CPUs/Python3.12.14. Pure computation, no SQL/JSON/SLA; explicit benchmark cap100000, API cap10000 unchanged.
 
-P0/P1: none identified locally, pending remote PostgreSQL/CI. P2: VALIDATION-001/002, BACKTEST-001/002, QUANT-001/002, DATA-001, SEC-001, dependency and bundle warnings. Human Acceptance PENDING. No merge, tag or REQ-007.
+P0/P1: none identified in automated/agent QA. P2: VALIDATION-001/002, BACKTEST-001/002, QUANT-001/002, DATA-001, SEC-001, dependency and bundle warnings. Human Acceptance PENDING. No merge, tag or REQ-007.
+
+## Remote CI / QA handoff
+
+[PR #5 — REQ-006 Validation & Walk-Forward Engine](https://github.com/jsmontenegro17/ciberquant/pull/5): OPEN, base main, head codex/req-006-validation-walk-forward.
+
+Implementation commit: `3224966b9137e61520ab2390886dd579cf9242d6`. PR CI [35464481642](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464481642) and push CI [35464479292](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464479292): Backend, Frontend/E2E and Docker PASS. PostgreSQL migration005, JSONB/FK/constraints/uniqueness, ORM immutability and concurrent single reveal execute in CI, not merely SQLite. Existing migrations and idempotent seed PASS.
+
+Final QA review additionally enforces section7: changed validation payout/expiry requires a new StrategyVersion and ValidationRun. Preview/creation reject changed parameters; concurrent first plans serialize the choice under the version lock, with PostgreSQL regression. No frozen engine semantics change.
+
+Final QA commit must also retain green CI. Its SHA/run IDs are recorded in PR #5 and the delivery report to avoid a self-referential commit. Stop at QA; require independent Human Acceptance before merge and independent REQ-007 authorization.

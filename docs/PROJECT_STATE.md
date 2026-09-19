@@ -13,19 +13,19 @@ REQ-002 is DONE with Human Acceptance PASS. Functional flow: login → account �
 Behavioural analytics remain future scope. RiskProfile retains the user-scoped Foundation model; profile editing/account-specific assignments are not part of this delivery. Import recovery/background ingestion is separate P2 debt DATA-001.
 
 ## Foundation only
-Historical validation is implemented on the REQ-006 branch, pending CI/QA and human acceptance. Live/paper validation remains future scope; positive in-sample results never automatically confer statistical validation.
+Historical validation is implemented and automated QA passes on the REQ-006 branch, pending human acceptance. Live/paper validation remains future scope; positive in-sample results never automatically confer statistical validation.
 
 ## Planned
 Validation/walk-forward, live data/scanning and integrated research workspace.
 
 ## Modules in development
-REQ-006 — IN_PROGRESS: cq-validation-v1 fixed-strategy chronological60/20/20, four folds, computationally sealed test, explicit single reveal, deterministic day-block bootstrap, sufficiency-first verdict, derived historical state, replay/holdout warnings and Validation UI. Human Acceptance PENDING. cq-features-v1/DSL/outcome unchanged; binary simulation extracted for shared rows with exact v0.5.0 golden equivalence. No automatic merge or REQ-007.
+REQ-006 — QA: cq-validation-v1 fixed-strategy chronological60/20/20, four folds, computationally sealed test, explicit single reveal, deterministic day-block bootstrap, sufficiency-first verdict, derived historical state, replay/holdout warnings and Validation UI. Human Acceptance PENDING. cq-features-v1/DSL/outcome unchanged; binary simulation extracted for shared rows with exact v0.5.0 golden equivalence. [PR #5](https://github.com/jsmontenegro17/ciberquant/pull/5) OPEN; implementation CI35464481642/35464479292 Backend, Frontend/E2E, PostgreSQL and Docker PASS. Final-head evidence is recorded in PR/report. No automatic merge or REQ-007.
 
 ## Experimental / disabled
 Auto-trading, broker integrations, ML and live streaming are disabled.
 
 ## Migrations / integrations
-005_validation adds validation_runs/validation_segments and backtest purpose MANUAL/VALIDATION. PostgreSQL migration validation is a required CI gate. Downgrade deletes validation plans and loses child-purpose distinction; backup/export first. No raw/financial schema changes.
+005_validation adds validation_runs/validation_segments and backtest purpose MANUAL/VALIDATION. PostgreSQL migration validation PASS in CI. Downgrade deletes validation plans and loses child-purpose distinction; backup/export first. No raw/financial schema changes.
 Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strategy_versions, backtest_runs, backtest_trades and constraints/indexes. PostgreSQL/JSONB target; SQLite local test harness. Raw candles and financial tables/contracts unchanged. Downgrade004 discards derived research evidence; export/backup first.
 
 ## Git workflow
@@ -40,7 +40,7 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-[REQ-006](requirements/REQ-006-validation-walk-forward.md): IN_PROGRESS; Human Acceptance PENDING. REQ-001–005 DONE. No optimization, ranking, money management, automatic trading or strategy recommendation.
+[REQ-006](requirements/REQ-006-validation-walk-forward.md): QA; Human Acceptance PENDING. REQ-001–005 DONE. No optimization, ranking, money management, automatic trading or strategy recommendation.
 
 ## Next milestones
 REQ-006 Validation & Walk-Forward Engine.

@@ -99,3 +99,28 @@ def test_postgres_concurrent_single_reveal(validation_db):
     with ThreadPoolExecutor(max_workers=2) as pool:
         outcomes = list(pool.map(work, range(2)))
     assert sorted(map(str, outcomes)) == ["409", "COMPLETED"]
+
+
+def test_postgres_first_plan_parameter_choice_is_serialized(validation_db):
+    if validation_db.dialect.name != "postgresql":
+        pytest.skip("Row-lock concurrency requires PostgreSQL")
+    factory, uid, rid = setup(validation_db)
+    with factory() as s:
+        first = s.get(ValidationRun, rid)
+        from app.models import StrategyVersion
+
+        strategy_id = s.get(StrategyVersion, first.strategy_version_id).strategy_id
+        vid = create_version(s, strategy_id, uid, definition()).id
+    barrier = Barrier(2)
+
+    def work(payout):
+        with factory() as s:
+            barrier.wait(timeout=10)
+            try:
+                return create(s, uid, request(100, strategy_version_id=vid, payout_percent=payout)).status
+            except HTTPException as e:
+                return e.status_code
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(work, ["80", "90"]))
+    assert sorted(map(str, outcomes)) == ["422", "SEALED"]

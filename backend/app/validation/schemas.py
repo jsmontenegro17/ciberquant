@@ -18,6 +18,8 @@ class ValidationCreate(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def normalize(cls, values):
+        if not isinstance(values, dict):
+            raise ValueError("Validation plan must be a JSON object")
         data = dict(values)
         child = {k: v for k, v in data.items() if k not in ("overall_start", "overall_end")}
         child.update(signal_start=data.get("overall_start"), signal_end=data.get("overall_end"))

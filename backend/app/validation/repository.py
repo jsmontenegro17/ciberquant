@@ -59,6 +59,9 @@ def state(session, vid):
 
 def plan(session, uid, request):
     version, strategy, definition = version_definition(session, request.strategy_version_id, uid, True)
+    prior = session.scalar(select(ValidationRun).where(ValidationRun.strategy_version_id == version.id).order_by(ValidationRun.id).limit(1))
+    if prior and (prior.payout_percent != Decimal(request.payout_percent) or prior.expiry_bars != request.expiry_bars):
+        raise HTTPException(422, "Changing validation payout or expiry requires a new StrategyVersion and ValidationRun")
     conditions = dataset_conditions(request.dataset)
     maximum = session.scalar(select(func.max(Candle.id)).where(*conditions)) or 0
     ceiling = maximum if request.as_of_candle_id is None else request.as_of_candle_id
@@ -168,6 +171,10 @@ def fail(session, rid, exc):
 
 
 def create(session, uid, request):
+    version_definition(session, request.strategy_version_id, uid, True)
+    # Freeze the version's validation payout/expiry choice across subsequent attempts.
+    # Serialize competing first plans so neither can bypass the prior-attempt check.
+    session.execute(select(StrategyVersion.id).where(StrategyVersion.id == request.strategy_version_id).with_for_update())
     version, strategy, definition, parts, frozen = plan(session, uid, request)
     versions = {
         k: frozen["protocol"][k]

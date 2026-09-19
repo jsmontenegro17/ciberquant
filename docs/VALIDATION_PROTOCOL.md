@@ -2,6 +2,8 @@
 
 Immutable fixed-strategy historical evaluation, not optimization. Strategy lifecycle remains DRAFT/TESTING/DISABLED. Creation requires TESTING. Freeze one version/definition hash, all engine versions, full dataset identity, as-of candle ceiling, UTC overall range, payout, expiry, overlap, boundaries and canonical config hash. Unit stake only, fixed payout; no future-profit guarantee.
 
+The first validation plan also fixes payout and expiry for that StrategyVersion's subsequent validation attempts. Changing either requires a new immutable StrategyVersion and a new plan; preview and creation reject reuse with changed values. Creation serializes this first-plan choice under the version row lock. Range/dataset/as-of may change for later chronological reevaluation; every plan remains immutable. Manual in-sample backtests retain their independent REQ-005 contract.
+
 ## Chronology and sealing
 
 Select raw candles with overall_start <= open_time < overall_end and id <= as_of, ordered by open_time. Require at least20 candles and strictly increasing open/close times. Cuts are floor(3*N/5), floor(4*N/5). Internal boundaries are the open_time of the candle at the cut index; outer boundaries are the requested range. Require positive ranges. Four folds divide the validation candle indices at floor(k*M/4), k=0..4; endpoints exactly cover VALIDATION. Boundaries never depend on signals/trades/results. Each segment uses signal_start inclusive, signal_end exclusive and expiry <= signal_end under frozen binary-v1. No candle open at a partition end enters that segment; never use the next partition outcome.

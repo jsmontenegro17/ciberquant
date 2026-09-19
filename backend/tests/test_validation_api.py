@@ -181,3 +181,20 @@ def test_plan_immutable_while_sealed_and_body_constraints(harness):
     ]:
         assert client.post("/api/v1/validations", json={**body, field: value}).status_code == 422
     assert client.post("/api/v1/validations", content=b" " * 65537).status_code == 413
+
+
+def test_changed_payout_or_expiry_requires_new_version(harness):
+    from backtest_fixture import definition
+
+    client, factory, _ = harness
+    seed(factory, data(100))
+    sid, vid = create_strategy(client)
+    create(client, vid, 100)
+    body = request(100, strategy_version_id=vid).model_dump(mode="json")
+    for field, value in [("payout_percent", "84"), ("expiry_bars", 2)]:
+        for path in ["/validations", "/validations/preview"]:
+            response = client.post("/api/v1" + path, json={**body, field: value})
+            assert response.status_code == 422
+            assert "new StrategyVersion" in response.json()["detail"]
+    version = client.post(f"/api/v1/strategies/{sid}/versions", json=definition().model_dump(mode="json")).json()
+    create(client, version["id"], 100, payout_percent="84", expiry_bars=2)
