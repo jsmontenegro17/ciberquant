@@ -1,0 +1,42 @@
+import { test, expect } from "@playwright/test";
+import path from "node:path";
+
+test("ADMIN imports disposable deterministic candles and catalogs CCC without crossing gaps", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("market-admin@example.com");
+  await page.getByLabel("Password").fill("browser-test-only");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.getByRole("link", { name: "Market Data", exact: true }).click();
+  await page.getByLabel("Source", { exact: true }).fill("SYNTHETIC_QA");
+  await page.getByLabel("Broker", { exact: true }).fill("DEMO");
+  await page.getByLabel("Symbol", { exact: true }).fill("EURUSD");
+  await page.getByLabel("CSV file").setInputFiles(path.resolve("../examples/market_data/synthetic_regular.csv"));
+  await page.getByRole("button", { name: "Review import", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("synthetic_regular.csv");
+  await page.getByRole("button", { name: "Confirm import" }).click();
+  await expect(page.getByRole("heading", { name: "Import COMPLETED" })).toBeVisible();
+  const report = page.getByRole("region", { name: "Import report" });
+  await expect(report.locator("div").filter({ has: page.locator("dt", { hasText: /^Inserted$/ }) }).last()).toContainText("30");
+  await page.getByRole("button", { name: "Inspect", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Candle inspection" })).toBeVisible();
+  await page.getByRole("link", { name: "Cataloger", exact: true }).click();
+  await page.getByLabel("Dataset", { exact: true }).selectOption({ label: "SYNTHETIC_QA / DEMO / EURUSD / REGULAR / 1m" });
+  await page.getByLabel("Pattern length").selectOption("3");
+  await page.getByRole("button", { name: "Analyze", exact: true }).click();
+  const results = page.getByRole("region", { name: "Catalog results" });
+  const row = results.getByRole("row").filter({ has: page.getByRole("cell", { name: "CCC", exact: true }) });
+  await expect(row).toContainText("100.00%");
+  const cells = row.getByRole("cell");
+  await expect(cells.nth(1)).toContainText("6");
+  await expect(cells.nth(2)).toHaveText("0");
+  await expect(cells.nth(3)).toHaveText("6");
+  await expect(cells.nth(4)).toHaveText("0");
+  await expect(results.locator("div").filter({ has: page.locator("dt", { hasText: "Gap windows skipped" }) }).last()).toContainText("3");
+  await page.screenshot({ path: "test-results/req003-cataloger-desktop.png", fullPage: true });
+  await page.setViewportSize({ width: 768, height: 1024 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/req003-cataloger-tablet.png", fullPage: true });
+  await page.getByRole("link", { name: "Market Data", exact: true }).click();
+  await page.screenshot({ path: "test-results/req003-market-data-tablet.png", fullPage: true });
+});
+

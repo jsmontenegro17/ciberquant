@@ -2,12 +2,12 @@ const base =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
 export async function api<T>(path: string, init: RequestInit = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10000);
+  const timer = setTimeout(() => controller.abort(), init.body instanceof FormData ? 120000 : 30000);
   try {
     const response = await fetch(`${base}${path}`, {
       ...init,
       credentials: "include",
-      headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+      headers: { ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }), ...(init.headers || {}) },
       signal: controller.signal,
     });
     if (response.status === 401)

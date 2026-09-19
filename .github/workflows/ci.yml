@@ -22,6 +22,7 @@ jobs:
       JWT_SECRET: ci-only-secret
       SEED_ADMIN_EMAIL: admin@example.com
       SEED_ADMIN_PASSWORD: ci-only-password
+      CI_MARKET_DATA_POSTGRES_TESTS: 'true'
     defaults: {run: {working-directory: backend}}
     steps:
       - uses: actions/checkout@v4

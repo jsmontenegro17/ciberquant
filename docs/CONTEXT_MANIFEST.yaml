@@ -5,7 +5,8 @@ modules:
   risk: {docs: [docs/modules/RISK_ENGINE.md], backend: [backend/app/services/finance.py], dependencies: [trading_accounts]}
   sessions: {docs: [docs/modules/SESSIONS.md], backend: [backend/app/api/trading.py], dependencies: [risk, trades]}
   trades: {docs: [docs/modules/TRADES.md], backend: [backend/app/api/trading.py], dependencies: [sessions, trading_accounts]}
-  market_data: {docs: [docs/modules/MARKET_DATA.md], backend: [backend/app/services/market_data.py], tests: [backend/tests/test_market_data.py]}
+  market_data: {docs: [docs/modules/MARKET_DATA.md, docs/MARKET_DATA_CSV_FORMAT.md], backend: [backend/app/market_data/, backend/app/api/market_data.py, backend/app/services/market_data.py], frontend: [frontend/src/features/market-data/MarketData.tsx], tests: [backend/tests/test_market_data.py, backend/tests/test_req003.py, backend/tests/test_market_data_migration.py, frontend/e2e/market-data.spec.ts]}
+  cataloger: {docs: [docs/modules/CATALOGER.md, docs/requirements/REQ-003-market-data-candle-cataloger.md], backend: [backend/app/cataloger/], frontend: [frontend/src/features/market-data/Cataloger.tsx], tests: [backend/tests/test_req003.py, frontend/src/features/market-data/marketData.test.tsx], dependencies: [market_data]}
   analytics: {docs: [docs/modules/ANALYTICS.md], backend: [backend/app/api/trading.py], dependencies: [trading_accounts, sessions, trades]}
   journal: {docs: [docs/modules/JOURNAL.md], backend: [backend/app/api/trading.py], frontend: [frontend/src/features/journal/Journal.tsx]}
   frontend: {docs: [docs/requirements/REQ-002-session-manager-trading-journal.md], frontend: [frontend/src/app/router.tsx, frontend/src/api/client.ts, frontend/src/features/], tests: [frontend/src/features/sessions/workflow.test.tsx, frontend/e2e/session.spec.ts]}

@@ -9,6 +9,8 @@ import {
   SessionWorkspace,
 } from "../features/sessions/Pages";
 import { Journal } from "../features/journal/Journal";
+import { MarketData } from "../features/market-data/MarketData";
+import { Cataloger } from "../features/market-data/Cataloger";
 export function Router() {
   return (
     <BrowserRouter>
@@ -22,7 +24,9 @@ export function Router() {
             <Route path="/sessions/new" element={<NewSession />} />
             <Route path="/sessions/:id" element={<SessionWorkspace />} />
             <Route path="/journal" element={<Journal />} />
-            {["settings", "cataloger", "strategies", "backtests"].map(
+            <Route path="/market-data" element={<MarketData />} />
+            <Route path="/cataloger" element={<Cataloger />} />
+            {["settings", "strategies", "backtests"].map(
               (path) => (
                 <Route
                   key={path}

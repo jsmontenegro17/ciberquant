@@ -17,6 +17,7 @@ engine = create_engine("sqlite:///" + str(Path(test_directory.name) / "qa.db"), 
 Base.metadata.create_all(engine)
 factory = sessionmaker(bind=engine)
 with factory() as s:
+    s.add(User(email="market-admin@example.com", name="Market Admin", password_hash=pwd.hash("browser-test-only"), role="ADMIN"))
     user = User(email="qa@example.com", name="Browser QA", password_hash=pwd.hash("browser-test-only"))
     s.add(user)
     s.flush()
