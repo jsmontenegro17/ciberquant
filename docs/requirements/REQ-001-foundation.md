@@ -1,6 +1,6 @@
 # REQ-001 — CiberQuant Foundation
 
-Status: QA  
+Status: DONE  
 Priority: CRITICAL  
 Created: 2026-09-18  
 Updated: 2026-09-18
@@ -83,9 +83,17 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | FAIL (fixed, awaiting rerun) | Run `35415226319` / commit `62056ce`; Alembic, both seed runs and smoke passed; Frontend/Docker passed; pytest collected 9 tests and failed 2 assertions: NUMERIC scale string and duplicate fixture timestamps. |
+| GitHub CI workflow | Remote | PASS | Run `35415290649` / commit `92a17a6d4e2962bb0ee56c3127ee15582eb52815`; Backend, Frontend and Docker jobs succeeded. |
+
+Remote run details: https://github.com/jsmontenegro17/ciberquant/actions/runs/35415290649
+
+Backend steps: PostgreSQL service healthy — PASS; Python setup — PASS; dependency installation — PASS; Ruff — PASS; `alembic upgrade head` — PASS; seed first run — PASS; seed second run — PASS; FastAPI import smoke — PASS; pytest — PASS (9 tests).
+
+Frontend: `npm ci` — PASS; lint — PASS; typecheck — PASS; tests — PASS; build — PASS.
+
+Docker: `docker compose config` — PASS; `docker compose build` — PASS.
 
 Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin, explicit pytest package path and deterministic duplicate fixture. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation QA corrections implemented. Status remains QA until the corrected remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.
+Foundation QA corrections implemented and validated by remote CI run `35415290649`. This requirement is ready for DONE; `main` must be created from the final documentation commit after its CI rerun, preserving the validated branch history.

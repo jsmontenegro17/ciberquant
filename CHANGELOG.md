@@ -7,3 +7,6 @@
 
 ### Security
 - Passwords hasheados y tokens JWT en cookies HttpOnly.
+
+### QA
+- Remote CI run 35415290649 validated backend, PostgreSQL migrations, idempotent seed, tests, frontend and Docker.

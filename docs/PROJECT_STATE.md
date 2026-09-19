@@ -31,7 +31,7 @@ REQ-001 is the bootstrap exception. After CI validation, `main` must be created 
 P0: latest CI run `35415226319` passed migrations, both seeds and FastAPI smoke; pytest ran 9 tests but exposed two assertion/fixture issues now corrected. After a successful run, create `main` from the validated SHA. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
 
 ## Active requirements
-REQ-001 — Foundation (QA).
+None. REQ-001 — Foundation is DONE after remote CI run `35415290649`.
 
 ## Next milestones
-REQ-002 session UI and richer analytics; REQ-003 cataloger; REQ-004 backtesting.
+REQ-002 session UI and richer analytics; REQ-003 cataloger; REQ-004 backtesting. Do not start them until `main` is established from the final validated REQ-001 commit.
