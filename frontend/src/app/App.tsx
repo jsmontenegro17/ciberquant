@@ -49,6 +49,8 @@ export function Layout() {
           ["Accounts", "/accounts"],
           ["Sessions", "/sessions"],
           ["Journal", "/journal"],
+          ["Market Data", "/market-data"],
+          ["Cataloger", "/cataloger"],
         ].map(([x, p]) => (
           <NavLink
             className={({ isActive }) => `nav ${isActive ? "active" : ""}`}
@@ -58,7 +60,6 @@ export function Layout() {
             {x}
           </NavLink>
         ))}
-        <div className="nav muted">Cataloger · Planned</div>
         <div className="bottom">
           <div className="user">
             ◉ {user?.name}

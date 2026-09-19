@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0-dev] - Unreleased
+### Added
+- REQ-003 broker-aware immutable candle identity, import provenance and migration 003.
+- ADMIN-only atomic CSV ingestion with UTC/Decimal validation, limits, duplicate/conflict handling and audit events.
+- Paginated dataset coverage, import history and candle inspection; backend timeframe options.
+- Deterministic C/P/D cataloger for lengths 2–5, gap/doji exclusion and descriptive next-candle distributions.
+- Connected Market Data/Cataloger UI, synthetic fixtures, backend/frontend/E2E and PostgreSQL concurrency/migration regressions.
+### Boundaries
+- No trading recommendations, strategies, indicators, backtesting or live integration. Human acceptance required before merge.
+
 ## [0.1.0] - 2026-09-18
 ### Added
 - Foundation operativa, API FastAPI, PostgreSQL/Alembic, auth, accounts, ledger, sessions, trades, journal y market-data providers.
