@@ -1,7 +1,7 @@
 # Project State
 
 ## Current version
-0.7.0-dev — REQ-007 IN_PROGRESS on codex/req-007-live-scanner. Baseline main/v0.6.0 a7a304981b50c6d30261d3460f6e547383e09e8d. REQ-001–006 remain DONE / Human Acceptance PASS. No merge or release tag authorized for REQ-007 before separate human acceptance.
+0.7.0-dev — REQ-007 QA on codex/req-007-live-scanner / PR #6. Baseline main/v0.6.0 a7a304981b50c6d30261d3460f6e547383e09e8d. REQ-001–006 remain DONE / Human Acceptance PASS. No merge or release tag authorized for REQ-007 before separate human acceptance.
 
 ## Functional
 REQ-006 — DONE, Human Acceptance PASS on 2026-09-19. CiberQuant provides Authentication, Trading Accounts, Risk Engine, Session Manager, Trading Journal, Market Data, Dataset Provenance, Data Quality, Candle Cataloger, Feature Engine, Indicator Engine, Strategy DSL, Strategy Lab, Binary Outcome Engine, Binary Backtesting Engine, Validation Engine, Chronological Holdout, Walk-Forward Evaluation, Block Bootstrap and Historical Validation State. Official cq-validation-v1 and its three v1 dependencies are frozen; incompatible changes require new versions. Historical validation PASS is not a guarantee of future profitability, safety or external blindness.
@@ -26,7 +26,7 @@ REQ-007 Live Data & Strategy Scanner: cq-live-data-v1 / cq-scanner-v1; dedicated
 MT5, IQ Option and Replay flags default false. IQ external transport intentionally unavailable/experimental; no OTC fallback. Real terminal smoke remains optional/unperformed. Auto-trading/order sending absent; ML not implemented.
 
 ## Migrations / integrations
-006_live_scanner adds watchlists/items, provider snapshot cache, live observation provenance, immutable scanner events and outcomes. No financial/raw candle schema change. Downgrade loses scanner/provenance evidence; export/backup first. PostgreSQL validation pending CI.
+006_live_scanner adds watchlists/items, provider snapshot cache, live observation provenance, immutable scanner events and outcomes. No financial/raw candle schema change. Downgrade loses scanner/provenance evidence; export/backup first. PostgreSQL migration/tests PASS in CI35468326588/35468338708; final HEAD checks and counts recorded in REQ-007/PR #6 handoff.
 005_validation adds validation_runs/validation_segments and backtest purpose MANUAL/VALIDATION. PostgreSQL migration validation PASS in CI. Downgrade deletes validation plans and loses child-purpose distinction; backup/export first. No raw/financial schema changes.
 Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strategy_versions, backtest_runs, backtest_trades and constraints/indexes. PostgreSQL/JSONB target; SQLite local test harness. Raw candles and financial tables/contracts unchanged. Downgrade004 discards derived research evidence; export/backup first.
 
@@ -44,7 +44,7 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-[REQ-007](requirements/REQ-007-live-scanner.md): IN_PROGRESS; Human Acceptance PENDING. REQ-001–006 DONE / PASS. No optimization, ranking, money management, automatic trading or strategy recommendation.
+[REQ-007](requirements/REQ-007-live-scanner.md): QA; automated A–J PASS, Human Acceptance PENDING. REQ-001–006 DONE / PASS. No optimization, ranking, money management, automatic trading or strategy recommendation.
 
 ## Next milestones
 REQ-007 Live Data & Scanner.

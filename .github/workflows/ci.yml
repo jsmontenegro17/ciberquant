@@ -57,11 +57,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: docker compose config
-      - run: docker compose build
-      - run: docker compose up -d
+      - run: docker compose --profile scanner build
+      - run: docker compose --profile scanner up -d
       - run: curl --fail --retry 20 --retry-all-errors --retry-delay 2 http://localhost:8000/health
       - run: curl --fail --retry 20 --retry-all-errors --retry-delay 2 http://localhost:5173
+      - name: Verify dedicated scanner worker stays running
+        run: |
+          sleep 5
+          test "$(docker inspect --format='{{.State.Running}}' "$(docker compose --profile scanner ps -q scanner-worker)")" = "true"
       - if: always()
-        run: docker compose logs --tail=100
+        run: docker compose --profile scanner logs --tail=100
       - if: always()
-        run: docker compose down
+        run: docker compose --profile scanner down

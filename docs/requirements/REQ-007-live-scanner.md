@@ -1,6 +1,6 @@
 # REQ-007 — Live Data & Strategy Scanner
 
-Status: IN_PROGRESS
+Status: QA
 Priority: P1
 Classification: CRITICAL
 Target: 0.7.0-dev
@@ -27,7 +27,7 @@ A exact feature equivalence; B exact signal timestamps; C forming excluded; D st
 - Paper: actual consecutive next-open/expiry candles only; fixed assumption clearly distinguished from provider payout; gap/interruption unavailable; no account/session/ledger/Trade writes.
 - Database: migration006 six tables, JSONB target, immutable event/outcome/provenance application guards, unique event/observation identities, constraints, reversible migration with destructive-downgrade warning.
 - Frontend: `/scanner`, providers/capabilities, watchlist and full dataset/version selection, research filter, neutral MATCH, health/context/snapshot, payout warning, REPLAY/paper history, SSE plus polling fallback. Existing paging buttons fixed to avoid submitting containing forms.
-- Local verification: Python/ruff, frontend lint/typecheck/tests/build and all6 E2E; migration PostgreSQL/Docker await CI. Real MT5/IQ smoke NOT RUN (not an automated gate).
+- Local verification: Backend162 PASS/13 PostgreSQL-dependent skips, frontend44 PASS, lint/typecheck/build PASS and all6 E2E PASS. CI baseline171 backend PASS/4 intentional SQLite concurrency skips; migration006 PostgreSQL and Docker PASS. Real MT5/IQ smoke NOT RUN (not an automated gate).
 - Benchmark 2026-09-19 Windows/Python3.12.14: 3 datasets ×10000 candles ×4 strategies,120000 evaluations/110190 matches in1.505s;79759.3 in-memory event decisions/sec and evaluations/sec; mean feature update33.70μs. Excludes SQL/network/JSON and is not an SLA.
 
 ## Acceptance matrix (automated)
@@ -43,4 +43,10 @@ A exact feature equivalence; B exact signal timestamps; C forming excluded; D st
 
 ## Risks / boundaries
 
-No known P0/P1 found in local checks; final CI/QA required. P2 [LIVE-001](../debt/LIVE-001-provider-operations.md), existing SEC-001 and quant/recovery debts, dependency warnings and bundle-size warning. Actual IQ OTC is a conditional v1.0 blocker if product acceptance requires it; separate authorization required, no REQ-008 implementation. Human acceptance remains PENDING; no merge/tag.
+No known P0/P1 found in automated checks; independent human QA required. P2 [LIVE-001](../debt/LIVE-001-provider-operations.md), existing SEC-001 and quant/recovery debts, dependency warnings and bundle-size warning. Actual IQ OTC is a conditional v1.0 blocker if product acceptance requires it; separate authorization required, no REQ-008 implementation. Human acceptance remains PENDING; no merge/tag.
+
+## CI and handoff
+
+[PR #6](https://github.com/jsmontenegro17/ciberquant/pull/6), base main. Initial implementation d2034510ac2a75b0e590da06ffb26cadff9bccb6: push CI [35468326588](https://github.com/jsmontenegro17/ciberquant/actions/runs/35468326588) and PR CI [35468338708](https://github.com/jsmontenegro17/ciberquant/actions/runs/35468338708), all three jobs PASS. Final follow-up adds Docker dedicated-worker startup verification, explicit receive-latency display and frontend configuration/compatibility/forming/history regression (44 frontend tests). Its exact final HEAD/CI run IDs are recorded in the PR handoff and final report after green checks; do not merge on the earlier run alone.
+
+Automated acceptance A–J: PASS. Status QA; Human Acceptance PENDING. Stop after final CI; no REQ-008.

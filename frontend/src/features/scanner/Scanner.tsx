@@ -11,13 +11,15 @@ export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  return <section className="panel" aria-label={`Watch item ${item.id}`}>
  <h3>{item.dataset.symbol} · {item.dataset.timeframe}</h3><p>{Object.values(item.dataset).join(' / ')}</p>
  <p>{item.provider==='REPLAY'?'REPLAY MODE':item.provider} · {item.state} · {item.research_mode?'RESEARCH FILTER — not validated for normal scanning':'Validated scanner'}</p>
+ {item.provider==='IQOPTION'&&<p className="researchWarning">EXPERIMENTAL DATA PROVIDER — PROVIDER UNAVAILABLE</p>}
  <h4>{e?.strategy_name??`Version #${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {e?.state==='MATCH'?'CONDITIONS MATCHED':e?.state??'Waiting for closed candles'}</h4>
  <p>Research direction: {e?.research_direction??'—'} · Research signal — no order sent.</p>
  <p>Validation: {e?.validation_state??'Checking'} · Dataset: {e?.dataset_validation_state??'Checking'}</p>
- <p>Current payout: {e?.current_payout??'Unavailable'} · Validation assumption: {e?.validation_payout??'Unavailable'} · Break-even %: {e?.current_break_even??'Unavailable'}</p>
+ <p>Current payout %: {e?.current_payout??'Unavailable'} · Validation assumption %: {e?.validation_payout??'Unavailable'} · Break-even %: {e?.current_break_even??'Unavailable'}</p>
  {e?.payout_warning&&<p role="alert" className="researchWarning">PAYOUT BELOW VALIDATION ASSUMPTION</p>}
  {item.state==='SUSPENDED_DEGRADED'&&<p role="alert">DEGRADED — normal scanning suspended.</p>}
  <p>Signal available: {e?.signal_time??'—'} · NEXT_CANDLE_OPEN boundary: {e?.next_entry_boundary??'—'}. Future entry price unknown.</p>
+ <p>Signal candle: {e?.signal_open??'—'} → {e?.signal_time??'—'} · Receive latency ms: {e?.latency_ms??'Unavailable / logical replay'}. Detection is not an executable quote.</p>
  {e?.error&&<p role="alert">{e.error}</p>}
  <details><summary>Provider health and exact signal context</summary><Json value={e?.health}/><Json value={e?.signal_context}/><Json value={e?.features}/></details>
  <button onClick={onToggle}>{item.enabled?'Pause item':'Enable item'}</button>
