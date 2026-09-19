@@ -83,9 +83,9 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | PASS | Run `35415290649` / commit `92a17a6d4e2962bb0ee56c3127ee15582eb52815`; Backend, Frontend and Docker jobs succeeded. |
+| GitHub CI workflow | Remote | PASS | Run `35415492813` / commit `175004d4d859e7bfba3c39031ea816f239c1c9c8`; Backend, Frontend and Docker jobs succeeded. |
 
-Remote run details: https://github.com/jsmontenegro17/ciberquant/actions/runs/35415290649
+Remote run details: https://github.com/jsmontenegro17/ciberquant/actions/runs/35415492813
 
 Backend steps: PostgreSQL service healthy — PASS; Python setup — PASS; dependency installation — PASS; Ruff — PASS; `alembic upgrade head` — PASS; seed first run — PASS; seed second run — PASS; FastAPI import smoke — PASS; pytest — PASS (9 tests).
 
@@ -96,4 +96,4 @@ Docker: `docker compose config` — PASS; `docker compose build` — PASS.
 Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin, explicit pytest package path and deterministic duplicate fixture. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation QA corrections implemented and validated by remote CI run `35415392532`. `main` now points to the same validated SHA `729ddc694468daedefbea8f163125aac12695f76` and is the repository default branch. REQ-001 is DONE.
+Foundation QA corrections implemented and validated by remote CI runs `35415290649` and `35415492813`. `main` is now the repository default branch and is synchronized with the validated REQ-001 branch. REQ-001 is DONE.

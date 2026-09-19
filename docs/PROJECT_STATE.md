@@ -25,7 +25,7 @@ Auto-trading, broker integrations, ML and live streaming are disabled.
 Alembic initial migration; PostgreSQL; Docker Compose.
 
 ## Git workflow
-REQ-001 is the bootstrap exception. `main` was created from validated SHA `729ddc694468daedefbea8f163125aac12695f76` and configured as the default branch. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
+REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
 P0: none known. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
