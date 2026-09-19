@@ -155,7 +155,7 @@ export function NewSession() {
       <form
         onSubmit={(e: FormEvent) => {
           e.preventDefault();
-          if (risk.data && !create.isPending) create.mutate();
+          if (risk.data && !risk.isError && !create.isPending) create.mutate();
         }}
       >
         <label>
@@ -204,7 +204,7 @@ export function NewSession() {
           </div>
         )}
         {create.error && <p role="alert">{create.error.message}</p>}
-        <button disabled={!risk.data || risk.isFetching || create.isPending}>
+        <button disabled={!risk.data || risk.isError || risk.isFetching || create.isPending}>
           {create.isPending ? "Starting…" : "Start session"}
         </button>
       </form>

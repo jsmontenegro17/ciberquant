@@ -85,7 +85,9 @@ Status: QA; corrections implemented, no merge authorized. No database migration 
 
 Local validation: backend 19 tests, frontend 10 tests, lint/typecheck/build and real API browser workflow PASS. Browser also verifies over-risk rejection, the net-risk summary and unchanged ledger after DRAW/CANCELLED. Existing ownership tests retained.
 
-Correction CI: [35454718064](https://github.com/jsmontenegro17/ciberquant/actions/runs/35454718064), commit `8f22c626f55a115c8ed48e5055388c06bc6f7680` — Backend PASS, Frontend/E2E PASS, Docker build/startup PASS. PR #1 remains open in QA; final documentation-only head checks are linked from its description. All four findings are covered by passing regressions. Final human acceptance is still required; no merge performed.
+Correction CI: [35454718064](https://github.com/jsmontenegro17/ciberquant/actions/runs/35454718064), commit `8f22c626f55a115c8ed48e5055388c06bc6f7680` — Backend PASS, Frontend/E2E PASS, Docker build/startup PASS. PR #1 remains open in QA; final head checks are linked from its description. All four findings are covered by passing regressions. Final human acceptance is still required; no merge performed.
+
+UI follow-up regression: a 409 preview response disables Start even when TanStack Query still retains a previously valid cached preview. The frontend test asserts this state; submission also explicitly checks preview error status. Local frontend tests remain 10 PASS.
 
 Decisions: retain negative `gross_loss` for contract compatibility. `suggested_stake` is capped by all three limits. The session floor remains starting_balance - max_loss_amount; following the requested formula, positive net P&L does not expand spendable remaining risk above max_loss_amount, although it increases mathematical distance to the floor. Neither risk overrides nor profile editing are introduced.
 

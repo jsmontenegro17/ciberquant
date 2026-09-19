@@ -100,7 +100,9 @@ describe("REQ-002 user workflow", () => {
     vi.mocked(riskPreview).mockRejectedValue(
       new Error("No risk profile configured"),
     );
-    mount(<NewSession />);
+    const cache=mount(<NewSession />);
+    // A previously valid preview must not allow a start after the profile disappears.
+    cache.setQueryData(['risk','3'],{trading_account_id:3,current_balance:'2000',currency:'USD',risk_per_trade_percent:'1',suggested_stake:'20',max_loss_amount:'40',max_operations:4,minimum_payout_percent:'80',profit_target_amount:null});
     await screen.findByText("No profile · USD");
     fireEvent.change(screen.getByLabelText("Trading account"), {
       target: { value: "3" },
