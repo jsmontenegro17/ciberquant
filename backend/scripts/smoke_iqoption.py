@@ -29,13 +29,13 @@ def emit(value):
     print(json.dumps(value, default=str), flush=True)
 
 
-def main():
+def main(soak=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--product", choices=["turbo", "binary"], default=settings.iqoption_product)
-    parser.add_argument("--seconds", type=int, default=150)
+    parser.add_argument("--seconds", type=int, default=420 if soak else 150)
     args = parser.parse_args()
-    if not 65 <= args.seconds <= 300:
-        raise SystemExit("Smoke duration must be65..300 seconds")
+    if not 65 <= args.seconds <= (900 if soak else 300):
+        raise SystemExit("Invalid bounded test duration")
     if not settings.enable_iqoption_experimental or settings.iqoption_balance != "PRACTICE":
         raise SystemExit("IQ smoke requires explicit flag and PRACTICE")
     provider = None
@@ -87,7 +87,9 @@ def main():
             # This smoke freezes its own explicit canonical origin. Production requires env origin.
             provider._origin = rows[0].open_time
             history = provider.bootstrap(dataset)
-            selected.append(dict(dataset=dataset, last=history[-1].open_time, forming=False, closed=False))
+            selected.append(
+                dict(dataset=dataset, last=history[-1].open_time, forming=False, closed=False, seen={}, new_closes=set(), gaps=0)
+            )
             emit(
                 {
                     "stage": "HISTORY",
@@ -138,13 +140,21 @@ def main():
                 )
                 session.commit()
             runtime = ScannerRuntime(factory, lambda *args: provider)
+            reconnected = False
+            observations = 0
+            last_emitted = None
             # Runtime bootstraps once from the same frozen OTC origin, then evaluates actual new closes.
             start = time.monotonic()
             while time.monotonic() - start < args.seconds:
                 runtime.cycle()
                 with factory() as session:
+                    current_item = session.scalar(select(ScannerWatchItem))
+                    if soak and provider._closed:
+                        code = (current_item.latest or {}).get("error", "PROVIDER_UNAVAILABLE")
+                        raise ValueError("IQ_SOAK_" + code)
                     event = session.scalar(select(ScannerEvent).order_by(ScannerEvent.id.desc()))
-                    if event:
+                    if event and event.id != last_emitted:
+                        last_emitted = event.id
                         otc["closed"] = True
                         emit(
                             {
@@ -163,9 +173,42 @@ def main():
                 for item in selected:
                     frame = provider.poll(item["dataset"])
                     item["forming"] |= frame.forming is not None
+                    for candle in frame.closed:
+                        key = candle.open_time
+                        prices = (candle.open, candle.high, candle.low, candle.close)
+                        if key in item["seen"] and item["seen"][key] != prices:
+                            raise ValueError("IQ_SOAK_DATA_CONFLICT")
+                        if key not in item["seen"]:
+                            if item["seen"] and (key - max(item["seen"])).total_seconds() != 60:
+                                item["gaps"] += 1
+                            item["seen"][key] = prices
+                        if key > item["last"]:
+                            item["new_closes"].add(key)
                     if any(c.open_time > item["last"] for c in frame.closed):
                         item["closed"] = True
-                if all(x["forming"] and x["closed"] for x in selected) and event is not None:
+                observations += 1
+                if soak and not reconnected and all(x["closed"] for x in selected) and event is not None:
+                    # Deliberately interrupt the real socket; never replay missed closes as LIVE.
+                    origin = provider._origin
+                    runtime.close()
+                    provider.close()
+                    provider = IQOptionReadOnlyProvider(
+                        email=settings.iqoption_email.get_secret_value(),
+                        password=settings.iqoption_password.get_secret_value(),
+                        ssid=settings.iqoption_ssid.get_secret_value(),
+                        balance=settings.iqoption_balance,
+                        product=args.product,
+                        timeout=settings.iqoption_timeout_seconds,
+                        origin=origin,
+                    )
+                    for item in selected:
+                        provider.bootstrap(item["dataset"])
+                    runtime = ScannerRuntime(factory, lambda *args: provider)
+                    runtime.recover_pending()
+                    reconnected = True
+                    emit({"stage": "CONTROLLED_RECONNECT", "result": "PASS", "mode": "PRACTICE", "orders_sent": 0})
+                enough = all(len(x["new_closes"]) >= 3 for x in selected) and reconnected if soak else True
+                if enough and all(x["forming"] and x["closed"] for x in selected) and event is not None:
                     break
                 time.sleep(2)
             for item in selected:
@@ -183,6 +226,29 @@ def main():
                 evaluated = session.scalar(select(func.count()).select_from(ScannerEvent)) > 0
                 assert session.scalar(select(func.count()).select_from(LedgerEntry)) == 0
             success = evaluated and all(x["forming"] and x["closed"] for x in selected)
+            if soak:
+                success = success and reconnected and all(len(x["new_closes"]) >= 3 and x["gaps"] == 0 for x in selected)
+                with factory() as session:
+                    counts = dict(session.execute(select(ScannerEvent.state, func.count()).group_by(ScannerEvent.state)).all())
+                emit(
+                    {
+                        "stage": "SOAK",
+                        "observations": observations,
+                        "reconnect": reconnected,
+                        "scanner_counts": counts,
+                        "datasets": [
+                            dict(
+                                symbol=x["dataset"].symbol,
+                                market_type=x["dataset"].market_type,
+                                closed_count=len(x["new_closes"]),
+                                gaps=x["gaps"],
+                            )
+                            for x in selected
+                        ],
+                        "orders_sent": 0,
+                        "result": "PASS" if success else "FAIL",
+                    }
+                )
             # Windows must release pooled SQLite handles before temporary-directory cleanup.
             runtime.close()
             runtime = None
