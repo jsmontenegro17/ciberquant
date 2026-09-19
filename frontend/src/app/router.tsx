@@ -11,6 +11,7 @@ import {
 import { Journal } from "../features/journal/Journal";
 import { MarketData } from "../features/market-data/MarketData";
 import { Cataloger } from "../features/market-data/Cataloger";
+import { FeatureLab } from "../features/features/FeatureLab";
 export function Router() {
   return (
     <BrowserRouter>
@@ -26,6 +27,7 @@ export function Router() {
             <Route path="/journal" element={<Journal />} />
             <Route path="/market-data" element={<MarketData />} />
             <Route path="/cataloger" element={<Cataloger />} />
+            <Route path="/features" element={<FeatureLab />} />
             {["settings", "strategies", "backtests"].map(
               (path) => (
                 <Route

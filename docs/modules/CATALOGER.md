@@ -16,9 +16,9 @@ C = bullish candle (close > open), P = bearish candle (close < open), D = exact 
 
 Example: binary entry price 100; next candle opens at 102 and closes at 101. The candle is bearish/P because 101 < 102, but a PUT entered at 100 and expiring at 101 loses. Therefore P candle ≠ PUT win and C candle ≠ CALL win.
 
-The future REQ-004 Backtest Engine must not interpret `next_bullish_probability` as CALL win probability or `next_bearish_probability` as PUT win probability. It must calculate the real outcome against entry/expiry prices and timestamps, with explicit trade direction.
+The future REQ-005 Backtest Engine must not interpret `next_bullish_probability` as CALL win probability or `next_bearish_probability` as PUT win probability. It must calculate the real outcome against entry/expiry prices and timestamps, with explicit trade direction.
 
-Conceptual future `BinaryOutcome`: `entry_time`, `entry_price`, `expiry_time`, `expiry_price`, `direction` (CALL/PUT), `result` (WIN/LOSS/DRAW). This is an architecture boundary only, not an implementation or authorization to start REQ-004. See [Backtesting](BACKTESTING.md).
+Conceptual future `BinaryOutcome`: `entry_time`, `entry_price`, `expiry_time`, `expiry_price`, `direction` (CALL/PUT), `result` (WIN/LOSS/DRAW). This is an architecture boundary only, not an implementation or authorization to start REQ-005. See [Backtesting](BACKTESTING.md).
 
 ## API fields
 

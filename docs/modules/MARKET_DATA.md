@@ -4,6 +4,8 @@ REQ-003 introduces auditable append-only ingestion. Source, broker, symbol, mark
 
 ## Architecture
 
+REQ-004 consumes raw candles through a read-only feature repository. No indicator columns, storage or schema change. Dataset MAX(id) fixes each computation's ceiling; historical backfill with newer IDs cannot alter a replay using the original ceiling. Every data query is scoped by all five identity fields and id<=ceiling, with canonical origin calculation before output-range filtering. PostgreSQL ingestion already serializes inserts per dataset using a transaction advisory lock; integrations must preserve this ordering contract. See [indicator definitions](../INDICATOR_DEFINITIONS.md).
+
 - `app/market_data/providers/`: base contract, Mock and CSV. Foundation imports remain compatible through `app/services/market_data.py`.
 - `normalization.py`, `timeframe.py`, `quality.py`: canonical identity, UTC, exact Decimal storage validation.
 - `ingestion.py`: validation, conflict detection, transactional persistence and audit.

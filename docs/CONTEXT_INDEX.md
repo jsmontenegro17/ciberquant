@@ -8,11 +8,14 @@
 | Trades / journal | [TRADES](modules/TRADES.md), [JOURNAL](modules/JOURNAL.md) | `backend/app/api/trading.py` |
 | Market data | [MARKET_DATA](modules/MARKET_DATA.md), [CSV format](MARKET_DATA_CSV_FORMAT.md) | `backend/app/market_data/`, `backend/app/api/market_data.py` |
 | Cataloger | [CATALOGER](modules/CATALOGER.md) | `backend/app/cataloger/` |
-| Indicators / strategies | [INDICATORS](modules/INDICATORS.md), [STRATEGIES](modules/STRATEGIES.md) | planned |
+| Features / indicators | [INDICATORS](modules/INDICATORS.md), [Definitions](INDICATOR_DEFINITIONS.md) | `backend/app/features/`, `backend/app/api/features.py`, `frontend/src/features/features/` |
+| Strategies | [STRATEGIES](modules/STRATEGIES.md) | future REQ-005 |
 | Backtesting / validation | [BACKTESTING](modules/BACKTESTING.md), [VALIDATION](modules/VALIDATION.md) | planned |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Current delivery: [REQ-003](requirements/REQ-003-market-data-candle-cataloger.md), DONE / Human Acceptance PASS, version 0.3.0. REQ-001/REQ-002 remain DONE.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted delivery: [REQ-004](requirements/REQ-004-feature-indicator-engine.md), DONE / Human Acceptance PASS, version0.4.0; REQ-001/002/003 remain DONE. Next roadmap: REQ-005 Strategy Lab & Binary Backtesting, REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None started.
+
+P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md). Official cq-features-v1 is frozen; full-candle features become available at close_time only.
 
 Future security debt: [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
 

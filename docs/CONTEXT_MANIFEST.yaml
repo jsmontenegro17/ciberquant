@@ -1,4 +1,5 @@
 modules:
+  features: {docs: [docs/modules/INDICATORS.md, docs/INDICATOR_DEFINITIONS.md, docs/requirements/REQ-004-feature-indicator-engine.md], backend: [backend/app/features/, backend/app/api/features.py], frontend: [frontend/src/api/features.ts, frontend/src/features/features/], tests: [backend/tests/test_features.py, backend/tests/test_feature_api.py, backend/tests/feature_fixture.py, frontend/src/features/features/features.test.tsx, frontend/e2e/features.spec.ts], dependencies: [market_data]}
   auth: {docs: [docs/modules/AUTH.md], backend: [backend/app/api/auth.py], tests: [backend/tests/test_auth.py]}
   users: {docs: [docs/modules/USERS.md], backend: [backend/app/models.py]}
   trading_accounts: {docs: [docs/modules/TRADING_ACCOUNTS.md], backend: [backend/app/services/finance.py], dependencies: [users]}

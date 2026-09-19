@@ -17,7 +17,7 @@ test("ADMIN imports disposable deterministic candles and catalogs CCC without cr
   await expect(page.getByRole("heading", { name: "Import COMPLETED" })).toBeVisible();
   const report = page.getByRole("region", { name: "Import report" });
   await expect(report.locator("div").filter({ has: page.locator("dt", { hasText: /^Inserted$/ }) }).last()).toContainText("30");
-  await page.getByRole("button", { name: "Inspect", exact: true }).click();
+  await page.getByRole("row").filter({ has: page.getByRole("cell", { name: "SYNTHETIC_QA", exact: true }) }).getByRole("button", { name: "Inspect", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Candle inspection" })).toBeVisible();
   await page.getByRole("link", { name: "Cataloger", exact: true }).click();
   await page.getByLabel("Dataset", { exact: true }).selectOption({ label: "SYNTHETIC_QA / DEMO / EURUSD / REGULAR / 1m" });
