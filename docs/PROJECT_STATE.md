@@ -31,7 +31,7 @@ REQ-001 is the bootstrap exception. `main` was created from the validated REQ-00
 P0: none known. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
 
 ## Active requirements
-None. REQ-001 — Foundation is DONE after remote CI run `35415290649`.
+None. REQ-001 — Foundation is DONE after remote CI run `35415610726`.
 
 ## Next milestones
 REQ-002 session UI and richer analytics; REQ-003 cataloger; REQ-004 backtesting. Do not start them until `main` is established from the final validated REQ-001 commit.
