@@ -42,3 +42,34 @@ def test_006_migration_provenance_constraints_and_downgrade(migrated_database):
         assert "scanner_events" not in inspect(c).get_table_names()
         assert "candles" in inspect(c).get_table_names()
         migration("006_live_scanner").upgrade()
+
+
+def test_conflict_diagnostics_exact_identity_numeric_and_no_overwrite(migrated_database):
+    from dataclasses import replace
+    from decimal import Decimal
+    from app.live.conflicts import DataConflictError
+    from app.market_data.repository import existing_for
+
+    engine = migrated_database
+    with engine.begin() as c, Operations.context(MigrationContext.configure(c)):
+        for rev in ("004_strategy_backtesting", "005_validation", "006_live_scanner"):
+            migration(rev).upgrade()
+    factory = sessionmaker(bind=engine)
+    original = replace(candles()[0], open=Decimal("1.10001"), high=Decimal("1.11"), low=Decimal("1.10"), close=Decimal("1.10002"))
+    dataset = Dataset(**META)
+    with factory() as s:
+        persist_closed(s, dataset, [original], "IQOPTION", "LIVE", original.close_time, original.close_time)
+        s.commit()
+    with factory() as s:
+        for field, value in [("source", "OTHER"), ("broker", "OTHER"), ("symbol", "OTHER"), ("market_type", "OTC"), ("timeframe", "5m")]:
+            assert existing_for(s, dataset.model_copy(update={field: value}), [original]) == {}
+        same = existing_for(s, dataset, [original])[original.open_time]
+        assert all(getattr(same, k) == getattr(original, k) for k in ("open", "high", "low", "close"))
+        with pytest.raises(DataConflictError) as caught:
+            persist_closed(
+                s, dataset, [replace(original, close=Decimal("1.10003"))], "IQOPTION", "LIVE", original.close_time, original.close_time
+            )
+        assert caught.value.details["changed_fields"] == ["close"]
+        assert caught.value.details["first_seen_provider_time"] == original.close_time.isoformat()
+        s.rollback()
+        assert existing_for(s, dataset, [original])[original.open_time].close == original.close
