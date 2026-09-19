@@ -8,6 +8,7 @@ from .quality import validate_candle, VALUE_FIELDS
 from .normalization import stored_utc
 from .timeframe import duration
 from .repository import lock_dataset, existing_for
+from ..operations import lifecycle
 
 
 def audit(session, batch, event):
@@ -27,6 +28,7 @@ def safe_name(name):
     return "".join(c for c in name if c.isprintable())[:255] or "upload.csv"
 
 
+@lifecycle("import")
 def ingest(session, actor_id, dataset, raw, filename, max_rows):
     batch = MarketDataImport(
         created_by_user_id=actor_id, **dataset.model_dump(), file_name=safe_name(filename), file_sha256=hashlib.sha256(raw).hexdigest()

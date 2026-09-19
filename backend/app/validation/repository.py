@@ -16,6 +16,7 @@ from ..config import settings
 from ..backtesting.engine import simulate_rows
 from .schemas import ValidationCreate
 from .protocol import split, definitions, bootstrap, verdict, monthly, historical_state
+from ..operations import lifecycle
 
 
 def version_definition(session, vid, uid, require_testing=False):
@@ -170,6 +171,7 @@ def fail(session, rid, exc):
     return run
 
 
+@lifecycle("validation")
 def create(session, uid, request):
     version_definition(session, request.strategy_version_id, uid, True)
     # Freeze the version's validation payout/expiry choice across subsequent attempts.
@@ -237,6 +239,7 @@ def create(session, uid, request):
     return run
 
 
+@lifecycle("validation")
 def reveal(session, uid, rid):
     run = owned(session, ValidationRun, rid, uid)
     # Serialize claims for the same immutable version; CAS also protects SQLite and duplicate requests.

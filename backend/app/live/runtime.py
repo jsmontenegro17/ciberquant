@@ -117,6 +117,8 @@ class ScannerRuntime:
                     if isinstance(exc, ValueError)
                     else "PROVIDER_UNAVAILABLE"
                 )
+                import logging
+                logging.getLogger('ciberquant.provider').warning('provider_failure code=%s exception_type=%s', code, type(exc).__name__)
                 attempt += 1
                 self.retry[key] = (attempt, received_at + timedelta(seconds=min(60, 2 ** min(attempt, 6))), code == "DATA_CONFLICT")
                 with self.factory() as s:
