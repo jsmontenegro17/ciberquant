@@ -58,8 +58,8 @@ jobs:
       - run: docker compose config
       - run: docker compose build
       - run: docker compose up -d
-      - run: curl --fail --retry 20 --retry-connrefused --retry-delay 2 http://localhost:8000/health
-      - run: curl --fail --retry 20 --retry-connrefused --retry-delay 2 http://localhost:5173
+      - run: curl --fail --retry 20 --retry-all-errors --retry-delay 2 http://localhost:8000/health
+      - run: curl --fail --retry 20 --retry-all-errors --retry-delay 2 http://localhost:5173
       - if: always()
         run: docker compose logs --tail=100
       - if: always()
