@@ -14,11 +14,11 @@
 | Validation | [VALIDATION](modules/VALIDATION.md) | future REQ-006 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Active delivery: [REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md), version0.5.0-dev. Stable main/tag v0.4.0; REQ-001/002/003/004 remain DONE / Human Acceptance PASS. Next: REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None authorized or started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: [REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md), version0.5.0, DONE / Human Acceptance PASS. REQ-001/002/003/004 remain DONE / Human Acceptance PASS. Integrated main SHA, CI and tag evidence: [PR #4](https://github.com/jsmontenegro17/ciberquant/pull/4). Next: REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None authorized or started.
 
 Research regressions: `backend/tests/test_backtest_engine.py`, `test_research_api.py`, `test_research_migration.py`; manual fixture `backtest_fixture.py`; UI/E2E `frontend/src/features/research/research.test.tsx`, `frontend/e2e/research.spec.ts`; benchmark `backend/scripts/benchmark_backtest.py`. Debt: [BACKTEST-001](debt/BACKTEST-001-stale-run-recovery.md), [BACKTEST-002](debt/BACKTEST-002-execution-realism.md).
 
-P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md). Official cq-features-v1 is frozen; full-candle features become available at close_time only.
+P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md), [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md). Official cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 are frozen; full-candle features become available at close_time only. No multi-version dispatcher is implemented in REQ-005.
 
 Future security debt: [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
 
