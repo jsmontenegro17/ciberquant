@@ -2,9 +2,9 @@
 
 | Módulo | Unit | API/Integration | Quant regression | E2E |
 |---|---:|---:|---:|---:|
-| Auth | ✅ | ✅ | — | — |
-| Accounts / ledger | ✅ | ✅ | — | — |
-| Risk / sessions | ✅ | ✅ | — | — |
-| Market data quality | ✅ | — | ✅ fixture | — |
-| Cataloger | planned | planned | planned | planned |
-| Backtest | planned | planned | planned | planned |
+| Auth | PASS | PASS (CI) | — | UNVERIFIED |
+| Accounts / ledger | PASS | PASS (CI) | — | UNVERIFIED |
+| Risk / sessions | PASS | PASS (CI) | — | UNVERIFIED |
+| Market data quality | PASS | PASS (CI) | PASS fixture | — |
+| Cataloger | N/A | N/A | N/A | N/A |
+| Backtest | N/A | N/A | N/A | N/A |

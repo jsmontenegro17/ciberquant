@@ -3,6 +3,22 @@ on: [push, pull_request]
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: ciberquant
+          POSTGRES_USER: ciberquant
+          POSTGRES_PASSWORD: ciberquant
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd="pg_isready -U ciberquant -d ciberquant"
+          --health-interval=5s --health-timeout=5s --health-retries=10
+    env:
+      DATABASE_URL: postgresql+psycopg://ciberquant:ciberquant@localhost:5432/ciberquant
+      JWT_SECRET: ci-only-secret
+      SEED_ADMIN_EMAIL: admin@example.com
+      SEED_ADMIN_PASSWORD: ci-only-password
     defaults: {run: {working-directory: backend}}
     steps:
       - uses: actions/checkout@v4
@@ -10,6 +26,9 @@ jobs:
         with: {python-version: '3.12'}
       - run: pip install -r requirements.txt
       - run: ruff check app tests
+      - run: alembic upgrade head
+      - run: python -m app.seed
+      - run: python -c "from app.main import app; assert app.title == 'CiberQuant API'"
       - run: pytest
   frontend:
     runs-on: ubuntu-latest
@@ -21,4 +40,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config
+      - run: docker compose build

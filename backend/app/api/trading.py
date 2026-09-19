@@ -1,8 +1,9 @@
+from datetime import datetime, timezone
 from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from ..models import TradingAccount,TradingSession,Trade,LedgerEntry,JournalEntry
+from ..models import TradingAccount,TradingSession,Trade,LedgerEntry,JournalEntry,AuditLog
 from ..schemas import AccountCreate,AccountOut,SessionCreate,SessionOut,TradeCreate,TradeOut,JournalCreate,JournalOut
 from ..services.finance import binary_profit,session_limit_reached
 from .deps import db,current_user
@@ -16,9 +17,17 @@ def accounts(user=Depends(current_user),s:Session=Depends(db)): return s.scalars
 def create_session(data:SessionCreate,user=Depends(current_user),s:Session=Depends(db)):
     a=s.scalar(select(TradingAccount).where(TradingAccount.id==data.trading_account_id,TradingAccount.user_id==user.id))
     if not a: raise HTTPException(404,'Account not found')
-    x=TradingSession(user_id=user.id,starting_balance=a.current_balance,**data.model_dump()); s.add(x); s.commit(); s.refresh(x); return x
+    x=TradingSession(user_id=user.id,starting_balance=a.current_balance,**data.model_dump()); s.add(x); s.flush(); s.add(AuditLog(user_id=user.id,event_type='SESSION_STARTED',entity_type='session',entity_id=x.id)); s.commit(); s.refresh(x); return x
 @router.get('/sessions',response_model=list[SessionOut])
 def sessions(user=Depends(current_user),s:Session=Depends(db)): return s.scalars(select(TradingSession).where(TradingSession.user_id==user.id)).all()
+@router.post('/sessions/{session_id}/close',response_model=SessionOut)
+def close_session(session_id:int,user=Depends(current_user),s:Session=Depends(db)):
+    sess=s.scalar(select(TradingSession).where(TradingSession.id==session_id,TradingSession.user_id==user.id))
+    if not sess: raise HTTPException(404,'Session not found')
+    if sess.status=='CLOSED': return sess
+    account=s.scalar(select(TradingAccount).where(TradingAccount.id==sess.trading_account_id,TradingAccount.user_id==user.id))
+    sess.status='CLOSED'; sess.ended_at=datetime.now(timezone.utc); sess.ending_balance=account.current_balance
+    s.add(AuditLog(user_id=user.id,event_type='SESSION_CLOSED',entity_type='session',entity_id=sess.id)); s.commit(); s.refresh(sess); return sess
 @router.post('/trades',response_model=TradeOut)
 def create_trade(data:TradeCreate,user=Depends(current_user),s:Session=Depends(db)):
     a=s.scalar(select(TradingAccount).where(TradingAccount.id==data.trading_account_id,TradingAccount.user_id==user.id)); sess=s.scalar(select(TradingSession).where(TradingSession.id==data.trading_session_id,TradingSession.user_id==user.id))
@@ -30,7 +39,7 @@ def create_trade(data:TradeCreate,user=Depends(current_user),s:Session=Depends(d
     t=Trade(user_id=user.id,profit_loss=pl,**data.model_dump()); s.add(t); s.flush()
     if pl is not None:
         before=a.current_balance; after=before+pl; a.current_balance=after; s.add(LedgerEntry(account_id=a.id,trade_id=t.id,session_id=sess.id,entry_type='TRADE_PROFIT' if pl>0 else 'TRADE_LOSS',amount=pl,balance_before=before,balance_after=after))
-    s.commit(); s.refresh(t); return t
+    s.add(AuditLog(user_id=user.id,event_type='TRADE_CREATED',entity_type='trade',entity_id=t.id)); s.commit(); s.refresh(t); return t
 @router.post('/journal',response_model=JournalOut)
 def journal(data:JournalCreate,user=Depends(current_user),s:Session=Depends(db)):
-    x=JournalEntry(user_id=user.id,**data.model_dump()); s.add(x); s.commit(); s.refresh(x); return x
+    x=JournalEntry(user_id=user.id,**data.model_dump()); s.add(x); s.flush(); s.add(AuditLog(user_id=user.id,event_type='JOURNAL_CREATED',entity_type='journal',entity_id=x.id)); s.commit(); s.refresh(x); return x

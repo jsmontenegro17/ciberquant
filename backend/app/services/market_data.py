@@ -29,3 +29,10 @@ def validate_candle(c:CandleData):
     if c.close_time <= c.open_time: return ['timestamps must be increasing']
     if '-OTC' in c.symbol and c.market_type != 'OTC': return ['OTC symbol must use OTC market_type']
     return []
+def validate_candles(candles:list[CandleData]):
+    errors=[]; seen=set()
+    for candle in candles:
+        identity=(candle.source,candle.symbol,candle.market_type,candle.timeframe,candle.open_time)
+        if identity in seen: errors.append(f'duplicate candle: {identity}')
+        seen.add(identity); errors.extend(validate_candle(candle))
+    return errors

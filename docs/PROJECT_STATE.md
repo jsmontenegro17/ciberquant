@@ -3,8 +3,17 @@
 ## Current version
 0.1.0
 
-## Production-ready modules
-Repository foundation, health endpoints, user authentication, accounts, auditable ledger, sessions, trades, risk calculations, journal notes, market-data provider interface, mock/CSV providers and data quality checks.
+## Functional
+Health endpoints, authentication, accounts, auditable ledger, session lifecycle, trades, risk calculations, journal API, market-data provider interface, Mock/CSV providers and data-quality checks.
+
+## Partial
+Frontend dashboard is a navigational shell with static overview data; it is not connected to the API. Backend aggregate session analytics and candle import endpoint remain partial.
+
+## Foundation only
+Cataloger, indicators, strategies, validation and backtesting have documentation/contracts but no production implementation.
+
+## Planned
+Feature-complete frontend screens, cataloger, indicators, strategies, validation and backtesting.
 
 ## Modules in development
 Frontend feature screens; cataloger, indicators, strategies and backtesting contracts.
@@ -16,7 +25,7 @@ Auto-trading, broker integrations, ML and live streaming are disabled.
 Alembic initial migration; PostgreSQL; Docker Compose.
 
 ## Known issues
-P0: none known. P1: frontend is an app shell and needs feature screens. P2: full quant engines remain next milestones.
+P0: backend/Docker execution evidence depends on CI because the current host has no Python or Docker. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
 
 ## Active requirements
 REQ-001 — Foundation (QA).

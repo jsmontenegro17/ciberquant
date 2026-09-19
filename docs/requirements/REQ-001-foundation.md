@@ -72,7 +72,20 @@ AGENTS, context index/manifest, module docs, state, runbook, testing, ADRs and c
 SQLite is only a local/test fallback; production configuration is PostgreSQL. Broker adapters and order execution are deliberately absent.
 
 ## QA Evidence
-Frontend `npm ci`, `npm run lint`, `npm run typecheck` and `npm run build` pass. Backend/Docker smoke tests are not executable in the current host because Python and Docker are unavailable.
+
+| Command / check | Environment | Result | Observation |
+|---|---|---|---|
+| `npm ci` | Windows host | PASS | Clean dependency install |
+| `npm run lint` | Windows host | PASS | ESLint completed without errors |
+| `npm run typecheck` | Windows host | PASS | TypeScript completed without errors |
+| `npm test` | Windows host | PASS | Typecheck-backed frontend smoke command |
+| `npm run build` | Windows host | PASS | Vite production build generated |
+| `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
+| `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
+| `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
+| GitHub CI workflow | Remote | UNVERIFIED | Workflow updated but not triggered from this iteration |
+
+Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job and Docker CI job. Commit evidence is recorded in Git.
 
 ## Final Result
-Foundation implemented; status remains QA until backend and Docker checks run in a Python/Docker-capable environment.
+Foundation QA corrections implemented. Status remains QA because backend, migration, seed, PostgreSQL and Docker evidence is still UNVERIFIED in the available environment.
