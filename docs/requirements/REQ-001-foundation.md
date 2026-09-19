@@ -83,7 +83,7 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | UNVERIFIED | Branch was pushed; GitHub Actions currently reports 0 workflow runs |
+| GitHub CI workflow | Remote | UNVERIFIED | Workflow now includes `workflow_dispatch`; repository currently reports 0 workflow runs. Admin may need to enable Actions and run it manually |
 
 Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job and Docker CI job. Commit evidence is recorded in Git.
 
