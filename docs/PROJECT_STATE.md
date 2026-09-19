@@ -1,7 +1,7 @@
 # Project State
 
 ## Current version
-1.0.0-dev — REQ-008 BLOCKED (real IQ closed-candle DATA_CONFLICT unresolved) / Human Acceptance PENDING on codex/req-008-integrated-workspace, PR #7. Accepted release remains v0.7.0; the following release history is preserved. No v1.0 merge/tag authorized.
+1.0.0-dev — REQ-008 BLOCKED — UPSTREAM FINALITY POLICY REQUIRED / Human Acceptance PENDING on codex/req-008-integrated-workspace, PR #7. IQ historical post-close revisions reproduced independently; see [investigation](providers/IQOPTION_FINALITY_INVESTIGATION.md). Accepted release remains v0.7.0; the following release history is preserved. No v1.0 merge/tag authorized.
 0.7.0 — REQ-007 DONE / Human Acceptance PASS on 2026-09-19. Approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5, PR #6. REQ-001–007 DONE / PASS. Main SHA, final CI and tag evidence are recorded in the PR #6 release handoff.
 
 ## Functional

@@ -1,6 +1,6 @@
 # Context Index
 
-Active: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), 1.0.0-dev / BLOCKED (real IQ DATA_CONFLICT unresolved) / Human Acceptance PENDING. [Workspace semantics](WORKSPACE_SEMANTICS.md), [operations/deployment](OPERATIONS_DEPLOYMENT.md), [real IQ probe](providers/IQOPTION_SOAK_2026-09-19.md). `/workspace` and `/operations/status`; backend api/workspace.py, api/operations.py, operations.py; migration007_operations. REQ-008 is now authorized; historical v0.7.0 statements below remain release context.
+Active: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), 1.0.0-dev / BLOCKED — UPSTREAM FINALITY POLICY REQUIRED / Human Acceptance PENDING. [Workspace semantics](WORKSPACE_SEMANTICS.md), [operations/deployment](OPERATIONS_DEPLOYMENT.md), [real IQ probe](providers/IQOPTION_SOAK_2026-09-19.md), [reproduced IQ finality revisions](providers/IQOPTION_FINALITY_INVESTIGATION.md). `/workspace` and `/operations/status`; backend api/workspace.py, api/operations.py, operations.py; migration007_operations. REQ-008 is now authorized; historical v0.7.0 statements below remain release context.
 
 REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2026-09-19 real PRACTICE smoke](providers/IQOPTION_SMOKE_2026-09-19.md); `backend/app/live/iqoption.py`, `iq_transport.py`, `backend/tests/test_iqoption.py`, `backend/scripts/smoke_iqoption.py`. Mandatory in this requirement, not deferred to REQ-008.
 

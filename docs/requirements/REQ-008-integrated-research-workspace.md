@@ -1,7 +1,7 @@
 # REQ-008 — Integrated Research Workspace / v1.0
 
 Status: BLOCKED
-Investigation authorized: instrument exact IQ conflict provenance and run separate bounded no-reconnect, reconnect and scanner probes. No finality/engine/persistence-policy change; later successful probes alone cannot resolve the blocker. See providers/IQOPTION_FINALITY_INVESTIGATION.md when evidence is available.
+Investigation completed: IQ_UPSTREAM_POST_CLOSE_REVISION reproduced in three BTC candles across independent no-reconnect/reconnect probes, including identical end/count requests. BLOCKED — UPSTREAM FINALITY POLICY REQUIRED. No finality/engine/persistence-policy change; later scanner soak success does not resolve the blocker. See [investigation](../providers/IQOPTION_FINALITY_INVESTIGATION.md) for exact data, causal entry impact and options A–D.
 Human Acceptance: PENDING
 Target: 1.0.0-dev
 Base main/tag: 2f39bdb47d8c44056d905a923d6281246ad8fb43 / v0.7.0
@@ -34,7 +34,7 @@ Workspace/API, pipeline/lineage, paginated histories, descriptive comparisons, m
 
 Local regression: backend197 PASS/21 explicit skips, frontend57 PASS, E2E7 PASS. PostgreSQL/concurrency and Docker are validated in CI, not claimed as local executions. Six mathematical engines unchanged; no persisted historical evidence rewritten. PR #7 remains draft, not merged/tagged.
 
-Blocker: real IQ probe observed `IQ_SOAK_DATA_CONFLICT` after two closes and reconnect. Exact affected candle was not recorded in that revision; root cause unresolved. Three other bounded probes passed, including an explicit BTCUSD retest, but cannot erase the failure. Section24 operational acceptance is not satisfied; L human QA readiness FAIL until a resolution/explicit decision. The read-only PRACTICE boundary remains PASS, orders0. No incompatible candle-finality change is authorized. No v1.0 release readiness claimed.
+Original blocker: real IQ probe observed `IQ_SOAK_DATA_CONFLICT` after two closes and reconnect, without exact candle attribution. Subsequent independent investigation demonstrated upstream post-close revisions (see update above); the original missing identity cannot be reconstructed. Successful bounded probes cannot erase these failures. Section24 operational acceptance is not satisfied; L human QA readiness FAIL pending human policy decision. The read-only PRACTICE boundary remains PASS, orders0. No incompatible candle-finality change is authorized. No v1.0 release readiness claimed.
 
 ## Boundaries
 

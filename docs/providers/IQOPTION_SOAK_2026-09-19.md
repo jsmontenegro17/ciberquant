@@ -2,6 +2,8 @@
 
 Overall acceptance: BLOCKED by an observed closed-candle DATA_CONFLICT; successful later probes do not erase it. No frozen close semantics or upstream pin changed. Human Acceptance PENDING.
 
+Investigation update2026-09-19: **IQ_UPSTREAM_POST_CLOSE_REVISION reproduced** independently of ScannerRuntime/DB/reconnect, including identical end/count requests. [Detailed investigation and decision gate](IQOPTION_FINALITY_INVESTIGATION.md). REQ-008 now remains BLOCKED — UPSTREAM FINALITY POLICY REQUIRED. The original uninstrumented candle/layer is still not retrospectively identifiable; the mechanism is demonstrated by new evidence, not guessed from successful retries.
+
 Second attempt: PASS (bounded multi-close/reconnect probe), completed2026-09-19T23:06:01.540028Z, exit0. Productbinary. Pin acac6e08333466ae188c7dfa7fd2a03174e34ca2 unchanged. Command: `python -m scripts.soak_iqoption --product binary --seconds 420`.
 
 - Auth/profile PRACTICE PASS;98 REGULAR/171 OTC discovered,2/168 open.
@@ -17,7 +19,7 @@ This is several real M1 closes, not hours of unattended soak or production certi
 
 ## Additional attempts (all PRACTICE, read-only, orders 0)
 
-Third attempt: BTCUSD-OP REGULAR / EURUSD-OTC, bootstrap origin22:51Z; scanner MATCH at23:12/23:13Z and controlled reconnect PASS, then FAIL `IQ_SOAK_DATA_CONFLICT`. The probe observed different OHLC for an already seen closed identity and stopped. This revision did not log the exact affected symbol/candle/fields, so attributing it to either market or to a particular reconnect race would be speculation. No raw overwrite or fabricated completion. Root cause remains unresolved.
+Third attempt: BTCUSD-OP REGULAR / EURUSD-OTC, bootstrap origin22:51Z; scanner MATCH at23:12/23:13Z and controlled reconnect PASS, then FAIL `IQ_SOAK_DATA_CONFLICT`. The code can emit this from either the direct observer or the runtime failure wrapper; the retained failure does not identify which. This revision did not log the exact affected symbol/candle/fields, so attributing that original failure to either market or a particular reconnect race would be speculation. No raw overwrite or fabricated completion. At this stage root cause remained unresolved; see the later independent reproduction above.
 
 Fourth attempt completed2026-09-19T23:17:02.081885Z: ETHUSD-OP REGULAR / EURUSD-OTC, origin22:54Z, PASS;50 observations,3 new closes each, gaps0 each, duplicates closed0/events0, stale observations0, reconnectPASS,3 OTC MATCH at23:15/16/17Z. Payout snapshots87/85, last provider clock23:17:01Z. Seven capabilities true; orders0.
 
@@ -28,3 +30,7 @@ The tooling now emits only sanitized symbol/market/open-time/changed-field names
 ## Acceptance blocker / decision required
 
 REQ-008 section24 requires no DATA_CONFLICT in real soak. Three bounded successful attempts do not establish that the observed conflict is resolved. Keep PR #7 draft/BLOCKED. Further diagnosis or an explicitly authorized versioned finality/quarantine policy is required before declaring production IQ operational acceptance. Do not silently delay/rewrite candles, change frozen cq-live-data-v1, replace OTC, reseal evidence, or claim this is merely a successful rerun. The accepted v0.7.0 baseline/tag remains untouched.
+
+## Investigation scanner probe (separate, not a fix)
+
+Completed2026-09-19T23:46:02.510159Z; binary/PRACTICE BTCUSD-OP REGULAR + EURUSD-OTC, canonical origin23:23Z.54 cycles,3 new closes each,gaps0,OTC persisted duplicate candles/events0,stale observations0,controlled reconnectPASS,3 OTC MATCH at23:44/45/46Z,payout snapshots87/85,orders0. Local observer6372 closed observations/170 queries/0 revisions. Operational probe PASS; conflict NOT REPRODUCED in this window, **not FIXED**. Independent finality experiments immediately before it reproduced three revisions across three BTC candles; see investigation report. No semantic fix was made.

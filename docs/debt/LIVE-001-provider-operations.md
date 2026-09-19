@@ -1,6 +1,7 @@
 # LIVE-001 — Provider operations and recovery
 
 Status: PARTIAL
+Investigation2026-09-19: IQ_UPSTREAM_POST_CLOSE_REVISION demonstrated without DB/scanner/reconnect; identical history parameters can return changed closed OHLC. Current fail-closed rule is preserved. REQ-008 blocked pending human finality-policy decision; no silent stabilization or NEXT_CANDLE_OPEN change. See [evidence and options](../providers/IQOPTION_FINALITY_INVESTIGATION.md).
 REQ-008 implementation update (Human Acceptance PENDING): Worker heartbeat/stale state, bounded owned subscription diagnostics, fixed-code logging, controlled real PRACTICE multi-close/reconnect probe implemented. Observed real closed-candle DATA_CONFLICT blocks REQ-008 acceptance despite three other bounded successful probes; root cause unresolved. Prolonged soak, unknown first probe interruption, unofficial protocol drift, digital unsupported, optional MT5 real verification and larger-scale operations remain open. See dated REQ-008 soak report.
 
 ## Historical problem and original scope
