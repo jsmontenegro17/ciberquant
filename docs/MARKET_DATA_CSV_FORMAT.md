@@ -11,7 +11,7 @@ Required columns: open_time,close_time,open,high,low,close. Optional columns: ti
 
 All timestamps must contain Z or an explicit UTC offset. 2026-09-19T09:00:00-05:00 is the same instant as 2026-09-19T14:00:00Z. Naive timestamps are rejected, never guessed. Stored/returned timestamps normalize to UTC. close_time must be greater than open_time. Rows must be strictly ascending by open_time.
 
-Numbers use a decimal point, not localized comma separators. OHLC is parsed directly from string to Decimal, must be positive and fit NUMERIC(24,10): fewer than 14 integer digits or at most 14 within range, maximum 10 fractional places (trailing zeroes do not lose information). No NaN/infinity or silent rounding. high>=open/close, low<=open/close, high>=low; volume/spread must be nonnegative when present.
+Numbers use a decimal point, not localized comma separators. OHLC is parsed directly from string to Decimal, must be positive and fit NUMERIC(24,10): absolute value below 10^14 and at most 10 fractional places (value-preserving trailing zeroes are allowed). No NaN/infinity or silent rounding. high>=open/close, low<=open/close, high>=low; volume/spread must be nonnegative when present.
 
 Duplicate identities within a file invalidate the whole batch. Exact database duplicates are counted/skipped. Same identity with any different stored value is DATA_CONFLICT and the whole import fails, preserving original rows and provenance. Gaps are warnings; catalog observations never cross gaps.
 
@@ -31,4 +31,3 @@ Change one close within the OHLC range → FAILED/DATA_CONFLICT; original covera
 Cataloger → same dataset, full default coverage date range, length3 → Analyze → examined30, eligible24, gap-skipped3, CCC samples6/next P6.
 Import OTC fixture under OTC → REGULAR results unchanged; OTC PPP samples24/next P24.
 USER can read but cannot see import controls; direct POST returns403.
-

@@ -1,6 +1,6 @@
 # REQ-003 — Market Data Ingestion & Candle Cataloger
 
-Status: IN_PROGRESS
+Status: QA
 Priority: P1
 Classification: LARGE
 Created: 2026-09-19
@@ -38,7 +38,22 @@ No production deployment claim; SEC-001 remains separate. Migration downgrade mu
 
 ## Evidence
 
-Local implementation checkpoint 2026-09-19:46 backend tests PASS/3 PostgreSQL-only or nonapplicable cases skipped,18 frontend tests PASS,2 browser E2E PASS (REQ-002 preserved), typecheck/lint/build PASS. Desktop/tablet screenshots inspected with no page overflow. PostgreSQL/Docker CI and PR pending. Human Acceptance: PENDING.
+Local implementation checkpoint 2026-09-19: 46 backend tests PASS/3 PostgreSQL-only or nonapplicable cases skipped, 18 frontend tests PASS, 2 browser E2E PASS (REQ-002 preserved), typecheck/lint/build PASS. Desktop/tablet screenshots inspected with no page overflow. Human Acceptance: PENDING.
+
+Remote implementation CI: [35456931568](https://github.com/jsmontenegro17/ciberquant/actions/runs/35456931568), commit `c117822487802b42544f01b28d29123a61aab04d`: Backend PASS (48 tests, 1 intentional SQLite concurrency skip), Frontend/E2E PASS, Docker build/Compose startup PASS. PostgreSQL 001→002→003, migration roundtrip/refusal, concurrent duplicate imports and exact NUMERIC storage all validated. Pull-request CI 35456933449 also PASS. [PR #2](https://github.com/jsmontenegro17/ciberquant/pull/2) remains open; final-head CI evidence is recorded in its description to avoid self-referencing commit changes.
+
+## Acceptance scenarios
+
+| Scenario | Result | Evidence |
+|---|---|---|
+| A — ADMIN import | PASS | 30 candles, original batch FK, SHA-256, coverage and audit; browser report COMPLETED |
+| B — reimport | PASS | 0 inserts / 30 duplicates; original provenance retained |
+| C — conflict | PASS | FAILED/DATA_CONFLICT, no partial inserts, original values preserved; OHLC/volume/spread/close-time conflicts tested |
+| D — catalog | PASS | Exact multiple-pattern counts and Decimal probabilities; CCC samples6/nextP6 in browser |
+| E — gap | PASS | 3 excluded length3 windows; explicit10:02→10:10 fixture never bridged |
+| F — OTC | PASS | OTC and REGULAR queried independently; broker/source/symbol/timeframe isolation also tested |
+| Security | PASS | ADMIN-only mutations; USER403 and unauthenticated401; bounded request/file/rows |
+| Delivery | PASS | Migration, backend, frontend/E2E, Docker, docs and open PR; human acceptance still required |
 
 Manual deterministic fixture: two days of CCCPD repeated three times/day.30 total candles. Length3 CCC samples6/nextP6; CCP samples6/nextD6; CPD,DCC,PDC each samples4/nextC4.24 eligible windows and3 gap-skipped. Separate OTC/broker/source/symbol/timeframe queries verified. include_doji=false yields6 eligible/18 doji-skipped.
 
@@ -46,4 +61,4 @@ Performance:100,000 synthetic candles (6,560,041-byte CSV), pure engine0.9356s, 
 
 ## Known limitations
 
-Synchronous bounded V1 imports; infrastructure/process interruption can leave a visible PROCESSING batch requiring operator investigation/reimport (idempotent). No background worker/recovery UI. Optional hour/day filters deferred. Existing auth dependency warnings and SEC-001 production hardening remain separate debt. No known functional P0/P1 in locally validated scope; final PostgreSQL/Docker validation still required before QA.
+P0: none known in validated scope. P1: none known in validated scope. P2/limitations: synchronous bounded V1 imports; infrastructure/process interruption can leave a visible PROCESSING batch requiring operator investigation/reimport (idempotent). No background worker/recovery UI. Optional hour/day filters deferred. Existing auth dependency warnings and SEC-001 production hardening remain separate debt. PostgreSQL/Docker CI validated. No merge or release/tag; REQ-004 not started.
