@@ -26,6 +26,12 @@ Auditable immutable historical candles, atomic admin-only CSV ingestion, import 
 
 ## Design decisions
 
+### Final Human Review — semantic contract correction
+
+Status remains QA; human acceptance pending. Rename direction statistics to `next_bullish_count`, `next_bearish_count`, `next_bullish_probability` and `next_bearish_probability`; keep doji fields and C/P/D codes. No legacy aliases. Candle direction describes open→close, not a binary trade result. No mathematical, engine, ingestion or database changes; no new migration. Add an explicit API contract regression, update frontend types/consumers and document the future BinaryOutcome boundary. New final-head CI must pass; PR #2 remains open without automatic merge. REQ-004 is not started.
+
+Correction validation: local backend 47 PASS / 3 PostgreSQL-only or nonapplicable skips; frontend 18 PASS; E2E 2 PASS; lint/typecheck/build PASS. Exact API field allowlist excludes all legacy aliases. CCC remains sample_size=6, bullish=0, bearish=6, doji=0 with probabilities 0/1/0; CC remains 12 samples, counts 6/6/0 and probabilities 0.5/0.5/0. Global repository search finds no obsolete contract identifiers. Final correction CI run/commit is recorded in PR #2; no merge until renewed human acceptance.
+
 Optional hour/day filters and single-pattern inspection are deferred. Date ranges are inclusive start/exclusive end and apply to every candle in each window. Bounded V1 imports and catalog queries avoid unbounded resource usage. Exact duplicate comparison includes close_time, OHLC and optional volume/spread. Numeric values exceeding storage precision are rejected rather than rounded silently.
 
 ## Implementation sequence

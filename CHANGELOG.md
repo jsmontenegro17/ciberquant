@@ -1,6 +1,8 @@
 # Changelog
 
 ## [0.3.0-dev] - Unreleased
+### Fixed
+- Human semantic QA: catalog statistics use bullish/bearish candle-direction fields without legacy aliases; distinguish candle color from future binary trade outcomes. Mathematical results unchanged.
 ### Added
 - REQ-003 broker-aware immutable candle identity, import provenance and migration 003.
 - ADMIN-only atomic CSV ingestion with UTC/Decimal validation, limits, duplicate/conflict handling and audit events.

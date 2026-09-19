@@ -31,6 +31,7 @@ REQ-001 is the bootstrap exception. `main` was created from the validated REQ-00
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
+REQ-003 semantic review correction: catalog statistics use bullish/bearish direction names, not trade-outcome names. C/P/D, counts and probabilities remain unchanged. API contract regression and future BinaryOutcome boundary documented; correction CI is tracked in PR #2. Human acceptance remains pending.
 REQ-003: QA, Human Acceptance PENDING. Implementation CI 35456931568 at c117822487802b42544f01b28d29123a61aab04d PASS; final-head checks in PR #2. REQ-001/REQ-002: DONE. New quant behavior is descriptive only, not strategy recommendations. No merge until separate human acceptance.
 
 ## Next milestones

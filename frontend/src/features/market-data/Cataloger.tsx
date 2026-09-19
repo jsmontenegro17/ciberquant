@@ -21,7 +21,7 @@ export function Cataloger() {
   };
   return <div>
     <section className="panel formPanel"><h2>Candle Cataloger</h2>
-      <p>Observed next-candle distribution. C = bullish, P = bearish, D = exact doji. These are candle colors, not trading signals.</p>
+      <p>Observed next-candle distribution. C = bullish candle, P = bearish candle, D = exact doji. These describe open → close, not binary trade wins or trading signals.</p>
       <p>Historical frequency does not establish causality, independence, economic advantage or future profitability. Overlapping windows may be autocorrelated.</p>
       <Failure error={coverage.error} />
       {coverage.isPending && <p>Loading datasets…</p>}
@@ -49,7 +49,7 @@ export function Cataloger() {
       <dl className="grid compact">{Object.entries({ "Candles examined": analysis.data.candles_examined, "Eligible windows": analysis.data.eligible_windows, "Gap windows skipped": analysis.data.windows_skipped_due_to_gaps, "Doji windows skipped": analysis.data.windows_skipped_due_to_doji }).map(([label, n]) => <div key={label}><dt>{label}</dt><dd>{n}</dd></div>)}</dl>
       {analysis.data.patterns.length === 0 && <p>No eligible windows in this range.</p>}
       <div className="tableWrap"><table><thead><tr>{["Pattern", "Samples", "Next C", "Next P", "Next D", "C %", "P %", "D %", "First observation (UTC)", "Last observation (UTC)", "Distinct days"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>
-        {analysis.data.patterns.map(p => <tr key={p.pattern}><td>{p.pattern}</td><td>{p.sample_size}{p.sample_size < 30 && <small className="sampleWarning">Small sample</small>}</td><td>{p.next_call_count}</td><td>{p.next_put_count}</td><td>{p.next_doji_count}</td><td>{percent(p.next_call_probability)}</td><td>{percent(p.next_put_probability)}</td><td>{percent(p.next_doji_probability)}</td><td>{p.first_observation}</td><td>{p.last_observation}</td><td>{p.distinct_days}</td></tr>)}
+        {analysis.data.patterns.map(p => <tr key={p.pattern}><td>{p.pattern}</td><td>{p.sample_size}{p.sample_size < 30 && <small className="sampleWarning">Small sample</small>}</td><td>{p.next_bullish_count}</td><td>{p.next_bearish_count}</td><td>{p.next_doji_count}</td><td>{percent(p.next_bullish_probability)}</td><td>{percent(p.next_bearish_probability)}</td><td>{percent(p.next_doji_probability)}</td><td>{p.first_observation}</td><td>{p.last_observation}</td><td>{p.distinct_days}</td></tr>)}
       </tbody></table></div><p>Small sample: fewer than 30 observations; a display reminder only, not a statistical validity threshold.</p>
     </section>}
   </div>;

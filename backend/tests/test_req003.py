@@ -151,7 +151,7 @@ def test_broker_otc_source_timeframe_symbol_isolation(harness):
     result = client.get("/api/v1/cataloger/patterns", params=query(pattern_length=3)).json()
     assert result["candles_examined"] == 30
     assert result["eligible_windows"] == 24 and result["windows_skipped_due_to_gaps"] == 3
-    assert next(p for p in result["patterns"] if p["pattern"] == "CCC")["next_put_count"] == 6
+    assert next(p for p in result["patterns"] if p["pattern"] == "CCC")["next_bearish_count"] == 6
     for change in variants[:-1]:
         separate = client.get("/api/v1/cataloger/patterns", params=query(**change)).json()
         assert [p["pattern"] for p in separate["patterns"]] == ["PPP"]
@@ -165,15 +165,50 @@ def fixture_candles():
     return CSVMarketDataProvider(EXAMPLES / "synthetic_regular.csv", Dataset(**META)).get_historical_candles()
 
 
+def test_catalog_api_direction_contract_without_legacy_aliases(harness):
+    client, _, _ = harness
+    assert upload(client, (EXAMPLES / "synthetic_regular.csv").read_bytes()).json()["status"] == "COMPLETED"
+    response = client.get("/api/v1/cataloger/patterns", params=query(pattern_length=3))
+    assert response.status_code == 200
+    patterns = response.json()["patterns"]
+    # Exact allowlist proves the response contains every direction field and no legacy aliases.
+    expected_keys = {
+        "pattern",
+        "pattern_length",
+        "sample_size",
+        "next_bullish_count",
+        "next_bearish_count",
+        "next_doji_count",
+        "next_bullish_probability",
+        "next_bearish_probability",
+        "next_doji_probability",
+        "first_observation",
+        "last_observation",
+        "distinct_days",
+    }
+    assert patterns and all(set(pattern) == expected_keys for pattern in patterns)
+    ccc = next(pattern for pattern in patterns if pattern["pattern"] == "CCC")
+    assert ccc["sample_size"] == 6
+    assert [ccc[key] for key in ("next_bullish_count", "next_bearish_count", "next_doji_count")] == [0, 6, 0]
+    assert [ccc[key] for key in ("next_bullish_probability", "next_bearish_probability", "next_doji_probability")] == ["0", "1", "0"]
+    # Mixed outcomes retain fractional probabilities as Decimal strings, too.
+    response = client.get("/api/v1/cataloger/patterns", params=query(pattern_length=2))
+    assert response.status_code == 200
+    cc = next(pattern for pattern in response.json()["patterns"] if pattern["pattern"] == "CC")
+    assert cc["sample_size"] == 12
+    assert [cc[key] for key in ("next_bullish_count", "next_bearish_count", "next_doji_count")] == [6, 6, 0]
+    assert [cc[key] for key in ("next_bullish_probability", "next_bearish_probability", "next_doji_probability")] == ["0.5", "0.5", "0"]
+
+
 def test_manual_quant_regression():
     result = analyze(fixture_candles(), 3)
     expected = {"CCC": (6, 0, 6, 0), "CCP": (6, 0, 0, 6), "CPD": (4, 4, 0, 0), "DCC": (4, 4, 0, 0), "PDC": (4, 4, 0, 0)}
     assert {
-        p["pattern"]: (p["sample_size"], p["next_call_count"], p["next_put_count"], p["next_doji_count"]) for p in result["patterns"]
+        p["pattern"]: (p["sample_size"], p["next_bullish_count"], p["next_bearish_count"], p["next_doji_count"]) for p in result["patterns"]
     } == expected
     for p in result["patterns"]:
         assert p["distinct_days"] == 2
-        assert sum(p[k] for k in ("next_call_probability", "next_put_probability", "next_doji_probability")) == Decimal(1)
+        assert sum(p[k] for k in ("next_bullish_probability", "next_bearish_probability", "next_doji_probability")) == Decimal(1)
     excluded = analyze(fixture_candles(), 3, False)
     assert excluded["eligible_windows"] == 6 and excluded["windows_skipped_due_to_doji"] == 18
     assert [p["pattern"] for p in excluded["patterns"]] == ["CCC"]

@@ -18,8 +18,8 @@ export interface Candle extends Dataset {
 export interface CatalogFilter extends Dataset { start: string; end: string; pattern_length: number; include_doji: boolean }
 export interface Pattern {
   pattern: string; pattern_length: number; sample_size: number;
-  next_call_count: number; next_put_count: number; next_doji_count: number;
-  next_call_probability: string; next_put_probability: string; next_doji_probability: string;
+  next_bullish_count: number; next_bearish_count: number; next_doji_count: number;
+  next_bullish_probability: string; next_bearish_probability: string; next_doji_probability: string;
   first_observation: string; last_observation: string; distinct_days: number;
 }
 export interface CatalogResult {
@@ -44,4 +44,3 @@ export const marketApi = {
   })),
   analyze: (filters: CatalogFilter) => api<CatalogResult>("/cataloger/patterns?" + params(filters)),
 };
-

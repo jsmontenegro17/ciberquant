@@ -10,10 +10,20 @@ Engine `app/cataloger/engine.py` is pure and has no DB dependency. Input must be
 
 include_doji=false excludes any D in the entire observation, including outcome. Filtering does not delete D candles then bridge their timestamps. Start is inclusive, end exclusive, applies to all candles via open_time. No hour/day filter or implicit local timezone in V1.
 
-## Results
+## Candle Direction vs Binary Outcome
+
+C = bullish candle (close > open), P = bearish candle (close < open), D = exact doji (close == open). These codes describe one candle's open → close only. They do not mean a successful CALL or PUT trade.
+
+Example: binary entry price 100; next candle opens at 102 and closes at 101. The candle is bearish/P because 101 < 102, but a PUT entered at 100 and expiring at 101 loses. Therefore P candle ≠ PUT win and C candle ≠ CALL win.
+
+The future REQ-004 Backtest Engine must not interpret `next_bullish_probability` as CALL win probability or `next_bearish_probability` as PUT win probability. It must calculate the real outcome against entry/expiry prices and timestamps, with explicit trade direction.
+
+Conceptual future `BinaryOutcome`: `entry_time`, `entry_price`, `expiry_time`, `expiry_price`, `direction` (CALL/PUT), `result` (WIN/LOSS/DRAW). This is an architecture boundary only, not an implementation or authorization to start REQ-004. See [Backtesting](BACKTESTING.md).
+
+## API fields
 
 GET /api/v1/cataloger/patterns requires dataset/start/end; pattern_length defaults3; include_doji defaults true. Authenticated users may read. Returns requested metadata and lexicographically ordered patterns:
-sample_size, next_call/put/doji_count and probability (Decimal string count/sample_size), first/last_observation (outcome open_time UTC), distinct_days (UTC outcome dates).
+sample_size; next_bullish_count, next_bearish_count, next_doji_count; next_bullish_probability, next_bearish_probability, next_doji_probability (Decimal strings count/sample_size); first/last_observation (outcome open_time UTC); distinct_days (UTC outcome dates). Only these direction names are exposed; no legacy trade-direction aliases in this unreleased contract.
 
 General counts: candles_examined; eligible_windows (after gap/doji exclusions); windows_skipped_due_to_gaps; windows_skipped_due_to_doji. Gap exclusion takes precedence. For n candles and length L, candidates=max(0,n-L); eligible+gap-skipped+doji-skipped=candidates. Pattern aggregates sum to eligible_windows.
 
