@@ -1,0 +1,14 @@
+# LIVE-001 — Provider operations and recovery
+
+Priority: P2. Separate from REQ-007 automated acceptance.
+
+Accepted nonblocking debt for v0.7.0. IQ protocol is unofficial; the pinned SHA cannot guarantee future external compatibility. Operational monitoring and a new real PRACTICE smoke are required after relevant provider/upstream changes. Prolonged live soak tests remain pending; digital remains unsupported. Optional real MT5 smoke remains unperformed and does not block this accepted release.
+
+- Real terminal smoke requires a configured Windows MT5 terminal; automated fake-SDK checks are not broker connectivity evidence.
+- IQ Option real PRACTICE/OTC integration is implemented and locally smoke-verified in REQ-007. Future debt: unofficial protocol drift, digital product support, deployment supervision and longer soak testing. Never silently substitute MT5. See the dated IQ smoke report; mandatory IQ integration is not deferred.
+- Single worker, synchronous provider interface: IQ has bounded asynchronous transport calls; isolated subprocess supervision for other SDKs, distributed sidecars, richer exchange calendars and versioned restart checkpoints remain future operations work.
+- Canonical histories are bounded by the existing source cap; at cap the subscription fails closed instead of silently truncating recursive state. Versioned checkpoints remain QUANT-001.
+- Interrupted paper observations become UNAVAILABLE on recovery; no retrospective reconstructed LIVE fills. Conflict subscriptions require operator investigation and worker restart, never raw candle overwrite.
+- Event retention, watchlist pagination beyond100 in UI, and large-scale SSE fanout are future capacity work. Backend watchlists/items/events are paginated; UI items/events and dataset/strategy/version selectors are paginated.
+
+Existing SEC-001, DATA-001, QUANT/BACKTEST/VALIDATION debts and dependency/bundle warnings are unchanged. No automatic trading is permitted.

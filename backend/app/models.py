@@ -277,3 +277,101 @@ def guard_segment(mapper, connection, target):
 
 for _model in (ValidationRun, ValidationSegment):
     event.listen(_model, 'before_delete', reject_research_mutation)
+
+
+class ScannerWatchlist(Base):
+    __tablename__ = 'scanner_watchlists'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    enabled: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ScannerWatchItem(Base):
+    __tablename__ = 'scanner_watch_items'
+    __table_args__ = (UniqueConstraint('watchlist_id', 'subscription_key', 'strategy_version_id', name='uq_scanner_item'),
+                     CheckConstraint("provider IN ('REPLAY','MT5','IQOPTION')", name='ck_scanner_provider'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
+    watchlist_id: Mapped[int] = mapped_column(ForeignKey('scanner_watchlists.id'))
+    strategy_version_id: Mapped[int] = mapped_column(ForeignKey('strategy_versions.id'))
+    provider: Mapped[str] = mapped_column(String(20))
+    dataset: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    subscription_key: Mapped[str] = mapped_column(String(64))
+    research_mode: Mapped[bool] = mapped_column(default=False)
+    research_payout: Mapped[Decimal | None] = mapped_column(Numeric(12, 6))
+    research_expiry: Mapped[int | None] = mapped_column(Integer)
+    enabled: Mapped[bool] = mapped_column(default=True)
+    state: Mapped[str] = mapped_column(String(40), default='PROVIDER_DOWN')
+    latest: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class LiveSubscription(Base):
+    __tablename__ = 'live_subscriptions'
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(20))
+    dataset: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    status: Mapped[str] = mapped_column(String(30), default='DISCONNECTED')
+    health: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'), default=dict)
+    snapshot: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class LiveObservation(Base):
+    __tablename__ = 'live_observations'
+    __table_args__ = (UniqueConstraint('provider','candle_id','mode','phase', name='uq_live_observation'),
+                     CheckConstraint("mode IN ('LIVE','REPLAY') AND phase IN ('BOOTSTRAP','OBSERVED')", name='ck_live_provenance'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    candle_id: Mapped[int] = mapped_column(ForeignKey('candles.id'))
+    provider: Mapped[str] = mapped_column(String(20))
+    mode: Mapped[str] = mapped_column(String(10))
+    phase: Mapped[str] = mapped_column(String(20))
+    provider_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ScannerEvent(Base):
+    __tablename__ = 'scanner_events'
+    __table_args__ = (UniqueConstraint('watch_item_id','strategy_version_id','signal_time','state', name='uq_scanner_event'),
+                     CheckConstraint("state IN ('MATCH','NO_MATCH','UNAVAILABLE','STALE','INSUFFICIENT_HISTORY','PROVIDER_DOWN')", name='ck_scanner_event_state'),
+                     CheckConstraint("mode IN ('LIVE','REPLAY')", name='ck_scanner_event_mode'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), index=True)
+    watch_item_id: Mapped[int] = mapped_column(ForeignKey('scanner_watch_items.id'))
+    strategy_version_id: Mapped[int] = mapped_column(ForeignKey('strategy_versions.id'))
+    dataset: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    scanner_engine_version: Mapped[str] = mapped_column(String(50))
+    feature_engine_version: Mapped[str] = mapped_column(String(50))
+    strategy_dsl_version: Mapped[str] = mapped_column(String(50))
+    live_data_engine_version: Mapped[str] = mapped_column(String(50))
+    signal_candle_id: Mapped[int] = mapped_column(ForeignKey('candles.id'))
+    signal_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    state: Mapped[str] = mapped_column(String(30))
+    mode: Mapped[str] = mapped_column(String(10))
+    direction: Mapped[str] = mapped_column(String(10))
+    signal_context: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    validation_state_snapshot: Mapped[str] = mapped_column(String(30))
+    current_payout: Mapped[Decimal | None] = mapped_column(Numeric(12, 6))
+    evidence: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    provider_timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ScannerOutcome(Base):
+    __tablename__ = 'scanner_outcomes'
+    __table_args__ = (UniqueConstraint('scanner_event_id', name='uq_scanner_outcome'),
+                     CheckConstraint("result IN ('WIN','LOSS','DRAW','UNAVAILABLE','GAP')", name='ck_scanner_outcome'),)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    scanner_event_id: Mapped[int] = mapped_column(ForeignKey('scanner_events.id'))
+    result: Mapped[str] = mapped_column(String(20))
+    evidence: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+for _model in (LiveObservation, ScannerEvent, ScannerOutcome):
+    event.listen(_model, 'before_update', reject_research_mutation)
+    event.listen(_model, 'before_delete', reject_research_mutation)

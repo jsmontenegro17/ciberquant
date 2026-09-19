@@ -4,6 +4,8 @@ Plataforma de investigación cuantitativa para trading, con foco inicial en opci
 
 ## Inicio rápido
 
+REQ-007 incluye integración real IQ Option PRACTICE de solo lectura (no oficial): [configuración y revisión fijada](docs/providers/IQOPTION_EXPERIMENTAL.md), [evidencia REGULAR/OTC](docs/providers/IQOPTION_SMOKE_2026-09-19.md). Requiere dependencia opcional y worker local; las credenciales nunca se guardan en Git ni en imágenes Docker.
+
 1. Copia `.env.example` a `.env`.
 2. Ejecuta `docker compose up --build`.
 3. API: http://localhost:8000/docs · Frontend: http://localhost:5173.

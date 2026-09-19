@@ -1,5 +1,15 @@
 # Testing
 
+## REQ-007 live scanner
+
+Final human QA: `test_paper_config.py` covers the four mode/provider combinations and prevents cross-mode fallback for missing assumptions. `test_paper_precedence_with_real_validation_and_observed_outcome` repeats all four cases against actual persisted historical84%/1-bar PASS, research90%/3-bar inputs and provider87%/79%/unavailable, verifying immutable evidence sources, no premature result, exact next-open/expiry and Decimal P&L. Frontend tests distinguish active provider payout from unused research fallback and label historical84%/1-bar evidence as reference only.
+
+`python -m pytest` covers exact 10000-candle incremental/batch feature equality, Replay DSL timestamps and frozen binary paper equality, forming/duplicate/stale/disconnect/conflict, private ownership, five-axis dataset rejection, real persisted PASS→FAIL degradation, payout warning, shared subscriptions/reconnect, optional read-only MT5 fake SDK and migration006 provenance/constraints/round-trip. PostgreSQL cases require `CI_MARKET_DATA_POSTGRES_TESTS=true`; local SQLite skips are explicit, not PostgreSQL acceptance.
+
+Frontend: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; `npx playwright test` now includes Replay worker-backed scanner acceptance with an actually computed historical PASS fixture. Isolated temporary DB/users/worker process; no production sample strategy seeded. Screenshots `req007-scanner-desktop.png` / `req007-scanner-tablet.png` in ignored test-results.
+
+Benchmark: `PYTHONPATH=.` then `python scripts/benchmark_live.py` from backend. Three datasets ×10000 closed candles ×4 strategies; event decisions and evaluations/sec plus mean feature-update latency. Excludes persistence/network/JSON; not an SLA. MT5 smoke remains optional. Real IQ PRACTICE smoke is mandatory for REQ-007: [dated evidence](providers/IQOPTION_SMOKE_2026-09-19.md). Install `requirements-iqoption.txt` to run `test_iqoption.py` (fake WebSocket/Decimal/metadata/PRACTICE/no orders/secret redaction/pagination/clock). CI installs the pinned dependency but uses only fake IQ and Replay, never broker credentials or a live feed. Local real smoke: `python -m scripts.smoke_iqoption --product binary --seconds 150`, with ignored backend `.env`.
+
 ## REQ-006 validation
 
 Protocol/API/migration tests cover candle-based cuts, four folds, computational seal spy and null TEST child, explicit single reveal, atomic failure, exact v0.5.0 simulation golden hashes (expiry1/5/60, both overlaps), deterministic manual-block interval, PASS/FAIL/INCONCLUSIVE fixtures, real persisted degradation, backfill replay, reuse refreshed at reveal, immutability and private ownership. Migration005 runs on PostgreSQL in CI with JSONB/FK/constraints/uniqueness and concurrent reveal (one succeeds, one409). SQLite is not locking evidence.

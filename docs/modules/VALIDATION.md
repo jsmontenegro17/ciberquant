@@ -1,5 +1,5 @@
 # Validation
-REQ-006 implements cq-validation-v1, historical validation of one immutable private strategy version. [VALIDATION_PROTOCOL](../VALIDATION_PROTOCOL.md) freezes exact boundaries, statistical gates and limitations. Live/paper evidence is separate future scope.
+REQ-006 implements cq-validation-v1, historical validation of one immutable private strategy version. [VALIDATION_PROTOCOL](../VALIDATION_PROTOCOL.md) freezes exact boundaries, statistical gates and limitations. REQ-007 live/paper evidence is separately stored, never historical BacktestTrade evidence or an amendment of validation PASS. Scanner rechecks exact-dataset/global state each cycle; DEGRADED suspends normal items. Current provider payout is displayed separately from the compatible PASS assumption.
 
 An owned TESTING StrategyVersion can create a fixed60/20/20 plan. TRAIN/VALIDATION/four folds use the same cq-binary-backtest-v1 event loop and origin-anchored feature rows, computed once before the sealed boundary. TEST is not simulated or persisted until explicit reveal. No strategy optimization, thresholds search or rankings. No changes to frozen feature/DSL/outcome mathematics.
 

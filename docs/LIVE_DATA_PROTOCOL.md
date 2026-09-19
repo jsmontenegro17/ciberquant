@@ -1,0 +1,15 @@
+# cq-live-data-v1
+
+Frozen by REQ-007 Human Acceptance PASS on2026-09-19. Incompatible semantic changes require a new engine identifier.
+
+IQ-specific normalization/clock/stream/payout contract and upstream pin: [IQ provider](providers/IQOPTION_EXPERIMENTAL.md). Real PRACTICE/OTC evidence: [dated smoke](providers/IQOPTION_SMOKE_2026-09-19.md). Raw IQ quantity is not tick volume; keep tick_volume/spread null. Missing real provider clock fails closed. Streaming forming is ephemeral; closed values are confirmed against history before persistence/evaluation.
+
+Read-only providers expose assets, canonical bootstrap and normalized ProviderFrame (closed candles, optional ephemeral forming candle, payout, market status, clock/status). No order API. Full identity source/broker/symbol/market_type/timeframe is mandatory. No fallback/substitution between providers or OTC/REGULAR. Replay carries REPLAY mode and frozen logical timestamps, never pretends to be a live broker. Initial replay prefix is bootstrap only, not retroactive events; subsequent candles emitted one by one at1x/10x/MAX development speeds.
+
+Closed candles must pass original Decimal/UTC/OHLC validation and close_time<=provider clock. FORMING never persists in raw candles nor updates features/DSL. CSV import provenance remains intact; separate immutable live observation provenance links raw candle IDs, provider, receive/server clocks and LIVE/REPLAY mode. Exact duplicates link existing candles; conflicting values stop the subscription as DATA_CONFLICT, never overwrite. Bootstrap provenance is distinguished from newly observed closes.
+
+The current forming display is a mutable, replaceable snapshot cache, not historical candle storage. API reads expire it with the worker heartbeat; it cannot be queried as raw or backtest input. Historical evidence retains only closed candles/events/outcomes.
+
+One single-node worker process owns shared provider+dataset subscriptions, persists owned state/events in PostgreSQL and publishes SSE through API reads. No loops/ingestion inside HTTP requests. Worker singleton lock prevents competing workers on PostgreSQL. Reconnect uses bounded exponential retry; restart bootstraps from canonical origin and skips intervening historical signals (no retrospective LIVE matches). Incremental feature state is in-memory, not a QUANT-001 historical checkpoint. Closed rows are evaluated once; each distinct new closed candle can have its own MATCH, never duplicate polls of the same candle.
+
+Stale: provider clock minus last closed close_time > timeframe duration * configured stale factor (default2). Worker receive heartbeat freshness is independently checked using local UTC, including when a process dies. Clock drift warning uses provider clock minus local receive UTC; never rewrite provider candle timestamps. Replay uses logical time for candle staleness and wall time for heartbeat; no broker clock claim. MT5 SDK has no authoritative server clock: mark LOCAL_UTC_PROXY, report delta unavailable, do not fabricate drift evidence.

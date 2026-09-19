@@ -5,7 +5,9 @@ from .api import market_data, features, research
 from .market_data.upload_limit import UploadLimitMiddleware
 from .strategies.request_limit import ResearchRequestLimit
 from .api import validation
-app=FastAPI(title='CiberQuant API',version='0.6.0')
+from .api import scanner
+app=FastAPI(title='CiberQuant API',version='0.7.0')
+app.include_router(scanner.router, prefix='/api/v1')
 app.include_router(validation.router, prefix='/api/v1')
 app.include_router(research.router, prefix='/api/v1')
 app.add_middleware(UploadLimitMiddleware)

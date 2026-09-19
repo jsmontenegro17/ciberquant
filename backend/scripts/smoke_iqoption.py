@@ -1,0 +1,225 @@
+"""Explicit local PRACTICE-only IQ smoke. No secrets/raw profile/IDs in output.
+
+Run from backend: python -m scripts.smoke_iqoption --product binary --seconds 150
+Uses an isolated temporary SQLite scanner database, never the user's accounts/ledger.
+"""
+
+import argparse
+import json
+import time
+import re
+from datetime import datetime, timezone
+from decimal import Decimal
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from sqlalchemy import create_engine, select, func
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
+from app.config import settings
+from app.db import Base
+from app.models import User, Strategy, ScannerWatchlist, ScannerWatchItem, ScannerEvent, LedgerEntry
+from app.strategies.schemas import VersionCreate
+from app.strategies.repository import create_version
+from app.strategies.dsl import digest
+from app.live.iqoption import IQOptionReadOnlyProvider, UPSTREAM_SHA
+from app.live.runtime import ScannerRuntime
+
+
+def emit(value):
+    print(json.dumps(value, default=str), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--product", choices=["turbo", "binary"], default=settings.iqoption_product)
+    parser.add_argument("--seconds", type=int, default=150)
+    args = parser.parse_args()
+    if not 65 <= args.seconds <= 300:
+        raise SystemExit("Smoke duration must be65..300 seconds")
+    if not settings.enable_iqoption_experimental or settings.iqoption_balance != "PRACTICE":
+        raise SystemExit("IQ smoke requires explicit flag and PRACTICE")
+    provider = None
+    runtime = None
+    db_engine = None
+    try:
+        provider = IQOptionReadOnlyProvider(
+            email=settings.iqoption_email.get_secret_value(),
+            password=settings.iqoption_password.get_secret_value(),
+            ssid=settings.iqoption_ssid.get_secret_value(),
+            balance=settings.iqoption_balance,
+            product=args.product,
+            timeout=settings.iqoption_timeout_seconds,
+        )
+        emit(
+            {
+                "stage": "AUTH",
+                "result": "PASS",
+                "mode": "PRACTICE",
+                "profile_verified": provider.status_metadata["profile_verified"],
+                "upstream_sha": UPSTREAM_SHA,
+                "product": args.product,
+            }
+        )
+        states = provider.asset_status()
+        datasets = provider.assets()
+        selected = []
+        emit(
+            {
+                "stage": "DISCOVERY",
+                "REGULAR": sum(a["market_type"] == "REGULAR" for a in states),
+                "OTC": sum(a["market_type"] == "OTC" for a in states),
+                "open_REGULAR": sum(a["market_type"] == "REGULAR" and a["open"] for a in states),
+                "open_OTC": sum(a["market_type"] == "OTC" and a["open"] for a in states),
+            }
+        )
+        for market in ("REGULAR", "OTC"):
+            candidates = [a for a in states if a["market_type"] == market and a["open"]]
+            if not candidates:
+                emit({"stage": "ASSET", "market_type": market, "result": "BLOCKED_EXTERNAL", "reason": "NO " + market + " CURRENTLY OPEN"})
+                if market == "OTC":
+                    return 2
+                continue
+            chosen = next((a for a in candidates if a["symbol"] in ("EURUSD", "EURUSD-OTC")), candidates[0])
+            dataset = next(d for d in datasets if d.symbol == chosen["symbol"])
+            rows = provider.recent_closed(dataset, 20)
+            if len(rows) < 20:
+                raise ValueError("IQ_SMOKE_INSUFFICIENT_CANDLES")
+            # This smoke freezes its own explicit canonical origin. Production requires env origin.
+            provider._origin = rows[0].open_time
+            history = provider.bootstrap(dataset)
+            selected.append(dict(dataset=dataset, last=history[-1].open_time, forming=False, closed=False))
+            emit(
+                {
+                    "stage": "HISTORY",
+                    "dataset": dataset.model_dump(),
+                    "count": len(history),
+                    "canonical_origin": history[0].open_time,
+                    "result": "PASS",
+                }
+            )
+        otc = next(x for x in selected if x["dataset"].market_type == "OTC")
+        with TemporaryDirectory(prefix="cq-iq-smoke-") as folder:
+            db_engine = create_engine("sqlite:///" + str(Path(folder) / "smoke.db"), poolclass=NullPool)
+            Base.metadata.create_all(db_engine)
+            factory = sessionmaker(bind=db_engine)
+            with factory() as session:
+                user = User(name="Read-only smoke", email="smoke@invalid.local", password_hash="no-login")
+                session.add(user)
+                session.flush()
+                strategy = Strategy(user_id=user.id, name="IQ real read-only smoke", status="TESTING")
+                session.add(strategy)
+                session.commit()
+                definition = VersionCreate(
+                    trade_direction="CALL",
+                    indicator_specs=[{"type": "EMA", "period": 3}],
+                    condition_tree={
+                        "left": {"type": "FIELD", "field": "close", "bars_ago": 0},
+                        "operator": "GT",
+                        "right": {"type": "NUMBER", "value": "0"},
+                    },
+                )
+                version = create_version(session, strategy.id, user.id, definition)
+                watch = ScannerWatchlist(user_id=user.id, name="IQ smoke")
+                session.add(watch)
+                session.flush()
+                dataset = otc["dataset"].model_dump()
+                session.add(
+                    ScannerWatchItem(
+                        user_id=user.id,
+                        watchlist_id=watch.id,
+                        strategy_version_id=version.id,
+                        provider="IQOPTION",
+                        dataset=dataset,
+                        subscription_key=digest(dict(provider="IQOPTION", dataset=dataset)),
+                        research_mode=True,
+                        research_payout=Decimal("84"),
+                        research_expiry=1,
+                    )
+                )
+                session.commit()
+            runtime = ScannerRuntime(factory, lambda *args: provider)
+            # Runtime bootstraps once from the same frozen OTC origin, then evaluates actual new closes.
+            start = time.monotonic()
+            while time.monotonic() - start < args.seconds:
+                runtime.cycle()
+                with factory() as session:
+                    event = session.scalar(select(ScannerEvent).order_by(ScannerEvent.id.desc()))
+                    if event:
+                        otc["closed"] = True
+                        emit(
+                            {
+                                "stage": "SCANNER",
+                                "signal_time": event.signal_time,
+                                "market_type": event.dataset["market_type"],
+                                "state": event.state,
+                                "mode": event.mode,
+                                "payout": event.current_payout,
+                                "payout_source": event.evidence["payout_source"],
+                                "expiry_source": event.evidence["expiry_source"],
+                                "feature_fields": list(event.evidence["features"]),
+                                "result": "PASS",
+                            }
+                        )
+                for item in selected:
+                    frame = provider.poll(item["dataset"])
+                    item["forming"] |= frame.forming is not None
+                    if any(c.open_time > item["last"] for c in frame.closed):
+                        item["closed"] = True
+                if all(x["forming"] and x["closed"] for x in selected) and event is not None:
+                    break
+                time.sleep(2)
+            for item in selected:
+                emit(
+                    {
+                        "stage": "REALTIME",
+                        "symbol": item["dataset"].symbol,
+                        "market_type": item["dataset"].market_type,
+                        "forming": item["forming"],
+                        "new_closed": item["closed"],
+                        "result": "PASS" if item["forming"] and item["closed"] else "FAIL",
+                    }
+                )
+            with factory() as session:
+                evaluated = session.scalar(select(func.count()).select_from(ScannerEvent)) > 0
+                assert session.scalar(select(func.count()).select_from(LedgerEntry)) == 0
+            success = evaluated and all(x["forming"] and x["closed"] for x in selected)
+            # Windows must release pooled SQLite handles before temporary-directory cleanup.
+            runtime.close()
+            runtime = None
+            provider.close()
+            db_engine.dispose()
+            db_engine = None
+            emit(
+                {
+                    "stage": "FINAL",
+                    "date": datetime.now(timezone.utc),
+                    "product": args.product,
+                    "capabilities": provider.capabilities,
+                    "orders_sent": 0,
+                    "result": "PASS" if success else "FAIL",
+                    "regular_tested": any(x["dataset"].market_type == "REGULAR" for x in selected),
+                }
+            )
+            return 0 if success else 1
+    except Exception as exc:
+        # Never print traceback/remote error text, which can include authentication/profile data.
+        code = str(exc) if re.fullmatch(r"IQ_[A-Z0-9_]{1,80}", str(exc)) else "IQ_SMOKE_FAILED"
+        emit({"stage": "FINAL", "result": "FAIL", "error_type": type(exc).__name__, "error_code": code, "orders_sent": 0})
+        return 1
+    finally:
+        if runtime:
+            try:
+                runtime.close()
+            except Exception:
+                pass
+        if provider:
+            try:
+                provider.close()
+            except Exception:
+                pass
+        if db_engine:
+            db_engine.dispose()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

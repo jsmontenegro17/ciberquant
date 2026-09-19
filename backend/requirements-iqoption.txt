@@ -1,0 +1,4 @@
+# Optional local IQ worker / fake transport tests. Never install a floating branch.
+iqoptionapi[aio] @ git+https://github.com/victalejo/iqoptionapi.git@acac6e08333466ae188c7dfa7fd2a03174e34ca2
+# Upstream uses websockets.asyncio.client (not present in its declared minimum12).
+websockets>=14,<16

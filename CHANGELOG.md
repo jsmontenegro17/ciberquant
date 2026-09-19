@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0] - 2026-09-19
+### Acceptance
+- REQ-007 DONE; Human Acceptance PASS on approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5. No P0/P1 within accepted scope. cq-live-data-v1 / cq-scanner-v1 frozen; existing four quant engines remain frozen.
+- Real IQ PRACTICE binary REGULAR/OTC smoke accepted:85% provider payout, real LIVE scanner MATCH, zero orders and zero ledger modifications. No auto-trading, REAL fallback or digital substitution. REQ-008 not started.
+### Fixed
+- REQ-007 human QA: explicit mode-aware paper-config precedence. Research uses its own expiry/payout fallback; normal mode retains compatible validation assumptions; current provider payout overrides either fallback with auditable source labels. UI distinguishes active paper settings, research fallback and historical reference. No frozen engine/version change.
+### Added
+- REQ-007 cq-live-data-v1 / cq-scanner-v1 read-only providers, Replay/Mock, optional terminal-local MT5 and real PRACTICE-only IQ Option with pinned async transport, dynamic assets/product payout, Decimal candles and guarded read-only wire protocol. IQ defaults disabled; real REGULAR/OTC smoke and OTC scanner PASS on2026-09-19.
+- Dedicated worker and shared full-identity subscriptions, canonical exact incremental frozen features/DSL, configurable stale/heartbeat/drift and bounded reconnect.
+- Exact-dataset historical compatibility, DEGRADED suspension, independent live payout warning, private watchlists, immutable events and next-open paper outcomes without financial writes.
+- Migration006 live provenance/idempotence/conflict protection, scanner APIs/SSE and `/scanner` workspace with REPLAY labels, health/context and paper history.
+- Replay quant regressions, optional SDK isolation, migration and browser acceptance, synthetic multi-dataset benchmark. Real broker smoke separate; LIVE-001 records future operations scope.
+- Existing pagination buttons explicitly avoid form submission when used inside scanner configuration.
+
 ## [0.6.0] - 2026-09-19
 ### Acceptance
 - REQ-006 DONE; Human Acceptance PASS on approved HEAD3e48ad684cfc471010c690c6820ef9dcc469c664. No P0/P1 within the accepted scope.

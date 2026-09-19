@@ -11,17 +11,34 @@ from app.db import Base
 from app.api.deps import db
 from app.api.auth import pwd
 from app.models import User, TradingAccount, RiskProfile, LedgerEntry
-from dataclasses import asdict
+from dataclasses import asdict,replace
 from app.models import Candle
 from feature_fixture import series
 from backtest_fixture import candles as binary_candles
 from validation_fixture import data as validation_candles
+from validation_fixture import request as validation_request
+from backtest_fixture import definition,leaf
+from app.models import Strategy
+from app.strategies.repository import create_version
+from app.validation.repository import create as create_validation,reveal
+from app.config import settings
+from app.api import scanner as scanner_api
+from contextlib import asynccontextmanager
+import os
+import sys
+import subprocess
 
 test_directory = TemporaryDirectory(prefix="ciberquant-e2e-")
 engine = create_engine("sqlite:///" + str(Path(test_directory.name) / "qa.db"), connect_args={"check_same_thread": False})
 Base.metadata.create_all(engine)
 factory = sessionmaker(bind=engine)
+scanner_api.SessionLocal=factory
+settings.enable_replay_provider=True
 with factory() as s:
+    for index,candle in enumerate(validation_candles()):
+        values=asdict(replace(candle,source='SCANNER_FIXTURE',close=Decimal(99 if index==1490 else 101)))
+        values.pop('candle_id')
+        s.add(Candle(**values))
     for candle in validation_candles():
         values = asdict(candle)
         values.pop('candle_id')
@@ -65,6 +82,25 @@ with factory() as s:
             )
         )
     s.commit()
+    strategy=Strategy(user_id=user.id,name='Scanner validated fixture',status='TESTING')
+    s.add(strategy);s.commit()
+    version=create_version(s,strategy.id,user.id,definition(leaf(value='100')))
+    plan=create_validation(s,user.id,validation_request(strategy_version_id=version.id,dataset={'source':'SCANNER_FIXTURE','broker':'DEMO','symbol':'EURUSD','market_type':'REGULAR','timeframe':'1h'}))
+    assert reveal(s,user.id,plan.id).verdict=='PASS'
+
+
+@asynccontextmanager
+async def qa_lifespan(_app):
+    # Browser QA only: dedicated worker process, never an HTTP ingestion loop.
+    env={**os.environ,'DATABASE_URL':str(engine.url),'ENABLE_REPLAY_PROVIDER':'true','REPLAY_PREFIX_CANDLES':'1490','REPLAY_PAYOUT':'79','LIVE_POLL_SECONDS':'1','REPLAY_SPEED':'MAX'}
+    worker=subprocess.Popen([sys.executable,'-m','app.live.worker'],env=env,creationflags=subprocess.CREATE_NO_WINDOW if os.name=='nt' else 0)
+    try:yield
+    finally:
+        worker.terminate()
+        worker.wait(timeout=10)
+
+
+app.router.lifespan_context=qa_lifespan
 
 
 def test_db():

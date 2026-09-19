@@ -1,0 +1,21 @@
+import {test,expect} from '@playwright/test';
+test('validated Replay → NO_MATCH → MATCH → paper outcome → private history',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/login');await page.getByLabel('Email').fill('qa@example.com');await page.getByLabel('Password').fill('browser-test-only');await page.getByRole('button',{name:'Sign in'}).click();
+ await page.getByRole('link',{name:'Scanner',exact:true}).click();
+ await page.getByLabel('Watchlist name').fill('Browser Replay');await page.getByRole('button',{name:'Create watchlist',exact:true}).click();
+ await page.getByLabel('Existing dataset').selectOption({label:'SCANNER_FIXTURE / DEMO / EURUSD / REGULAR / 1h'});
+ await page.getByRole('combobox',{name:'Strategy',exact:true}).selectOption({label:'Scanner validated fixture · TESTING'});
+ await page.getByRole('combobox',{name:'Immutable version',exact:true}).selectOption({label:'v1 · HISTORICALLY_VALIDATED'});
+ await page.getByRole('button',{name:'Create watch item / start provider'}).click();
+ const watched=page.getByRole('region',{name:'Watched datasets'});
+ await expect(watched.getByText(/REPLAY MODE/)).toBeVisible();
+ await expect(page.getByRole('cell',{name:'NO_MATCH',exact:true})).toBeVisible({timeout:15000});
+ await expect(watched.getByText(/CONDITIONS MATCHED/)).toBeVisible({timeout:15000});
+ await expect(watched.getByText('PAYOUT BELOW VALIDATION ASSUMPTION')).toBeVisible();
+ await expect(page.getByText('REPLAY PAPER OBSERVATION · WIN',{exact:true}).first()).toBeVisible();
+ await page.screenshot({path:'test-results/req007-scanner-desktop.png',fullPage:true});
+ await page.setViewportSize({width:768,height:1024});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.screenshot({path:'test-results/req007-scanner-tablet.png',fullPage:true});
+ expect(errors).toEqual([]);
+});

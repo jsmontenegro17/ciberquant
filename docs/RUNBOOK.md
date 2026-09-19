@@ -1,5 +1,15 @@
 # Runbook
 
+## Read-only scanner (REQ-007)
+
+Real IQ Option local setup: [provider guide](providers/IQOPTION_EXPERIMENTAL.md). Install pinned `backend/requirements-iqoption.txt`, configure ignored `backend/.env` with PRACTICE credentials/product and an available canonical origin, and run the local worker against the API's PostgreSQL database. Default Docker image does not include the optional IQ SDK. Verify safely using `python -m scripts.smoke_iqoption --product binary --seconds 150` from backend; never paste credentials or run REAL/order operations. [Verified smoke](providers/IQOPTION_SMOKE_2026-09-19.md).
+
+Upgrade to migration006 before starting `python -m app.live.worker` from backend. For Docker Replay use `ENABLE_REPLAY_PROVIDER=true` in API/worker environments and `docker compose --profile scanner up --build`; default Compose leaves worker/profile and providers disabled. Worker waits for backend migration/health. PostgreSQL advisory singleton prevents multiple owners; do not also run a terminal worker against that database.
+
+Configure `LIVE_STALE_FACTOR` (default2 × timeframe), clock drift30s, heartbeat15s and poll1s; heartbeat must exceed normal polling interval. `REPLAY_PREFIX_CANDLES`, `REPLAY_SPEED` (1x/10x/MAX) and optional synthetic `REPLAY_PAYOUT` are development-only. API and worker must share provider/health settings. MT5 runs separately on a configured Windows terminal host, not the Linux core image: [setup](providers/MT5.md).
+
+Create watchlist/item in `/scanner`; no orders or financial mutations. Provider failures retry with bounded exponential backoff. DATA_CONFLICT is latched: inspect provenance/raw values and correct the feed/configuration before restarting worker, never overwrite raw candles. Restart marks unfinished paper observations UNAVAILABLE and rebuilds canonical feature state without retrospective LIVE signals. Export scanner events/outcomes/provenance before downgrade006 (which destroys those derived tables but preserves raw candles/financial data).
+
 ## Compose
 `Copy-Item .env.example .env`; `docker compose up --build`. Detener con `docker compose down`; resetear datos con `docker compose down -v` (destructivo para la base local).
 
