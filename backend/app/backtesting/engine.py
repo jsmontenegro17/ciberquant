@@ -14,6 +14,23 @@ SKIPS = ("unavailable", "entry_gap", "expiry_gap", "outside_range", "overlap", "
 
 
 def simulate(candles, definition, config, max_source=250000, max_trades=10000, observe_signal=None):
+    step = [None]
+
+    def source():
+        for c in candles:
+            if c.open_time >= config.signal_end:
+                break
+            if step[0] is None:
+                step[0] = duration(c.timeframe)
+            yield c
+
+    return simulate_rows(
+        compute(source(), definition.indicator_specs), definition, config, lambda: step[0], max_source, max_trades, observe_signal
+    )
+
+
+def simulate_rows(rows, definition, config, get_step, max_source=250000, max_trades=10000, observe_signal=None):
+    """Same v1 event loop; caller supplies origin-anchored causal rows, never a warmup slice."""
     history, active, trades = deque(maxlen=51), [], []
     pending, previous_close, step = None, None, None
     counters = {f"skipped_{key}": 0 for key in SKIPS}
@@ -24,22 +41,17 @@ def simulate(candles, definition, config, max_source=250000, max_trades=10000, o
     def skip(reason):
         counters[f"skipped_{reason}"] += 1
 
-    def source():
-        nonlocal step
-        for c in candles:
-            if c.open_time >= config.signal_end:
-                break
-            if step is None:
-                step = duration(c.timeframe)
-            yield c
-
-    features = iter(compute(source(), definition.indicator_specs))
+    features = iter(rows)
     while True:
         mark = perf_counter()
         try:
             row = next(features)
         except StopIteration:
             break
+        if row["open_time"] >= config.signal_end:
+            break
+        if step is None:
+            step = get_step()
         timing["feature_calculation"] += perf_counter() - mark
         mark = perf_counter()
         counters["candles_processed"] += 1

@@ -1,0 +1,12 @@
+import {api} from './client';
+import type {Dataset,Page} from './marketData';
+export type Metrics=Record<string,string|number|null>;
+export interface ValidationInput {strategy_version_id:number;dataset:Dataset;overall_start:string;overall_end:string;as_of_candle_id:number|null;payout_percent:string;expiry_bars:number;overlap_policy:string}
+export interface Boundary {segment_type:string;fold_number:number;signal_start:string;signal_end:string}
+export interface Protocol {validation_engine_version:string;split:number[];fold_count:number;minimum_resolved:number;minimum_active_days:number;minimum_fold_resolved:number;minimum_evaluable_folds:number;minimum_positive_folds:number;bootstrap:{iterations:number;blocks:string};verdict_gates:string[]}
+export interface Snapshot extends ValidationInput {definition_sha256:string;protocol:Protocol;boundaries:Boundary[]}
+export interface Preview {config_snapshot:Snapshot;config_sha256:string}
+export interface ValidationRun extends ValidationInput {id:number;strategy_name?:string;strategy_id?:number;version_number?:number;status:string;verdict:string;validation_state:string;latest_validation_attempt:string|null;validation_engine_version:string;config_snapshot:Snapshot;config_sha256:string;development_summary:Record<string,Metrics>|null;walk_forward_summary:(Record<string,string|number|boolean|null>&{fold_number:number;evaluable:boolean})[]|null;test_summary:Metrics|null;bootstrap_summary:Metrics|null;temporal_stability:Record<string,(Metrics&{month:string})[]>|null;holdout_warnings:{prior_validation_count:number;prior_revealed_holdout_count:number;overlapping_holdout_count:number;replay_count:number};gates:Record<string,boolean>|null;test_revealed_at:string|null;created_at:string;error_summary:string|null}
+export interface Segment extends Boundary {id:number;backtest_run_id:number|null}
+const post=<T,>(path:string,body?:unknown)=>api<T>(path,{method:'POST',body:body?JSON.stringify(body):undefined});
+export const validationApi={definitions:()=>api<Protocol>('/validation/definitions'),preview:(body:ValidationInput)=>post<Preview>('/validations/preview',body),create:(body:ValidationInput)=>post<ValidationRun>('/validations',body),list:(offset=0)=>api<Page<ValidationRun>>(`/validations?offset=${offset}`),detail:(id:number)=>api<ValidationRun>(`/validations/${id}`),segments:(id:number)=>api<Segment[]>(`/validations/${id}/segments`),reveal:(id:number)=>post<ValidationRun>(`/validations/${id}/reveal-test`)};

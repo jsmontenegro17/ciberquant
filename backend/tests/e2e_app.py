@@ -15,12 +15,18 @@ from dataclasses import asdict
 from app.models import Candle
 from feature_fixture import series
 from backtest_fixture import candles as binary_candles
+from validation_fixture import data as validation_candles
 
 test_directory = TemporaryDirectory(prefix="ciberquant-e2e-")
 engine = create_engine("sqlite:///" + str(Path(test_directory.name) / "qa.db"), connect_args={"check_same_thread": False})
 Base.metadata.create_all(engine)
 factory = sessionmaker(bind=engine)
 with factory() as s:
+    for candle in validation_candles():
+        values = asdict(candle)
+        values.pop('candle_id')
+        values['source'] = 'VALIDATION_FIXTURE'
+        s.add(Candle(**values))
     for candle in series(size=100):
         values = asdict(candle)
         values.pop('candle_id')

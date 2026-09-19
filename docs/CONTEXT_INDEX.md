@@ -11,10 +11,12 @@
 | Features / indicators | [INDICATORS](modules/INDICATORS.md), [Definitions](INDICATOR_DEFINITIONS.md) | `backend/app/features/`, `backend/app/api/features.py`, `frontend/src/features/features/` |
 | Strategies | [STRATEGIES](modules/STRATEGIES.md), [DSL](STRATEGY_DSL.md) | `backend/app/strategies/`, `backend/app/api/research.py`, `frontend/src/features/research/` |
 | Backtesting | [BACKTESTING](modules/BACKTESTING.md), [Semantics](BINARY_BACKTEST_SEMANTICS.md) | `backend/app/backtesting/`, migration004 |
-| Validation | [VALIDATION](modules/VALIDATION.md) | future REQ-006 |
+| Validation | [VALIDATION](modules/VALIDATION.md), [Protocol](VALIDATION_PROTOCOL.md), [REQ-006](requirements/REQ-006-validation-walk-forward.md) | `backend/app/validation/`, `backend/app/api/validation.py`, `frontend/src/features/validation/`, migration005 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: [REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md), version0.5.0, DONE / Human Acceptance PASS. REQ-001/002/003/004 remain DONE / Human Acceptance PASS. Integrated main SHA, CI and tag evidence: [PR #4](https://github.com/jsmontenegro17/ciberquant/pull/4). Next: REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None authorized or started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Active: REQ-006, version0.6.0-dev, IN_PROGRESS / Human Acceptance PENDING. Stable main/tag v0.5.0; REQ-001–005 DONE / PASS. Next: REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0, neither authorized nor started.
+
+Validation regressions: `backend/tests/test_validation_protocol.py`, `test_validation_api.py`, `test_validation_migration.py`, `validation_fixture.py`; frontend `validation.test.tsx`, `e2e/validation.spec.ts`; performance `backend/scripts/benchmark_validation.py`. P2 [VALIDATION-001](debt/VALIDATION-001-stale-validation-run-recovery.md), [VALIDATION-002](debt/VALIDATION-002-multiple-testing-research-lineage.md).
 
 Research regressions: `backend/tests/test_backtest_engine.py`, `test_research_api.py`, `test_research_migration.py`; manual fixture `backtest_fixture.py`; UI/E2E `frontend/src/features/research/research.test.tsx`, `frontend/e2e/research.spec.ts`; benchmark `backend/scripts/benchmark_backtest.py`. Debt: [BACKTEST-001](debt/BACKTEST-001-stale-run-recovery.md), [BACKTEST-002](debt/BACKTEST-002-execution-realism.md).
 

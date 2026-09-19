@@ -1,5 +1,13 @@
 # Testing
 
+## REQ-006 validation
+
+Protocol/API/migration tests cover candle-based cuts, four folds, computational seal spy and null TEST child, explicit single reveal, atomic failure, exact v0.5.0 simulation golden hashes (expiry1/5/60, both overlaps), deterministic manual-block interval, PASS/FAIL/INCONCLUSIVE fixtures, real persisted degradation, backfill replay, reuse refreshed at reveal, immutability and private ownership. Migration005 runs on PostgreSQL in CI with JSONB/FK/constraints/uniqueness and concurrent reveal (one succeeds, one409). SQLite is not locking evidence.
+
+Frontend tests cover plan preview invalidation/frozen-as-of submission, sealed card without hidden metrics, four folds, confirmation, all verdicts, warnings/state and API errors. E2E `validation.spec.ts` uses disposable1500 hourly deterministic candles: login→TESTING version→plan preview→development/SEALED→confirm reveal→PASS/bootstrap. Prior REQ-002/003/004/005 E2E retained.
+
+Local2026-09-19 benchmark `PYTHONPATH=. python scripts/benchmark_validation.py`:100k candles, STANDARD features, fixed CALL condition, Windows11 build26200 / Intel64 Family6 Model151 Stepping2 /20 logical CPUs / Python3.12.14. Development feature computation2.020s; TRAIN1.565s; VALIDATION0.507s; four folds0.144/0.148/0.229/0.152s. Separate explicit reveal: origin features2.483s, test simulation0.583s, bootstrap0.046s. Pure computation, no SQL/JSON/SLA; benchmark explicitly raises trade cap to100000, API default10000 unchanged.
+
 ## REQ-005
 
 `test_backtest_engine.py`: six CALL/PUT outcome cases, exact83.5→0.835, entry105 vs signal close100, bearish expiry/PUT LOSS, expiry2, signal availability, entry/expiry gaps, overlap5(ALLOW15 vs SKIP3), fully resolved range, no future data, warmup/CCC/bars_ago, field comparisons, three-state groups, future mutation, manual metrics/streaks/drawdown, bounded invalid DSL and caps. Synthetic prices are test observations, not market claims.

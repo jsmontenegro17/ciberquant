@@ -98,7 +98,7 @@ class StrategyVersion(Base):
 
 class BacktestRun(Base):
     __tablename__ = 'backtest_runs'
-    __table_args__ = (Index('ix_backtest_runs_user_created', 'user_id', 'created_at'),
+    __table_args__ = (CheckConstraint("purpose IN ('MANUAL','VALIDATION')", name='ck_backtest_purpose'), Index('ix_backtest_runs_user_created', 'user_id', 'created_at'),
                       CheckConstraint("status IN ('RUNNING','COMPLETED','FAILED')", name='ck_run_status'),
                       CheckConstraint('expiry_bars BETWEEN 1 AND 60', name='ck_run_expiry'),
                       CheckConstraint('payout_percent > 0 AND payout_percent <= 100', name='ck_run_payout'),
@@ -110,6 +110,7 @@ class BacktestRun(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     strategy_version_id: Mapped[int] = mapped_column(ForeignKey('strategy_versions.id'))
     status: Mapped[str] = mapped_column(String(20), default='RUNNING')
+    purpose: Mapped[str] = mapped_column(String(20), default='MANUAL', server_default='MANUAL')
     backtest_engine_version: Mapped[str] = mapped_column(String(50))
     strategy_dsl_version: Mapped[str] = mapped_column(String(50))
     feature_engine_version: Mapped[str] = mapped_column(String(50))
@@ -177,3 +178,102 @@ def guard_run_transition(mapper, connection, target):
 
 
 event.listen(BacktestRun, 'before_delete', reject_research_mutation)
+
+
+class ValidationRun(Base):
+    __tablename__ = 'validation_runs'
+    __table_args__ = (
+        Index('ix_validation_owner_version', 'user_id', 'strategy_version_id', 'created_at'),
+        CheckConstraint("status IN ('RUNNING_DEVELOPMENT','SEALED','RUNNING_TEST','COMPLETED','FAILED')", name='ck_validation_status'),
+        CheckConstraint("verdict IN ('PENDING_TEST','PASS','FAIL','INCONCLUSIVE')", name='ck_validation_verdict'),
+        CheckConstraint("validation_engine_version = 'cq-validation-v1'", name='ck_validation_engine'),
+        CheckConstraint("feature_engine_version = 'cq-features-v1' AND strategy_dsl_version = 'cq-strategy-dsl-v1' AND backtest_engine_version = 'cq-binary-backtest-v1'", name='ck_validation_dependencies'),
+        CheckConstraint('overall_start = train_start AND train_start < train_end AND train_end = validation_start AND validation_start < validation_end AND validation_end = test_start AND test_start < test_end AND test_end = overall_end', name='ck_validation_ranges'),
+        CheckConstraint('as_of_candle_id >= 0 AND expiry_bars BETWEEN 1 AND 60 AND payout_percent > 0 AND payout_percent <= 100', name='ck_validation_parameters'),
+        CheckConstraint("entry_model = 'NEXT_CANDLE_OPEN' AND overlap_policy IN ('ALLOW','SKIP_UNTIL_EXPIRY')", name='ck_validation_execution'),
+        CheckConstraint("(status = 'COMPLETED' AND verdict <> 'PENDING_TEST' AND test_revealed_at IS NOT NULL) OR (status <> 'COMPLETED' AND verdict = 'PENDING_TEST')", name='ck_validation_final'),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    strategy_version_id: Mapped[int] = mapped_column(ForeignKey('strategy_versions.id'))
+    status: Mapped[str] = mapped_column(String(30), default='RUNNING_DEVELOPMENT')
+    verdict: Mapped[str] = mapped_column(String(20), default='PENDING_TEST')
+    validation_engine_version: Mapped[str] = mapped_column(String(50))
+    feature_engine_version: Mapped[str] = mapped_column(String(50))
+    strategy_dsl_version: Mapped[str] = mapped_column(String(50))
+    backtest_engine_version: Mapped[str] = mapped_column(String(50))
+    definition_sha256: Mapped[str] = mapped_column(String(64))
+    dataset: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    as_of_candle_id: Mapped[int] = mapped_column(Integer)
+    overall_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    overall_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    train_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    train_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    validation_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    validation_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    test_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    test_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    payout_percent: Mapped[Decimal] = mapped_column(Numeric(12, 6))
+    expiry_bars: Mapped[int] = mapped_column(Integer)
+    entry_model: Mapped[str] = mapped_column(String(30), default='NEXT_CANDLE_OPEN')
+    overlap_policy: Mapped[str] = mapped_column(String(30))
+    config_snapshot: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    config_sha256: Mapped[str] = mapped_column(String(64))
+    development_summary: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    walk_forward_summary: Mapped[list | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    test_summary: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    bootstrap_summary: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    temporal_stability: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    holdout_warnings: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    gates: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    test_revealed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    error_summary: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class ValidationSegment(Base):
+    __tablename__ = 'validation_segments'
+    __table_args__ = (
+        UniqueConstraint('validation_run_id', 'segment_type', 'fold_number', name='uq_validation_segment'),
+        UniqueConstraint('backtest_run_id', name='uq_validation_child'),
+        CheckConstraint("(segment_type = 'WALK_FORWARD' AND fold_number BETWEEN 1 AND 4) OR (segment_type IN ('TRAIN','VALIDATION','TEST') AND fold_number = 0)", name='ck_validation_segment_type'),
+        CheckConstraint('signal_start < signal_end', name='ck_validation_segment_range'),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    validation_run_id: Mapped[int] = mapped_column(ForeignKey('validation_runs.id'))
+    segment_type: Mapped[str] = mapped_column(String(20))
+    fold_number: Mapped[int] = mapped_column(Integer, default=0)
+    signal_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    signal_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    backtest_run_id: Mapped[int | None] = mapped_column(ForeignKey('backtest_runs.id'))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+@event.listens_for(ValidationRun, 'before_update')
+def guard_validation_transition(mapper, connection, target):
+    old = connection.scalar(select(ValidationRun.__table__.c.status).where(ValidationRun.__table__.c.id == target.id))
+    common = {'status', 'completed_at', 'error_summary'}
+    allowed = {
+        ('RUNNING_DEVELOPMENT', 'SEALED'): {'development_summary', 'walk_forward_summary', 'temporal_stability'},
+        ('SEALED', 'RUNNING_TEST'): {'test_revealed_at', 'holdout_warnings'},
+        ('RUNNING_TEST', 'COMPLETED'): {'test_summary', 'bootstrap_summary', 'temporal_stability', 'verdict', 'gates'},
+        ('RUNNING_DEVELOPMENT', 'FAILED'): set(), ('RUNNING_TEST', 'FAILED'): set(),
+    }
+    key = old, target.status
+    changed = {a.key for a in inspect(target).attrs if a.history.has_changes()}
+    if key not in allowed or not changed <= common | allowed[key]:
+        raise ValueError('Immutable validation plan or invalid lifecycle transition')
+
+
+@event.listens_for(ValidationSegment, 'before_update')
+def guard_segment(mapper, connection, target):
+    old = connection.scalar(select(ValidationSegment.__table__.c.backtest_run_id).where(ValidationSegment.__table__.c.id == target.id))
+    changed = {a.key for a in inspect(target).attrs if a.history.has_changes()}
+    if old is not None or target.backtest_run_id is None or changed != {'backtest_run_id'}:
+        raise ValueError('Immutable validation segment')
+
+
+for _model in (ValidationRun, ValidationSegment):
+    event.listen(_model, 'before_delete', reject_research_mutation)

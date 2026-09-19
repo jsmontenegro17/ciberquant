@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0-dev] - Unreleased
+### Added
+- REQ-006 cq-validation-v1 immutable owned plans, raw-candle chronological60/20/20 and four fixed-strategy validation folds.
+- Computationally sealed final test, single explicit reveal, transactional child backtest evidence, deterministic UTC-day block bootstrap and sufficiency-first PASS/FAIL/INCONCLUSIVE.
+- Derived historical validation/degradation, UTC monthly evidence, exact replay and holdout reuse warnings; migration005 JSONB/constraints and internal backtest purpose.
+- Validation workspace, immutable-version preview, reveal confirmation, gate evidence and child inspection; deterministic regression, PostgreSQL/concurrency, frontend/E2E and100k benchmark.
+### Boundaries
+- No fitting, optimization, ranking, live evidence or money management. Existing feature/DSL/outcome semantics frozen; shared simulation refactor tested against v0.5.0 golden hashes.
+- Historical PASS never guarantees future profit or perfect external blindness. VALIDATION-001/002 are P2 debt. Human Acceptance pending; no automatic merge or REQ-007.
+
 ## [0.5.0] - 2026-09-19
 ### Acceptance
 - REQ-005 DONE; Human Acceptance PASS on approved HEAD40981e0f25c1cda0d987c23eba0922f35d90db99. No P0/P1 within the accepted scope.

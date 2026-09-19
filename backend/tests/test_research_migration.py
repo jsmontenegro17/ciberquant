@@ -21,6 +21,7 @@ from test_market_data_migration import migrated_database, migration  # noqa: F40
 def research_db(migrated_database):
     with migrated_database.begin() as c, Operations.context(MigrationContext.configure(c)):
         migration("004_strategy_backtesting").upgrade()
+        migration("005_validation").upgrade()
     yield migrated_database
 
 
@@ -78,6 +79,7 @@ def test_migration_constraints_json_persistence_and_downgrade(research_db):
             str(next(c for c in inspect(research_db).get_columns("backtest_runs") if c["name"] == "strategy_snapshot")["type"]) == "JSONB"
         )
     with research_db.begin() as c, Operations.context(MigrationContext.configure(c)):
+        migration("005_validation").downgrade()
         migration("004_strategy_backtesting").downgrade()
     assert "backtest_runs" not in inspect(research_db).get_table_names()
     assert "candles" in inspect(research_db).get_table_names()

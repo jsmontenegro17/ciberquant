@@ -1,5 +1,5 @@
 # Strategies
-REQ-005 implements private strategies and immutable versions. States: DRAFT, TESTING, DISABLED. VALIDATED/DEGRADED are reserved for REQ-006 and rejected here. No strategy is presumed profitable and no examples are seeded.
+REQ-005 implements private strategies and immutable versions. Lifecycle: DRAFT, TESTING, DISABLED; never add VALIDATED/DEGRADED to this mutable field. REQ-006 derives NOT_VALIDATED/HISTORICALLY_VALIDATED/DEGRADED per immutable version from completed chronological validation attempts, ignoring inconclusive attempts and duplicate config evidence. Version API includes derived state/latest attempt. Only TESTING can start validation; changing lifecycle later does not edit an already frozen plan or prevent its explicitly authorized reveal. No strategy is presumed profitable and no examples are seeded in production.
 
 Conditions reference Feature Engine fields/specs, without duplicating indicator formulas. [STRATEGY_DSL](../STRATEGY_DSL.md) freezes the typed AST, three-valued evaluation and canonical hashes. Versions are numbered under a PostgreSQL strategy row lock and protected by a unique constraint. No version update/delete APIs; ORM mutation guards protect normal application writes (database operators remain a trusted boundary).
 

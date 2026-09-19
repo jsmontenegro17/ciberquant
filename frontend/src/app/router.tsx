@@ -14,6 +14,7 @@ import { Cataloger } from "../features/market-data/Cataloger";
 import { FeatureLab } from "../features/features/FeatureLab";
 import { StrategyLab, StrategyDetail } from "../features/research/StrategyLab";
 import { Backtests, BacktestResult } from "../features/research/Backtests";
+import {ValidationList,ValidationSetup,ValidationDetail} from '../features/validation/Validation';
 export function Router() {
   return (
     <BrowserRouter>
@@ -34,6 +35,9 @@ export function Router() {
             <Route path="/strategies/:id" element={<StrategyDetail />} />
             <Route path="/backtests" element={<Backtests />} />
             <Route path="/backtests/:id" element={<BacktestResult />} />
+            <Route path="/validation" element={<ValidationList />} />
+            <Route path="/validation/new" element={<ValidationSetup />} />
+            <Route path="/validation/:id" element={<ValidationDetail />} />
             {["settings"].map(
               (path) => (
                 <Route

@@ -101,7 +101,9 @@ def versions(
     strategy_id: int, limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0), user=Depends(current_user), session=Depends(db)
 ):
     owned(session, Strategy, strategy_id, user.id)
-    return page(session, StrategyVersion, [StrategyVersion.strategy_id == strategy_id], StrategyVersion.version.desc(), limit, offset)
+    from ..validation.repository import state
+    return page(session, StrategyVersion, [StrategyVersion.strategy_id == strategy_id], StrategyVersion.version.desc(), limit, offset,
+                lambda v: {**record(v), **state(session, v.id)})
 
 
 @router.post("/backtests")
@@ -114,7 +116,7 @@ def backtests(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0)
     return page(
         session,
         BacktestRun,
-        [BacktestRun.user_id == user.id],
+        [BacktestRun.user_id == user.id, BacktestRun.purpose == 'MANUAL'],
         BacktestRun.id.desc(),
         limit,
         offset,
