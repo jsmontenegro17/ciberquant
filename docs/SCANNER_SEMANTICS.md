@@ -1,5 +1,7 @@
 # cq-scanner-v1
 
+IQ event evidence includes `payout_product` (turbo/binary) alongside observed payout/source and provider health. No digital-to-binary substitution. Product payout is an observed metadata snapshot, not a guaranteed executable quote for the paper expiry. PRACTICE/read-only unofficial-provider warnings remain visible; paper configuration precedence below is unchanged.
+
 Evaluate frozen cq-strategy-dsl-v1 only on closed cq-features-v1 rows with available_at=close_time. Persistent generator preserves exact recursive state and trailing51 rows for bars_ago. Never recompute the full prefix per polling cycle. MATCH means conditions TRUE, not CALL/PUT now; direction is research metadata. Expected entry model NEXT_CANDLE_OPEN; boundary known, future entry price unknown.
 
 Normal items require owned TESTING StrategyVersion and HISTORICALLY_VALIDATED state both globally and for the exact dataset. A PASS on another broker/source/market/timeframe is not compatible. Explicit research mode permits nonvalidated research with visible badges; DEGRADED suspends normal scanning immediately on each worker cycle. Live payout and validation assumption remain separate; lower live payout warns, never mutates historical evidence. Missing live payout remains unknown, not an invented provider quote.

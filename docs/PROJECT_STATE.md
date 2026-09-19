@@ -24,7 +24,7 @@ REQ-007 final human QA correction: research-mode explicit payout fallback/expiry
 REQ-007 Live Data & Strategy Scanner: cq-live-data-v1 / cq-scanner-v1; dedicated singleton worker, canonical incremental feature state, private watchlists, exact dataset validation compatibility, payout warning, immutable events and paper outcomes, migration006, SSE/snapshot UI, deterministic Replay/Mock, isolated optional MT5. Evidence and current gates: [REQ-007](requirements/REQ-007-live-scanner.md).
 
 ## Experimental / disabled
-MT5, IQ Option and Replay flags default false. IQ external transport intentionally unavailable/experimental; no OTC fallback. Real terminal smoke remains optional/unperformed. Auto-trading/order sending absent; ML not implemented.
+MT5, IQ Option and Replay flags default false. IQ has a pinned real PRACTICE-only async read-only transport; real binary REGULAR/OTC history/realtime and OTC scanner smoke PASS on2026-09-19. No OTC fallback. MT5 real terminal smoke remains optional/unperformed. Auto-trading/order sending absent; ML not implemented.
 
 ## Migrations / integrations
 006_live_scanner adds watchlists/items, provider snapshot cache, live observation provenance, immutable scanner events and outcomes. No financial/raw candle schema change. Downgrade loses scanner/provenance evidence; export/backup first. PostgreSQL migration/tests PASS in CI35468326588/35468338708; final HEAD checks and counts recorded in REQ-007/PR #6 handoff.
@@ -35,7 +35,7 @@ Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strat
 REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-[LIVE-001](debt/LIVE-001-provider-operations.md): provider smoke/operations, bounded canonical history, interrupted-paper recovery and capacity follow-ups. Actual IQ OTC is a conditional v1.0 blocker if required by separately authorized product scope; REQ-008 is not started.
+[LIVE-001](debt/LIVE-001-provider-operations.md): provider smoke/operations, bounded canonical history, interrupted-paper recovery and capacity follow-ups. Real IQ OTC is delivered in REQ-007; unofficial protocol drift/digital support/soak testing remain separate future work. REQ-008 is not started.
 [UX-001](debt/UX-001-manual-vs-validation-child-backtests.md): Strategy list last_backtest can reference a validation child although GET /backtests correctly defaults to MANUAL. Separate presentation improvement, not a calculation/evidence defect. All listed debts remain nonblocking for v0.6.0; no debt implementation during release closure.
 [VALIDATION-001](debt/VALIDATION-001-stale-validation-run-recovery.md) stale phase recovery and [VALIDATION-002](debt/VALIDATION-002-multiple-testing-research-lineage.md) broader multiple-testing lineage are separate P2 scope. Holdout reuse warnings exist; perfect external blindness is not claimed.
 [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md): future registry/dispatcher must preserve replay of frozen v1 evidence when incompatible engines arrive. P2, not a v0.5.0 blocker; documentation only in REQ-005. All existing debts below remain nonblocking for v0.5.0.

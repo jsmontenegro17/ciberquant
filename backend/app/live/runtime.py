@@ -232,6 +232,7 @@ class ScannerRuntime:
                 mode=frame.mode,
                 error=None,
             )
+            health["provider_metadata"] = getattr(sub.provider, "status_metadata", None)
             if saved.status != health["status"]:
                 audit(s, first.user_id, "PROVIDER_STATE_CHANGED", "live_subscription", None)
             saved.status, saved.health, saved.updated_at = health["status"], serialize(health), received_at
@@ -286,6 +287,7 @@ class ScannerRuntime:
                         ),
                         payout_snapshot=payout,
                         payout_source=paper_config.payout_source,
+                        payout_product=(health.get("provider_metadata") or {}).get("product"),
                         expiry_bars=expiry,
                         expiry_source=paper_config.expiry_source,
                         validation_expiry=policy["expiry_bars"],

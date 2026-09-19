@@ -4,7 +4,7 @@
 ### Fixed
 - REQ-007 human QA: explicit mode-aware paper-config precedence. Research uses its own expiry/payout fallback; normal mode retains compatible validation assumptions; current provider payout overrides either fallback with auditable source labels. UI distinguishes active paper settings, research fallback and historical reference. No frozen engine/version change.
 ### Added
-- REQ-007 cq-live-data-v1 / cq-scanner-v1 read-only providers, Replay/Mock, optional terminal-local MT5 and disabled experimental IQ Option.
+- REQ-007 cq-live-data-v1 / cq-scanner-v1 read-only providers, Replay/Mock, optional terminal-local MT5 and real PRACTICE-only IQ Option with pinned async transport, dynamic assets/product payout, Decimal candles and guarded read-only wire protocol. IQ defaults disabled; real REGULAR/OTC smoke and OTC scanner PASS on2026-09-19.
 - Dedicated worker and shared full-identity subscriptions, canonical exact incremental frozen features/DSL, configurable stale/heartbeat/drift and bounded reconnect.
 - Exact-dataset historical compatibility, DEGRADED suspension, independent live payout warning, private watchlists, immutable events and next-open paper outcomes without financial writes.
 - Migration006 live provenance/idempotence/conflict protection, scanner APIs/SSE and `/scanner` workspace with REPLAY labels, health/context and paper history.

@@ -11,7 +11,7 @@ export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  return <section className="panel" aria-label={`Watch item ${item.id}`}>
  <h3>{item.dataset.symbol} · {item.dataset.timeframe}</h3><p>{Object.values(item.dataset).join(' / ')}</p>
  <p>{item.provider==='REPLAY'?'REPLAY MODE':item.provider} · {item.state} · {item.research_mode?'RESEARCH FILTER — not validated for normal scanning':'Validated scanner'}</p>
- {item.provider==='IQOPTION'&&<p className="researchWarning">EXPERIMENTAL DATA PROVIDER — PROVIDER UNAVAILABLE</p>}
+ {item.provider==='IQOPTION'&&<p className="researchWarning">UNOFFICIAL COMMUNITY INTEGRATION — Protocol may change without notice. PRACTICE / read-only. Product: {e?.payout_product??'Unverified'}. Observed payout is not a guaranteed executable quote.</p>}
  <h4>{e?.strategy_name??`Version #${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {e?.state==='MATCH'?'CONDITIONS MATCHED':e?.state??'Waiting for closed candles'}</h4>
  <p>Research direction: {e?.research_direction??'—'} · Research signal — no order sent.</p>
  <p>Validation: {e?.validation_state??'Checking'} · Dataset: {e?.dataset_validation_state??'Checking'}</p>
@@ -42,7 +42,7 @@ export function Scanner(){
  const [name,setName]=useState(''),[list,setList]=useState(0),[provider,setProvider]=useState('REPLAY'),[strategy,setStrategy]=useState(0),[version,setVersion]=useState(0),[strategyOffset,setStrategyOffset]=useState(0),[versionOffset,setVersionOffset]=useState(0),[coverageOffset,setCoverageOffset]=useState(0);
  const [dataset,setDataset]=useState<Dataset>({source:'',broker:'',symbol:'',market_type:'REGULAR',timeframe:'1m'});
  const [payout,setPayout]=useState('84'),[expiry,setExpiry]=useState(1),[selected,setSelected]=useState(0);
- const providers=useQuery({queryKey:['providers'],queryFn:scannerApi.providers});
+ const providers=useQuery({queryKey:['providers'],queryFn:scannerApi.providers,refetchInterval:5000});
  const lists=useQuery({queryKey:['scanner','lists'],queryFn:scannerApi.lists});
  const items=useQuery({queryKey:['scanner','items',research,offset],queryFn:()=>scannerApi.items(research,offset),refetchInterval:2000});
  const events=useQuery({queryKey:['scanner','events',eventOffset],queryFn:()=>scannerApi.events(eventOffset),refetchInterval:2000});

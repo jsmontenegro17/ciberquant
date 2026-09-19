@@ -10,7 +10,7 @@ from ..models import Candle
 from ..features.engine import FeatureCandle
 from ..market_data.repository import dataset_conditions, candle_data
 from ..config import settings
-from .providers import ReplayLiveProvider, IQOptionReadOnlyProvider
+from .providers import ReplayLiveProvider
 from .runtime import ScannerRuntime
 
 
@@ -37,7 +37,18 @@ def provider_factory(session, name, dataset):
 
         return MetaTrader5Provider(settings.mt5_broker, datetime.fromisoformat(settings.mt5_canonical_origin))
     if name == "IQOPTION" and settings.enable_iqoption_experimental:
-        return IQOptionReadOnlyProvider()
+        from .iqoption import IQOptionReadOnlyProvider
+
+        return IQOptionReadOnlyProvider(
+            email=settings.iqoption_email.get_secret_value(),
+            password=settings.iqoption_password.get_secret_value(),
+            ssid=settings.iqoption_ssid.get_secret_value(),
+            balance=settings.iqoption_balance,
+            product=settings.iqoption_product,
+            origin=datetime.fromisoformat(settings.iqoption_canonical_origin) if settings.iqoption_canonical_origin else None,
+            max_history=settings.feature_engine_max_source_candles,
+            timeout=settings.iqoption_timeout_seconds,
+        )
     raise ConnectionError("Provider disabled")
 
 

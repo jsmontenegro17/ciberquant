@@ -8,7 +8,7 @@ Final human QA: `test_paper_config.py` covers the four mode/provider combination
 
 Frontend: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`; `npx playwright test` now includes Replay worker-backed scanner acceptance with an actually computed historical PASS fixture. Isolated temporary DB/users/worker process; no production sample strategy seeded. Screenshots `req007-scanner-desktop.png` / `req007-scanner-tablet.png` in ignored test-results.
 
-Benchmark: `PYTHONPATH=.` then `python scripts/benchmark_live.py` from backend. Three datasets ×10000 closed candles ×4 strategies; event decisions and evaluations/sec plus mean feature-update latency. Excludes persistence/network/JSON; not an SLA. Optional real MT5/IQ smoke is explicitly separate and NOT RUN without safe local terminal setup. CI requires no broker credentials/feed internet.
+Benchmark: `PYTHONPATH=.` then `python scripts/benchmark_live.py` from backend. Three datasets ×10000 closed candles ×4 strategies; event decisions and evaluations/sec plus mean feature-update latency. Excludes persistence/network/JSON; not an SLA. MT5 smoke remains optional. Real IQ PRACTICE smoke is mandatory for REQ-007: [dated evidence](providers/IQOPTION_SMOKE_2026-09-19.md). Install `requirements-iqoption.txt` to run `test_iqoption.py` (fake WebSocket/Decimal/metadata/PRACTICE/no orders/secret redaction/pagination/clock). CI installs the pinned dependency but uses only fake IQ and Replay, never broker credentials or a live feed. Local real smoke: `python -m scripts.smoke_iqoption --product binary --seconds 150`, with ignored backend `.env`.
 
 ## REQ-006 validation
 

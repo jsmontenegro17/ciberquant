@@ -1,5 +1,7 @@
 # Context Index
 
+REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2026-09-19 real PRACTICE smoke](providers/IQOPTION_SMOKE_2026-09-19.md); `backend/app/live/iqoption.py`, `iq_transport.py`, `backend/tests/test_iqoption.py`, `backend/scripts/smoke_iqoption.py`. Mandatory in this requirement, not deferred to REQ-008.
+
 | Área | Documento | Código principal |
 |---|---|---|
 | Live / Scanner | [Protocol](LIVE_DATA_PROTOCOL.md), [Semantics](SCANNER_SEMANTICS.md), [REQ-007](requirements/REQ-007-live-scanner.md) | `backend/app/live/`, `backend/app/api/scanner.py`, `frontend/src/features/scanner/`, migration006 |

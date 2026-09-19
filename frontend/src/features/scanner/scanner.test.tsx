@@ -8,6 +8,12 @@ import {marketApi} from '../../api/marketData';
 import {researchApi} from '../../api/research';
 import type {WatchItem} from '../../api/scanner';
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
+it('labels unofficial IQ and observed product without claiming execution',()=>{
+ render(<ScannerCard item={{...item,provider:'IQOPTION',latest:{...item.latest,payout_product:'binary'}}} onToggle={()=>{}}/>);
+ expect(screen.getByText(/UNOFFICIAL COMMUNITY INTEGRATION/)).toBeTruthy();
+ expect(screen.getByText(/Product: binary/)).toBeTruthy();
+ expect(screen.getByText(/not a guaranteed executable quote/)).toBeTruthy();
+});
 it.each([null,'87'])('truthfully displays research90/3 vs validation84/1 with provider payout %s',provider=>{
  render(<ScannerCard item={{...item,research_mode:true,research_payout:'90',research_expiry:3,latest:{...item.latest,current_payout:provider,validation_payout:'84',validation_expiry:1,payout_snapshot:provider??'90',payout_source:provider?'PROVIDER':'RESEARCH_ASSUMPTION',expiry_bars:3,expiry_source:'RESEARCH_ASSUMPTION'}}} onToggle={()=>{}}/>);
  expect(screen.getByText('Research expiry assumption: 3 bars')).toBeTruthy();

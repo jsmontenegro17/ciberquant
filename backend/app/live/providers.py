@@ -94,25 +94,3 @@ class MockLiveProvider:
 
     def close(self):
         pass
-
-
-class IQOptionReadOnlyProvider:
-    """Experimental external transport intentionally unavailable until independently verified.
-
-    No unofficial SDK dependency, session tokens, broker credentials or trading surface.
-    Never substitute MT5 for IQOPTION/OTC.
-    """
-
-    capabilities = {k: False for k in CAPABILITIES}
-
-    def assets(self):
-        return []
-
-    def bootstrap(self, dataset):
-        raise ConnectionError("EXPERIMENTAL PROVIDER UNAVAILABLE")
-
-    def poll(self, dataset):
-        raise ConnectionError("EXPERIMENTAL PROVIDER UNAVAILABLE")
-
-    def close(self):
-        pass

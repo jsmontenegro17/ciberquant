@@ -70,7 +70,9 @@ def provider_definitions():
             enabled=settings.enable_iqoption_experimental,
             mode="EXPERIMENTAL",
             capabilities={k: False for k in CAPABILITIES},
-            warning="EXPERIMENTAL DATA PROVIDER / PROVIDER UNAVAILABLE",
+            warning="UNOFFICIAL COMMUNITY INTEGRATION — Protocol may change without notice.",
+            product=settings.iqoption_product,
+            capability_scope="Observed on current user subscriptions; false means unverified/unavailable",
         ),
     ]
 
@@ -83,9 +85,18 @@ def item_view(item):
 
 
 @router.get("/live/providers")
-def providers(user=Depends(current_user)):
+def providers(user=Depends(current_user), session=Depends(db)):
+    definitions = provider_definitions()
+    keys = select(ScannerWatchItem.subscription_key).where(ScannerWatchItem.user_id == user.id, ScannerWatchItem.provider == "IQOPTION")
+    for sub in session.scalars(select(LiveSubscription).where(LiveSubscription.key.in_(keys))):
+        if sub.status != "CONNECTED" or now() - stored_utc(sub.updated_at) > timedelta(seconds=settings.live_heartbeat_seconds):
+            continue
+        caps = (sub.health.get("provider_metadata") or {}).get("capabilities", {})
+        iq = next(p for p in definitions if p["provider"] == "IQOPTION")
+        for key in iq["capabilities"]:
+            iq["capabilities"][key] |= caps.get(key) is True
     return dict(
-        items=provider_definitions(),
+        items=definitions,
         live_data_engine_version=LIVE_DATA_ENGINE_VERSION,
         scanner_engine_version=SCANNER_ENGINE_VERSION,
         stale_factor=settings.live_stale_factor,

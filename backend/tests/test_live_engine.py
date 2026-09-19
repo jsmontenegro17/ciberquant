@@ -4,7 +4,8 @@ from decimal import Decimal
 from app.live.features import IncrementalFeatures
 from app.features.engine import compute
 from app.features.registry import STANDARD
-from app.live.providers import ReplayLiveProvider, ProviderFrame, MockLiveProvider, IQOptionReadOnlyProvider
+from app.live.providers import ReplayLiveProvider, ProviderFrame, MockLiveProvider
+from app.live.iqoption import IQOptionReadOnlyProvider
 from app.live.paper import PaperObservation
 from app.backtesting.engine import simulate
 from app.strategies.dsl import evaluate, Truth
