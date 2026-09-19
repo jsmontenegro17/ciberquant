@@ -1,5 +1,17 @@
 # Testing
 
+## REQ-005
+
+`test_backtest_engine.py`: six CALL/PUT outcome cases, exact83.5→0.835, entry105 vs signal close100, bearish expiry/PUT LOSS, expiry2, signal availability, entry/expiry gaps, overlap5(ALLOW15 vs SKIP3), fully resolved range, no future data, warmup/CCC/bars_ago, field comparisons, three-state groups, future mutation, manual metrics/streaks/drawdown, bounded invalid DSL and caps. Synthetic prices are test observations, not market claims.
+
+`test_research_api.py`: owned versions/runs even for ADMIN, definitions/auth/status restrictions, replay after backfill, version immutability, hashes, audit events, exact P&L and no ledger access; cap failures and injected persistence failure leave no partial evidence; ORM mutation guards; five dataset dimensions and64KiB request limit.
+
+`test_research_migration.py`: isolated migration001→004 on SQLite and CI PostgreSQL, indexes/unique constraints, JSONB, exact unit storage, persisted run/replay, PostgreSQL concurrent version numbering and downgrade preserving raw tables. PostgreSQL-only cases skip locally; CI opt-in service executes them.
+
+Frontend tests cover creation, indicator/condition builder, typed constants, field comparisons, bars_ago, immutable-version submission, explicit run setup, payout warning, IN-SAMPLE badge, result/equity/inspector and errors. `research.spec.ts` performs USER login→create DRAFT→RSI2/BB2 conditions→v1→backtest on a preseeded disposable manual fixture→inspect trade. Expected3 trades: DRAW0,LOSS-1,WIN+0.835; total-0.165, unavailable2. No strategy seeded. Existing3 E2Es preserved.
+
+Benchmark: `cd backend; python scripts/benchmark_backtest.py`.100,000 synthetic candles, STANDARD, rule rsi14>=50 CALL,94,243 trades. Windows11 build26200, Intel64 Family6 Model151 Stepping2,20 logical CPUs, Python3.12.14, one process. Features3.696s, signal evaluation0.391s, execution2.375s, total6.738s (includes generation and metrics, excludes SQL/JSON). Pure-engine trade cap explicitly100000 for benchmark; API default remains10000. Measurement, not SLA. Final local/CI evidence is in REQ-005.
+
 ## REQ-004
 
 `test_features.py` freezes manual SMA/EMA/RSI/ATR/population-Bollinger fixtures, null warmups, zero-range ratios, RSI100/0/50, gap continuity without resets, Decimal context isolation, serialized rounding, strict identities/specs, prefix100/200 and future-mutation invariance. Fixture closes1..100: EMA20 seed10.5 at index19; serialized EMA20=90.5 at index99; RSI14=100 from index14. Recurrence uses50-digit Decimal, no intermediate quantization; compare canonical18-fractional-digit strings at API boundaries.

@@ -9,11 +9,14 @@
 | Market data | [MARKET_DATA](modules/MARKET_DATA.md), [CSV format](MARKET_DATA_CSV_FORMAT.md) | `backend/app/market_data/`, `backend/app/api/market_data.py` |
 | Cataloger | [CATALOGER](modules/CATALOGER.md) | `backend/app/cataloger/` |
 | Features / indicators | [INDICATORS](modules/INDICATORS.md), [Definitions](INDICATOR_DEFINITIONS.md) | `backend/app/features/`, `backend/app/api/features.py`, `frontend/src/features/features/` |
-| Strategies | [STRATEGIES](modules/STRATEGIES.md) | future REQ-005 |
-| Backtesting / validation | [BACKTESTING](modules/BACKTESTING.md), [VALIDATION](modules/VALIDATION.md) | planned |
+| Strategies | [STRATEGIES](modules/STRATEGIES.md), [DSL](STRATEGY_DSL.md) | `backend/app/strategies/`, `backend/app/api/research.py`, `frontend/src/features/research/` |
+| Backtesting | [BACKTESTING](modules/BACKTESTING.md), [Semantics](BINARY_BACKTEST_SEMANTICS.md) | `backend/app/backtesting/`, migration004 |
+| Validation | [VALIDATION](modules/VALIDATION.md) | future REQ-006 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted delivery: [REQ-004](requirements/REQ-004-feature-indicator-engine.md), DONE / Human Acceptance PASS, version0.4.0; REQ-001/002/003 remain DONE. Next roadmap: REQ-005 Strategy Lab & Binary Backtesting, REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None started.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Active delivery: [REQ-005](requirements/REQ-005-strategy-lab-binary-backtesting.md), version0.5.0-dev. Stable main/tag v0.4.0; REQ-001/002/003/004 remain DONE / Human Acceptance PASS. Next: REQ-006 Validation & Walk-Forward, REQ-007 Live Data & Scanner, REQ-008 Integrated Research Workspace/v1.0. None authorized or started.
+
+Research regressions: `backend/tests/test_backtest_engine.py`, `test_research_api.py`, `test_research_migration.py`; manual fixture `backtest_fixture.py`; UI/E2E `frontend/src/features/research/research.test.tsx`, `frontend/e2e/research.spec.ts`; benchmark `backend/scripts/benchmark_backtest.py`. Debt: [BACKTEST-001](debt/BACKTEST-001-stale-run-recovery.md), [BACKTEST-002](debt/BACKTEST-002-execution-realism.md).
 
 P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md). Official cq-features-v1 is frozen; full-candle features become available at close_time only.
 

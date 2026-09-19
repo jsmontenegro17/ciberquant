@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from decimal import Decimal
-from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, JSON, UniqueConstraint, Index
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, JSON, UniqueConstraint, Index, CheckConstraint, event, inspect, select
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from .db import Base
@@ -67,3 +67,113 @@ class Candle(Base):
     spread: Mapped[Decimal | None] = mapped_column(Numeric(24, 10))
     import_id: Mapped[int | None] = mapped_column(ForeignKey('market_data_imports.id', name='fk_candle_import'))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class Strategy(Base):
+    __tablename__ = 'strategies'
+    __table_args__ = (CheckConstraint("status IN ('DRAFT','TESTING','DISABLED')", name='ck_strategy_status'), Index('ix_strategies_user', 'user_id', 'created_at'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    name: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str] = mapped_column(Text, default='')
+    status: Mapped[str] = mapped_column(String(20), default='DRAFT')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
+
+
+class StrategyVersion(Base):
+    __tablename__ = 'strategy_versions'
+    __table_args__ = (UniqueConstraint('strategy_id', 'version', name='uq_strategy_version'), CheckConstraint('version > 0', name='ck_version_positive'), CheckConstraint("trade_direction IN ('CALL','PUT')", name='ck_version_direction'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    strategy_id: Mapped[int] = mapped_column(ForeignKey('strategies.id'))
+    version: Mapped[int] = mapped_column(Integer)
+    strategy_dsl_version: Mapped[str] = mapped_column(String(50))
+    feature_engine_version: Mapped[str] = mapped_column(String(50))
+    trade_direction: Mapped[str] = mapped_column(String(10))
+    indicator_specs: Mapped[list] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    condition_tree: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    definition_sha256: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class BacktestRun(Base):
+    __tablename__ = 'backtest_runs'
+    __table_args__ = (Index('ix_backtest_runs_user_created', 'user_id', 'created_at'),
+                      CheckConstraint("status IN ('RUNNING','COMPLETED','FAILED')", name='ck_run_status'),
+                      CheckConstraint('expiry_bars BETWEEN 1 AND 60', name='ck_run_expiry'),
+                      CheckConstraint('payout_percent > 0 AND payout_percent <= 100', name='ck_run_payout'),
+                      CheckConstraint('signal_end > signal_start', name='ck_run_range'),
+                      CheckConstraint('as_of_candle_id >= 0', name='ck_run_asof'),
+                      CheckConstraint("entry_model = 'NEXT_CANDLE_OPEN'", name='ck_run_entry'),
+                      CheckConstraint("overlap_policy IN ('ALLOW','SKIP_UNTIL_EXPIRY')", name='ck_run_overlap'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    strategy_version_id: Mapped[int] = mapped_column(ForeignKey('strategy_versions.id'))
+    status: Mapped[str] = mapped_column(String(20), default='RUNNING')
+    backtest_engine_version: Mapped[str] = mapped_column(String(50))
+    strategy_dsl_version: Mapped[str] = mapped_column(String(50))
+    feature_engine_version: Mapped[str] = mapped_column(String(50))
+    dataset: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    as_of_candle_id: Mapped[int] = mapped_column(Integer)
+    signal_start: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    signal_end: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    payout_percent: Mapped[Decimal] = mapped_column(Numeric(12, 6))
+    expiry_bars: Mapped[int] = mapped_column(Integer)
+    entry_model: Mapped[str] = mapped_column(String(30))
+    overlap_policy: Mapped[str] = mapped_column(String(30))
+    strategy_snapshot: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    config_snapshot: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    config_sha256: Mapped[str] = mapped_column(String(64))
+    metrics: Mapped[dict | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    equity_curve: Mapped[list | None] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    error_summary: Mapped[str | None] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class BacktestTrade(Base):
+    __tablename__ = 'backtest_trades'
+    __table_args__ = (UniqueConstraint('backtest_run_id', 'sequence_no', name='uq_backtest_trade_sequence'),
+                      Index('ix_backtest_trade_signal', 'backtest_run_id', 'signal_time'),
+                      CheckConstraint('sequence_no > 0', name='ck_trade_sequence'),
+                      CheckConstraint('entry_time >= signal_time AND expiry_time > entry_time', name='ck_trade_causality'),
+                      CheckConstraint("direction IN ('CALL','PUT')", name='ck_backtest_direction'),
+                      CheckConstraint("result IN ('WIN','LOSS','DRAW')", name='ck_backtest_result'))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    backtest_run_id: Mapped[int] = mapped_column(ForeignKey('backtest_runs.id'))
+    sequence_no: Mapped[int] = mapped_column(Integer)
+    signal_candle_id: Mapped[int] = mapped_column(ForeignKey('candles.id'))
+    entry_candle_id: Mapped[int] = mapped_column(ForeignKey('candles.id'))
+    expiry_candle_id: Mapped[int] = mapped_column(ForeignKey('candles.id'))
+    signal_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    entry_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expiry_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    entry_price: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    expiry_price: Mapped[Decimal] = mapped_column(Numeric(24, 10))
+    direction: Mapped[str] = mapped_column(String(10))
+    result: Mapped[str] = mapped_column(String(10))
+    payout_percent: Mapped[Decimal] = mapped_column(Numeric(12, 6))
+    unit_pnl: Mapped[Decimal] = mapped_column(Numeric(18, 8))
+    signal_context: Mapped[dict] = mapped_column(JSON().with_variant(JSONB(), 'postgresql'))
+
+
+def reject_research_mutation(mapper, connection, target):
+    raise ValueError('Immutable research evidence cannot be updated or deleted')
+
+
+for _model in (StrategyVersion, BacktestTrade):
+    event.listen(_model, 'before_update', reject_research_mutation)
+    event.listen(_model, 'before_delete', reject_research_mutation)
+
+
+@event.listens_for(BacktestRun, 'before_update')
+def guard_run_transition(mapper, connection, target):
+    old = connection.scalar(select(BacktestRun.__table__.c.status).where(BacktestRun.__table__.c.id == target.id))
+    changed = {a.key for a in inspect(target).attrs if a.history.has_changes()}
+    allowed = {'status', 'completed_at', 'error_summary', 'metrics', 'equity_curve'}
+    if old != 'RUNNING' or target.status not in ('COMPLETED','FAILED') or not changed <= allowed:
+        raise ValueError('Backtest evidence permits only RUNNING to COMPLETED/FAILED transition')
+
+
+event.listen(BacktestRun, 'before_delete', reject_research_mutation)
