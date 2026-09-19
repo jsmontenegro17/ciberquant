@@ -1,0 +1,7 @@
+export type User={id:number;email:string;name:string;role:string;status:string};
+export type Account={id:number;name:string;broker?:string;currency:string;initial_balance:string;current_balance:string;status:string};
+export type Session={id:number;user_id:number;trading_account_id:number;starting_balance:string;ending_balance?:string;current_balance?:string;status:'OPEN'|'CLOSED'|'STOPPED';started_at:string;ended_at?:string;risk_per_trade_percent:string;max_loss_amount:string;max_operations:number;minimum_payout_percent:string;profit_target_amount?:string};
+export type Trade={id:number;trading_account_id:number;trading_session_id:number;symbol:string;market_type:string;timeframe:string;direction:string;stake:string;payout_percent:string;result?:string;profit_loss?:string;opened_at:string};
+export type Journal={id:number;title:string;content:string;user_id:number;session_id?:number;trade_id?:number;created_at:string};
+export type Summary={session_id:number;total_trades:number;wins:number;losses:number;draws:number;cancelled:number;win_rate:string;gross_profit:string;gross_loss:string;net_pnl:string;starting_balance:string;ending_balance:string;max_win_streak:number;max_loss_streak:number};
+export type Overview={current_balance:string;today_pnl:string;month_pnl:string;total_trades:number;monthly_trades:number;win_rate:string;sessions_count:number;current_session?:Session;max_win_streak:number;max_loss_streak:number};

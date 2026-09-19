@@ -1,0 +1,1 @@
+export const money=(v:string|number|undefined)=>v==null?'—':new Intl.NumberFormat(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(v));export const percent=(v:string|number|undefined)=>v==null?'—':`${Number(v).toFixed(2)}%`;export const dateTime=(v:string)=>new Date(v).toLocaleString();
