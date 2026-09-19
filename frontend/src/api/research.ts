@@ -7,7 +7,7 @@ export type Operand = FieldOperand | {type:FieldType;value:string|boolean};
 export interface Condition {left:FieldOperand;operator:string;right:Operand}
 export interface Group {operator:'AND'|'OR';conditions:(Condition|Group)[]}
 export interface VersionBody {trade_direction:'CALL'|'PUT';indicator_specs:Spec[];condition_tree:Condition|Group}
-export interface Version extends VersionBody {id:number;strategy_id:number;version:number;strategy_dsl_version:string;feature_engine_version:string;definition_sha256:string;created_at:string}
+export interface Version extends VersionBody {id:number;strategy_id:number;version:number;strategy_dsl_version:string;feature_engine_version:string;definition_sha256:string;created_at:string;validation_state?:string;latest_validation_attempt?:string|null}
 export interface Strategy {id:number;name:string;description:string;status:string;latest_version?:Version|null;last_backtest?:{id:number;status:string}|null}
 export interface DslDefinitions {strategy_dsl_version:string;feature_engine_version:string;backtest_engine_version:string;operators:string[];group_operators:('AND'|'OR')[];base_fields:Record<string,FieldType>;max_bars_ago:number;max_depth:number;max_nodes:number;entry_model:string;statuses:string[]}
 export interface RunInput {strategy_version_id:number;dataset:Dataset;signal_start:string;signal_end:string;as_of_candle_id:number|null;payout_percent:string;expiry_bars:number;overlap_policy:string}

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0] - 2026-09-19
+### Acceptance
+- REQ-006 DONE; Human Acceptance PASS on approved HEAD3e48ad684cfc471010c690c6820ef9dcc469c664. No P0/P1 within the accepted scope.
+- cq-validation-v1 is the official frozen protocol, alongside cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1. Incompatible changes require new versions.
+- UX-001 records the Strategy list last-backtest distinction as nonblocking P2 debt; no functional change during closure.
+### Added
+- REQ-006 cq-validation-v1 immutable owned plans, raw-candle chronological60/20/20 and four fixed-strategy validation folds.
+- Computationally sealed final test, single explicit reveal, transactional child backtest evidence, deterministic UTC-day block bootstrap and sufficiency-first PASS/FAIL/INCONCLUSIVE.
+- Derived historical validation/degradation, UTC monthly evidence, exact replay and holdout reuse warnings; migration005 JSONB/constraints and internal backtest purpose.
+- Validation workspace, immutable-version preview, reveal confirmation, gate evidence and child inspection; deterministic regression, PostgreSQL/concurrency, frontend/E2E and100k benchmark.
+### Boundaries
+- No fitting, optimization, ranking, live evidence or money management. Existing feature/DSL/outcome semantics frozen; shared simulation refactor tested against v0.5.0 golden hashes.
+- Historical PASS never guarantees future profit or perfect external blindness. VALIDATION-001/002 and existing debts remain P2. Human Acceptance PASS; REQ-007 is not authorized or started.
+
 ## [0.5.0] - 2026-09-19
 ### Acceptance
 - REQ-005 DONE; Human Acceptance PASS on approved HEAD40981e0f25c1cda0d987c23eba0922f35d90db99. No P0/P1 within the accepted scope.

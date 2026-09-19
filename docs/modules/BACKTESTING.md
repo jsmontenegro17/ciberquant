@@ -1,5 +1,7 @@
 # Backtesting
-REQ-005 implements deterministic IN-SAMPLE historical simulations, not statistical validation. Tables: backtest_runs/backtest_trades. Train/validation/test and walk-forward remain REQ-006 scope.
+REQ-005 implements deterministic IN-SAMPLE historical simulations, not statistical validation. Tables: backtest_runs/backtest_trades. REQ-006 orchestrates these same simulations through separate validation plans; it does not introduce a second outcome engine.
+
+REQ-006 migration005 adds purpose MANUAL/VALIDATION (existing rows default MANUAL). Public creation remains MANUAL; default listing excludes internal validation segments. Owned child detail/trades links remain available. `simulate_rows` extracts the unchanged v1 event loop for shared causal feature rows; six golden hashes captured from v0.5.0 plus existing regression prove identical trades/metrics/equity. Performance timing instrumentation is not historical evidence. Feature computation is reused once within development, recomputed from frozen canonical origin only on explicit test reveal.
 
 ## REQ-005 architecture
 

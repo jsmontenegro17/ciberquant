@@ -12,7 +12,7 @@ class ResearchRequestLimit:
         if (
             scope["type"] != "http"
             or scope.get("method") not in ("POST", "PATCH")
-            or not scope.get("path", "").startswith(("/api/v1/strategies", "/api/v1/backtests"))
+            or not scope.get("path", "").startswith(("/api/v1/strategies", "/api/v1/backtests", "/api/v1/validations"))
         ):
             return await self.app(scope, receive, send)
         maximum = 65536
