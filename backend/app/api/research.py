@@ -54,24 +54,25 @@ def strategy_fields(specs: list[IndicatorSpec] = Body(max_length=12), user=Depen
 
 @router.get("/strategies")
 def strategies(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0), user=Depends(current_user), session=Depends(db)):
-    def convert(s):
-        latest = session.scalar(
-            select(StrategyVersion).where(StrategyVersion.strategy_id == s.id).order_by(StrategyVersion.version.desc()).limit(1)
-        )
-        last = session.scalar(
-            select(BacktestRun)
-            .join(StrategyVersion)
-            .where(StrategyVersion.strategy_id == s.id, BacktestRun.user_id == user.id)
-            .order_by(BacktestRun.id.desc())
-            .limit(1)
-        )
-        return {
-            **record(s),
-            "latest_version": record(latest) if latest else None,
-            "last_backtest": {"id": last.id, "status": last.status} if last else None,
-        }
-
-    return page(session, Strategy, [Strategy.user_id == user.id], Strategy.id.desc(), limit, offset, convert)
+    # Constant query count per page, not one query per strategy/child run.
+    from ..models import ValidationRun
+    result = page(session, Strategy, [Strategy.user_id == user.id], Strategy.id.desc(), limit, offset)
+    ids = [s["id"] for s in result["items"]]
+    latest_ids = select(func.max(StrategyVersion.id)).where(StrategyVersion.strategy_id.in_(ids)).group_by(StrategyVersion.strategy_id)
+    versions = {v.strategy_id: record(v) for v in session.scalars(select(StrategyVersion).where(StrategyVersion.id.in_(latest_ids)))}
+    lookups = {}
+    for model, key in ((BacktestRun, "last_backtest"), (ValidationRun, "latest_validation")):
+        filters = [StrategyVersion.strategy_id.in_(ids), model.user_id == user.id]
+        if model is BacktestRun:
+            filters.append(model.purpose == "MANUAL")
+        maximum = select(func.max(model.id)).join(StrategyVersion).where(*filters).group_by(StrategyVersion.strategy_id)
+        rows = session.execute(select(StrategyVersion.strategy_id, model.id, model.status).join(model).where(model.id.in_(maximum)))
+        lookups[key] = {sid: dict(id=rid, status=status) for sid, rid, status in rows}
+    for s in result["items"]:
+        s["latest_version"] = versions.get(s["id"])
+        for key, values in lookups.items():
+            s[key] = values.get(s["id"])
+    return result
 
 
 @router.get("/strategies/{strategy_id}")

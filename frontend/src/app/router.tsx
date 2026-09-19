@@ -16,6 +16,9 @@ import { StrategyLab, StrategyDetail } from "../features/research/StrategyLab";
 import { Backtests, BacktestResult } from "../features/research/Backtests";
 import {ValidationList,ValidationSetup,ValidationDetail} from '../features/validation/Validation';
 import {Scanner} from '../features/scanner/Scanner';
+import {lazy,Suspense} from 'react';
+const Workspace=lazy(()=>import('../features/workspace/Workspace'));
+const WorkspaceEvent=lazy(()=>import('../features/workspace/Workspace').then(m=>({default:m.WorkspaceEvent})));
 export function Router() {
   return (
     <BrowserRouter>
@@ -24,6 +27,8 @@ export function Router() {
         <Route element={<Protected />}>
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/workspace" element={<Suspense fallback={<p>Loading workspace…</p>}><Workspace/></Suspense>} />
+            <Route path="/workspace/events/:id" element={<Suspense fallback={<p>Loading evidence…</p>}><WorkspaceEvent/></Suspense>} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/new" element={<NewSession />} />

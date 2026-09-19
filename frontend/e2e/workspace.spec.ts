@@ -1,0 +1,24 @@
+import {test,expect} from '@playwright/test';
+test('exact research workspace links manual, validation, Replay and paper evidence',async({page})=>{
+ await page.goto('/login');await page.getByLabel('Email').fill('qa@example.com');await page.getByLabel('Password').fill('browser-test-only');await page.getByRole('button',{name:'Sign in'}).click();
+ await expect(page.getByRole('link',{name:'Research Workspace',exact:true})).toBeVisible();
+ const base='http://localhost:8010/api/v1';
+ const strategies=await (await page.request.get(base+'/strategies')).json();
+ const strategy=strategies.items.find((s:{name:string})=>s.name==='Scanner validated fixture');
+ const version=strategy.latest_version.id;
+ const dataset={source:'SCANNER_FIXTURE',broker:'DEMO',symbol:'EURUSD',market_type:'REGULAR',timeframe:'1h'};
+ const run=await page.request.post(base+'/backtests',{data:{strategy_version_id:version,dataset,signal_start:'2026-01-01T00:00:00Z',signal_end:'2026-03-04T12:00:00Z',payout_percent:'83.5',expiry_bars:1}});
+ expect(run.ok()).toBeTruthy();const manual=await run.json();expect(manual.status).toBe('COMPLETED');
+ const watch=await (await page.request.post(base+'/scanner/watchlists',{data:{name:'Workspace E2E'}})).json();
+ expect((await page.request.post(base+`/scanner/watchlists/${watch.id}/items`,{data:{provider:'REPLAY',dataset,strategy_version_id:version,research_mode:true,research_payout:'84',research_expiry:1}})).ok()).toBeTruthy();
+ await page.getByRole('link',{name:'Research Workspace',exact:true}).click();
+ await page.getByLabel('Workspace dataset').selectOption({label:'SCANNER_FIXTURE / DEMO / EURUSD / REGULAR / 1h'});
+ await page.getByLabel('Workspace strategy').selectOption(String(strategy.id));await page.getByLabel('Workspace version').selectOption(String(version));
+ await expect(page.getByRole('list',{name:'Research pipeline'})).toBeVisible();
+ await expect(page.getByText('Last manual backtest:',{exact:false})).toBeVisible();
+ await expect(page.getByRole('link',{name:'VALIDATION',exact:true})).toHaveAttribute('href',/\/validation\/\d+/);
+ await expect.poll(async()=> (await (await page.request.get(base+'/workspace/events?'+new URLSearchParams({...dataset,strategy_version_id:String(version)}))).json()).total).toBeGreaterThan(0);
+ await page.reload();await page.getByLabel('Workspace dataset').selectOption({label:'SCANNER_FIXTURE / DEMO / EURUSD / REGULAR / 1h'});await page.getByLabel('Workspace strategy').selectOption(String(strategy.id));await page.getByLabel('Workspace version').selectOption(String(version));
+ await page.getByRole('link',{name:/Event #/}).first().click();await expect(page.getByRole('heading',{name:/Scanner \/ paper lineage/})).toBeVisible();
+ await expect(page.getByText(/payout_source/)).toBeVisible();
+});
