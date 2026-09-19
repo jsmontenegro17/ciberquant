@@ -1,5 +1,7 @@
 # cq-validation-v1
 
+Official frozen protocol for CiberQuant v0.6.0. REQ-006 Human Acceptance PASS, 2026-09-19. Dependencies cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 remain frozen. Incompatible future changes require a new version; never silently reinterpret historical evidence.
+
 Immutable fixed-strategy historical evaluation, not optimization. Strategy lifecycle remains DRAFT/TESTING/DISABLED. Creation requires TESTING. Freeze one version/definition hash, all engine versions, full dataset identity, as-of candle ceiling, UTC overall range, payout, expiry, overlap, boundaries and canonical config hash. Unit stake only, fixed payout; no future-profit guarantee.
 
 The first validation plan also fixes payout and expiry for that StrategyVersion's subsequent validation attempts. Changing either requires a new immutable StrategyVersion and a new plan; preview and creation reject reuse with changed values. Creation serializes this first-plan choice under the version row lock. Range/dataset/as-of may change for later chronological reevaluation; every plan remains immutable. Manual in-sample backtests retain their independent REQ-005 contract.

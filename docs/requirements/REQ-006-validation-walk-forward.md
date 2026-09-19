@@ -1,12 +1,14 @@
 # REQ-006 — Validation & Walk-Forward Engine
 
-Status: QA
+Status: DONE
 Priority: P1
 Classification: CRITICAL
-Target: 0.6.0-dev
+Target: 0.6.0
 Base: main / v0.5.0 / 2e2de69ba6fdcfdce0167f44f9f62869aa11774a
 Branch: codex/req-006-validation-walk-forward
-Human Acceptance: PENDING
+Human Acceptance: PASS
+Acceptance date: 2026-09-19
+Approved HEAD: 3e48ad684cfc471010c690c6820ef9dcc469c664
 
 ## Scope and gates
 
@@ -16,11 +18,11 @@ Reuse frozen cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1. Any c
 
 ## Implementation sequence
 
-Protocol and schema → pure chronological/statistical functions → persistence and sealed lifecycle → APIs → UI → deterministic A–I fixtures, ownership, leakage, replay, concurrency and PostgreSQL → E2E →100k benchmark → documentation → PR and green CI → QA. No automatic merge or tag.
+Protocol and schema → pure chronological/statistical functions → persistence and sealed lifecycle → APIs → UI → deterministic A–I fixtures, ownership, leakage, replay, concurrency and PostgreSQL → E2E →100k benchmark → documentation → PR and green CI → QA → Human Acceptance PASS. Release integration is authorized only after final feature CI; tag only after integrated main CI passes.
 
 ## Acceptance A–I
 
-A deterministic 60/20/20; B computational sealing; C four chronological folds; D deterministic bootstrap; E PASS/FAIL/INCONCLUSIVE; F no cross-partition outcomes; G as-of replay after backfill; H historical state/degradation; I full UI reveal workflow. Automated/agent QA PASS; Human Acceptance PENDING.
+A deterministic 60/20/20; B computational sealing; C four chronological folds; D deterministic bootstrap; E PASS/FAIL/INCONCLUSIVE; F no cross-partition outcomes; G as-of replay after backfill; H historical state/degradation; I full UI reveal workflow. Automated/agent QA PASS; Human Acceptance PASS.
 
 ## Implemented / local evidence — 2026-09-19
 
@@ -44,14 +46,22 @@ Browser fixture: definition hash `1efbccd7f578c6e43e298eaa8b0e304b53b3e392c48be2
 
 100k benchmark: development features2.020s, train1.565s, validation0.507s, folds0.144/0.148/0.229/0.152s; separate reveal features2.483s, simulation0.583s, bootstrap0.046s. Windows11/Intel64 Family6 Model151/20 logical CPUs/Python3.12.14. Pure computation, no SQL/JSON/SLA; explicit benchmark cap100000, API cap10000 unchanged.
 
-P0/P1: none identified in automated/agent QA. P2: VALIDATION-001/002, BACKTEST-001/002, QUANT-001/002, DATA-001, SEC-001, dependency and bundle warnings. Human Acceptance PENDING. No merge, tag or REQ-007.
+P0/P1: none within the human-accepted scope. Nonblocking P2: VALIDATION-001/002, BACKTEST-001/002, QUANT-001/002, DATA-001, SEC-001, [UX-001](../debt/UX-001-manual-vs-validation-child-backtests.md), dependency and bundle warnings. Human Acceptance PASS. No REQ-007 authorization.
 
 ## Remote CI / QA handoff
 
-[PR #5 — REQ-006 Validation & Walk-Forward Engine](https://github.com/jsmontenegro17/ciberquant/pull/5): OPEN, base main, head codex/req-006-validation-walk-forward.
+[PR #5 — REQ-006 Validation & Walk-Forward Engine](https://github.com/jsmontenegro17/ciberquant/pull/5): integration into main authorized after final green CI; head codex/req-006-validation-walk-forward.
 
 Implementation commit: `3224966b9137e61520ab2390886dd579cf9242d6`. PR CI [35464481642](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464481642) and push CI [35464479292](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464479292): Backend, Frontend/E2E and Docker PASS. PostgreSQL migration005, JSONB/FK/constraints/uniqueness, ORM immutability and concurrent single reveal execute in CI, not merely SQLite. Existing migrations and idempotent seed PASS.
 
 Final QA review additionally enforces section7: changed validation payout/expiry requires a new StrategyVersion and ValidationRun. Preview/creation reject changed parameters; concurrent first plans serialize the choice under the version lock, with PostgreSQL regression. No frozen engine semantics change.
 
-Final QA commit must also retain green CI. Its SHA/run IDs are recorded in PR #5 and the delivery report to avoid a self-referential commit. Stop at QA; require independent Human Acceptance before merge and independent REQ-007 authorization.
+Approved-head CI [35464754200](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464754200) and [35464751684](https://github.com/jsmontenegro17/ciberquant/actions/runs/35464751684): Backend157 PASS/4 intentional SQLite concurrency skips, Frontend36 PASS, E2E5 PASS, PostgreSQL and Docker PASS.
+
+## Final human acceptance / release
+
+cq-validation-v1 is frozen as the official v0.6.0 protocol with cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1. Incompatible future semantics require new versions. Human Review approves raw-snapshot chronological60/20/20, four fixed-strategy folds, computational TEST sealing, irreversible audited concurrent-safe reveal, fully resolved partition outcomes, deterministic2000 UTC-day block bootstrap, sufficiency precedence, all eight PASS gates, historical state/degradation, replay and visible holdout reuse warnings. Existing financial/research semantics remain unchanged during closure.
+
+Preserve limitations: day blocks do not prove interday independence, causality, persistent edge or future profitability; the interval is not a probability of future profit. CiberQuant cannot prove that raw holdout data was never inspected externally. Failed claimed reveals remain revealed; exact replays/reused holdouts are not independent evidence. Manual backtest listing continues to exclude validation children; UX-001 is documentation-only future debt.
+
+Release gates: final documentation/version commit CI green → PR merge → integrated main CI green → v0.6.0 tag on that exact validated main commit. Final feature SHA, main SHA, CI run IDs/test counts and remote tag verification are recorded in the final release evidence comment on PR #5 and the delivery report, avoiding a self-referential commit. Stop after closure; REQ-007 requires independent authorization.
