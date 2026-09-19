@@ -32,7 +32,13 @@ class AccountOut(AccountCreate):
     status: str
 
 
-class SessionCreate(BaseModel):
+class SessionStartRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    trading_account_id: int
+    notes: str | None = None
+
+
+class SessionSnapshot(BaseModel):
     trading_account_id: int
     risk_per_trade_percent: Decimal = Field(gt=0, le=100)
     max_loss_amount: Decimal = Field(gt=0)
@@ -42,7 +48,7 @@ class SessionCreate(BaseModel):
     notes: str | None = None
 
 
-class SessionOut(SessionCreate):
+class SessionOut(SessionSnapshot):
     model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: int
@@ -133,7 +139,7 @@ class SessionSummary(BaseModel):
     limit_reason: str | None
 
 
-class RiskPreview(SessionCreate):
+class RiskPreview(SessionSnapshot):
     current_balance: Decimal
     currency: str
     suggested_stake: Decimal

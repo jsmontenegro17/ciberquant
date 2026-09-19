@@ -29,9 +29,9 @@ def test_req002_complete_workflow_and_isolation():
         s.commit()
     preview = client.get(f"/api/v1/accounts/{account['id']}/risk-preview").json()
     assert Decimal(preview["suggested_stake"]) == Decimal("20")
-    session = client.post("/api/v1/sessions", json=preview).json()
+    session = client.post("/api/v1/sessions", json={"trading_account_id": account["id"]}).json()
     sid = session["id"]
-    assert client.post("/api/v1/sessions", json=preview).status_code == 409
+    assert client.post("/api/v1/sessions", json={"trading_account_id": account["id"]}).status_code == 409
     body = {
         "trading_account_id": account["id"],
         "trading_session_id": sid,
@@ -127,35 +127,53 @@ def test_auth_and_ownership():
 
 
 def test_loss_limit_draw_cancelled_and_invalid_trade_values():
-    setup_user('limits@example.com');login('limits@example.com')
-    account=client.post('/api/v1/accounts',json={'name':'Limits','initial_balance':'2000'}).json()
-    params={'trading_account_id':account['id'],'risk_per_trade_percent':'1','max_loss_amount':'40','max_operations':10}
-    sess=client.post('/api/v1/sessions',json=params).json()
-    body={'trading_account_id':account['id'],'trading_session_id':sess['id'],'symbol':'EURUSD','market_type':'OTC','timeframe':'1m','direction':'PUT','stake':'40','payout_percent':'84','result':'LOSS'}
-    assert client.post('/api/v1/trades',json={**body,'market_type':'MIXED'}).status_code==422
-    assert client.post('/api/v1/trades',json={**body,'stake':'41'}).status_code==422
-    assert client.post('/api/v1/trades',json=body).status_code==200
-    summary=client.get(f"/api/v1/sessions/{sess['id']}/summary").json()
-    assert summary['limit_reached'] and summary['limit_reason']=='Maximum session loss reached'
-    assert Decimal(summary['remaining_risk'])==0
-    assert client.post('/api/v1/trades',json=body).status_code==409
+    setup_user("limits@example.com")
+    login("limits@example.com")
+    configure_profile("limits@example.com")
+    account = client.post("/api/v1/accounts", json={"name": "Limits", "initial_balance": "2000"}).json()
+    params = {"trading_account_id": account["id"]}
+    sess = client.post("/api/v1/sessions", json=params).json()
+    body = {
+        "trading_account_id": account["id"],
+        "trading_session_id": sess["id"],
+        "symbol": "EURUSD",
+        "market_type": "OTC",
+        "timeframe": "1m",
+        "direction": "PUT",
+        "stake": "20",
+        "payout_percent": "84",
+        "result": "LOSS",
+    }
+    assert client.post("/api/v1/trades", json={**body, "market_type": "MIXED"}).status_code == 422
+    assert client.post("/api/v1/trades", json={**body, "stake": "41"}).status_code == 422
+    assert client.post("/api/v1/trades", json=body).status_code == 200
+    for stake in ["19.80", "0.20"]:
+        assert client.post("/api/v1/trades", json={**body, "stake": stake}).status_code == 200
+    summary = client.get(f"/api/v1/sessions/{sess['id']}/summary").json()
+    assert summary["limit_reached"] and summary["limit_reason"] == "Maximum session loss reached"
+    assert Decimal(summary["remaining_risk"]) == 0
+    assert client.post("/api/v1/trades", json=body).status_code == 409
     client.post(f"/api/v1/sessions/{sess['id']}/close")
-    second=client.post('/api/v1/sessions',json=params).json()
-    for result in ['DRAW','CANCELLED']:
-        assert client.post('/api/v1/trades',json={**body,'trading_session_id':second['id'],'stake':'20','result':result}).status_code==200
-    summary=client.get(f"/api/v1/sessions/{second['id']}/summary").json()
-    assert summary['draws']==summary['cancelled']==1
-    assert Decimal(summary['net_pnl'])==0 and Decimal(summary['win_rate'])==0
-    client.post('/api/v1/auth/logout')
+    second = client.post("/api/v1/sessions", json=params).json()
+    for result in ["DRAW", "CANCELLED"]:
+        assert (
+            client.post("/api/v1/trades", json={**body, "trading_session_id": second["id"], "stake": "19.60", "result": result}).status_code
+            == 200
+        )
+    summary = client.get(f"/api/v1/sessions/{second['id']}/summary").json()
+    assert summary["draws"] == summary["cancelled"] == 1
+    assert Decimal(summary["net_pnl"]) == 0 and Decimal(summary["win_rate"]) == 0
+    client.post("/api/v1/auth/logout")
 
 
 def test_ledger_session_close_and_idempotency():
     setup_user("c@example.com")
     login("c@example.com")
+    configure_profile("c@example.com")
     account = client.post("/api/v1/accounts", json={"name": "C", "initial_balance": "2000.00"}).json()
     session = client.post(
         "/api/v1/sessions",
-        json={"trading_account_id": account["id"], "risk_per_trade_percent": "1", "max_loss_amount": "40", "max_operations": 4},
+        json={"trading_account_id": account["id"]},
     ).json()
     trade = client.post(
         "/api/v1/trades",
@@ -199,3 +217,18 @@ def test_ledger_session_close_and_idempotency():
         assert account_row.current_balance == Decimal("2016.80")
         assert len(s.scalars(select(LedgerEntry).where(LedgerEntry.account_id == account_row.id)).all()) == 2
         assert s.scalar(select(AuditLog).where(AuditLog.event_type == "SESSION_CLOSED")) is not None
+
+
+def configure_profile(email):
+    with TestingSession() as s:
+        user = s.scalar(select(User).where(User.email == email))
+        s.add(
+            RiskProfile(
+                user_id=user.id,
+                risk_per_trade_percent=Decimal("1"),
+                max_session_loss_percent=Decimal("2"),
+                max_session_operations=4,
+                minimum_payout_percent=Decimal("80"),
+            )
+        )
+        s.commit()

@@ -72,6 +72,23 @@ Module docs, context index/manifest if paths change, PROJECT_STATE, CHANGELOG an
 Start from `main` on `codex/req-002-session-manager-journal`; no changes to `main` directly.
 
 ## QA Evidence
+
+### Human Review Financial Corrections
+Status: QA; corrections implemented, no merge authorized. No database migration needed.
+
+| Problem | Correction | Regression / result |
+|---|---|---|
+| P0: per-trade risk was advisory | Centralized Decimal per-trade maximum enforced with 422 | 20.00 accepted / 20.01 rejected at 2000; after WIN, 20.17 accepted / 20.18 rejected. PASS |
+| P0: session loss used gross losing trades | Shared Risk Engine computes net P&L, nonnegative consumed loss and remaining risk | 2000 + 16.80 - 20.17 = 1996.63; consumed 3.37; remaining 36.63. Floor reached via valid stakes 20, 19.80, 0.20; 0.21 rejected at final step. PASS |
+| P1: zero-result trades created TRADE_LOSS ledger rows | Persist trade/audit but no monetary entry for zero P&L | DRAW and CANCELLED preserve balance, leave ledger unchanged, each counts toward max_operations. PASS |
+| P1: client controlled risk when profile missing | SessionStartRequest contains only account ID and optional notes; backend requires profile and freezes snapshot | Missing profile: 409; arbitrary fields: 422; profile changes do not alter existing snapshots; OpenAPI and frontend payload assertions. PASS |
+
+Local validation: backend 19 tests, frontend 10 tests, lint/typecheck/build and real API browser workflow PASS. Browser also verifies over-risk rejection, the net-risk summary and unchanged ledger after DRAW/CANCELLED. CI run for these corrections: pending push; will be recorded below after completion. Existing ownership tests retained.
+
+Decisions: retain negative `gross_loss` for contract compatibility. `suggested_stake` is capped by all three limits. The session floor remains starting_balance - max_loss_amount; following the requested formula, positive net P&L does not expand spendable remaining risk above max_loss_amount, although it increases mathematical distance to the floor. Neither risk overrides nor profile editing are introduced.
+
+### Historical QA before financial review
+The following evidence predates the findings; it is retained for traceability and does not validate the corrected financial semantics.
 2026-09-19: Backend 11 tests PASS; frontend 8 tests PASS; lint/typecheck/build PASS. Chromium against FastAPI with a disposable SQLite database validates account selection, backend stake, WIN/LOSS, balance update, max-operations blocking, closure/reload and session journal persistence. Desktop 1366×768 and tablet 768×1024 were checked; screenshots inspected locally with no page overflow.
 
 Integration evidence: starting balance 2000; WIN stake 20 at 84% = +16.80; next recommended stake 20.17; LOSS = -20.17; ending balance 1996.63. Ledger, summary, W/L, closure and isolation verified. Separate tests cover max-loss rejection, invalid market/stake, DRAW/CANCELLED, cross-account references and cross-user journal links.

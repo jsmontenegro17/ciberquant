@@ -86,6 +86,51 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("REQ-002 user workflow", () => {
+  it("disables start when no risk profile is configured", async () => {
+    vi.mocked(accountsApi.list).mockResolvedValue([
+      {
+        id: 3,
+        name: "No profile",
+        currency: "USD",
+        initial_balance: "2000",
+        current_balance: "2000",
+        status: "ACTIVE",
+      },
+    ]);
+    vi.mocked(riskPreview).mockRejectedValue(
+      new Error("No risk profile configured"),
+    );
+    mount(<NewSession />);
+    await screen.findByText("No profile · USD");
+    fireEvent.change(screen.getByLabelText("Trading account"), {
+      target: { value: "3" },
+    });
+    await screen.findByText("No risk profile configured");
+    expect(
+      (
+        screen.getByRole("button", {
+          name: "Start session",
+        }) as HTMLButtonElement
+      ).disabled,
+    ).toBe(true);
+    expect(sessionsApi.create).not.toHaveBeenCalled();
+  });
+  it("renders backend net loss and remaining risk", async () => {
+    vi.mocked(sessionsApi.summary).mockResolvedValue({
+      ...summary,
+      net_pnl: "-3.37",
+      loss_consumed: "3.37",
+      remaining_risk: "36.63",
+    });
+    mount(
+      <Routes>
+        <Route path="/sessions/:id" element={<SessionWorkspace />} />
+      </Routes>,
+      "/sessions/7",
+    );
+    await screen.findByText(/Loss consumed: 3[.,]37/);
+    expect(screen.getByText(/Remaining risk: 36[.,]63/)).toBeTruthy();
+  });
   it("redirects an unauthenticated protected route", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("Unauthorized"));
     mount(
@@ -135,16 +180,11 @@ describe("REQ-002 user workflow", () => {
     await screen.findByText(/15[.,]00/);
     fireEvent.click(screen.getByRole("button", { name: "Start session" }));
     await screen.findByText("Workspace ready");
-    expect(sessionsApi.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        max_loss_amount: "30",
-        risk_per_trade_percent: "2",
-      }),
-    );
+    expect(sessionsApi.create).toHaveBeenCalledWith({ trading_account_id: 3 });
   });
   it("submits a trade with the recommended stake and shows backend rejection", async () => {
     vi.mocked(tradesApi.create).mockRejectedValue(
-      new Error("Stake exceeds remaining session risk"),
+      new Error("Stake exceeds per-trade risk limit"),
     );
     mount(<TradeForm session={session} summary={summary} onDone={() => {}} />);
     expect((screen.getByLabelText("Stake") as HTMLInputElement).value).toBe(
@@ -156,11 +196,14 @@ describe("REQ-002 user workflow", () => {
     fireEvent.change(screen.getByLabelText("Opened at"), {
       target: { value: "2026-09-19T10:00" },
     });
+    fireEvent.change(screen.getByLabelText("Stake"), {
+      target: { value: "20.18" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Save trade" }));
-    await screen.findByText("Stake exceeds remaining session risk");
+    await screen.findByText("Stake exceeds per-trade risk limit");
     expect(tradesApi.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        stake: "20.17",
+        stake: "20.18",
         trading_session_id: 7,
         result: "WIN",
       }),

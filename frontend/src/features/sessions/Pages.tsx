@@ -142,7 +142,8 @@ export function NewSession() {
     enabled: !!account,
   });
   const create = useMutation({
-    mutationFn: () => sessionsApi.create(risk.data!),
+    mutationFn: () =>
+      sessionsApi.create({ trading_account_id: Number(account) }),
     onSuccess: (s) => {
       qc.invalidateQueries();
       nav("/sessions/" + s.id);
@@ -235,13 +236,15 @@ export function SessionWorkspace() {
           </span>
           <span className="muted">
             {" "}
-            · started {dateTime(session.started_at)}
-            · Account #{session.trading_account_id} · {summary.data!.currency}
+            · started {dateTime(session.started_at)}· Account #
+            {session.trading_account_id} · {summary.data!.currency}
             {session.ended_at && ` · closed ${dateTime(session.ended_at)}`}
           </span>
         </div>
         <div className="actions">
-          {session.status !== "OPEN" && <button onClick={() => setShowNote(true)}>Add note</button>}
+          {session.status !== "OPEN" && (
+            <button onClick={() => setShowNote(true)}>Add note</button>
+          )}
           {session.status === "OPEN" && (
             <>
               <button
@@ -281,10 +284,24 @@ export function SessionWorkspace() {
       <section className="panel">
         <h2>Session summary</h2>
         <div className="grid compact">
-          <div><span>Starting balance</span><strong>{money(summary.data!.starting_balance)}</strong></div>
-          <div><span>Gross profit</span><strong>{money(summary.data!.gross_profit)}</strong></div>
-          <div><span>Gross loss</span><strong>{money(summary.data!.gross_loss)}</strong></div>
-          <div><span>Draws / cancelled</span><strong>{summary.data!.draws} / {summary.data!.cancelled}</strong></div>
+          <div>
+            <span>Starting balance</span>
+            <strong>{money(summary.data!.starting_balance)}</strong>
+          </div>
+          <div>
+            <span>Gross profit</span>
+            <strong>{money(summary.data!.gross_profit)}</strong>
+          </div>
+          <div>
+            <span>Gross loss</span>
+            <strong>{money(summary.data!.gross_loss)}</strong>
+          </div>
+          <div>
+            <span>Draws / cancelled</span>
+            <strong>
+              {summary.data!.draws} / {summary.data!.cancelled}
+            </strong>
+          </div>
         </div>
       </section>
       <section className="panel">
@@ -331,17 +348,19 @@ export function SessionWorkspace() {
       </p>
       <SessionNotes sid={sid} />
       <TradeList sid={sid} />
-      {showTrade && session.status === "OPEN" && !summary.data!.limit_reached && (
-        <TradeForm
-          summary={summary.data!}
-          session={session}
-          onDone={() => {
-            setShowTrade(false);
-            qc.invalidateQueries({ queryKey: ["summary", sid] });
-            qc.invalidateQueries({ queryKey: ["sessions"] });
-          }}
-        />
-      )}
+      {showTrade &&
+        session.status === "OPEN" &&
+        !summary.data!.limit_reached && (
+          <TradeForm
+            summary={summary.data!}
+            session={session}
+            onDone={() => {
+              setShowTrade(false);
+              qc.invalidateQueries({ queryKey: ["summary", sid] });
+              qc.invalidateQueries({ queryKey: ["sessions"] });
+            }}
+          />
+        )}
       {showNote && <NoteForm sid={sid} onDone={() => setShowNote(false)} />}
     </>
   );
@@ -388,7 +407,9 @@ function TradeList({ sid }: { sid: number }) {
       <h2>Recorded operations</h2>
       {q.isLoading ? (
         <div className="muted">Loading trades…</div>
-      ) : q.isError ? <ErrorState/> : !q.data?.length ? (
+      ) : q.isError ? (
+        <ErrorState />
+      ) : !q.data?.length ? (
         <div className="muted">No trades recorded.</div>
       ) : (
         <div className="tableWrap">

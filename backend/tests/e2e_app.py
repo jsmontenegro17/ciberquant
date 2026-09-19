@@ -25,7 +25,7 @@ with factory() as s:
             user_id=user.id,
             risk_per_trade_percent=Decimal("1"),
             max_session_loss_percent=Decimal("2"),
-            max_session_operations=2,
+            max_session_operations=4,
             minimum_payout_percent=Decimal("80"),
         )
     )

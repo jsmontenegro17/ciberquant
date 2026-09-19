@@ -18,6 +18,7 @@
 - Backend-authoritative risk preview, session capacity, account selection, filtered history/journal, and recent trades.
 - Component workflow tests and real API Chromium QA at desktop/tablet widths, included in CI.
 ### Fixed
+- REQ-002 human financial review: enforce per-trade percentage; calculate session capacity from net P&L; avoid zero-value DRAW/CANCELLED ledger entries; accept account-only session start and require backend RiskProfile.
 - Cross-account trade references and cross-user journal links are rejected.
 - Serialized PostgreSQL financial writes; fresh risk snapshot on session start and authoritative balance refresh.
 - Reproducible frontend Docker dependencies, API environment variable and Compose startup smoke checks.
