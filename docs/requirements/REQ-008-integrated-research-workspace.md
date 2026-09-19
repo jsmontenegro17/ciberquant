@@ -1,6 +1,7 @@
 # REQ-008 — Integrated Research Workspace / v1.0
 
 Status: BLOCKED
+Investigation authorized: instrument exact IQ conflict provenance and run separate bounded no-reconnect, reconnect and scanner probes. No finality/engine/persistence-policy change; later successful probes alone cannot resolve the blocker. See providers/IQOPTION_FINALITY_INVESTIGATION.md when evidence is available.
 Human Acceptance: PENDING
 Target: 1.0.0-dev
 Base main/tag: 2f39bdb47d8c44056d905a923d6281246ad8fb43 / v0.7.0

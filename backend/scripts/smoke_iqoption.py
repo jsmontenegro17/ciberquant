@@ -23,6 +23,7 @@ from app.strategies.repository import create_version
 from app.strategies.dsl import digest
 from app.live.iqoption import IQOptionReadOnlyProvider, UPSTREAM_SHA
 from app.live.runtime import ScannerRuntime
+from scripts.iq_diagnostics import HistoryTracker
 
 
 def emit(value):
@@ -34,6 +35,7 @@ def main(soak=False):
     parser.add_argument("--product", choices=["turbo", "binary"], default=settings.iqoption_product)
     parser.add_argument("--seconds", type=int, default=420 if soak else 150)
     parser.add_argument("--regular-symbol", default=None, help="Explicit discovered open REGULAR symbol for reproducible diagnostics")
+    parser.add_argument("--otc-symbol", default=None)
     args = parser.parse_args()
     if not 65 <= args.seconds <= (900 if soak else 300):
         raise SystemExit("Invalid bounded test duration")
@@ -42,6 +44,7 @@ def main(soak=False):
     provider = None
     runtime = None
     db_engine = None
+    tracker = HistoryTracker()
     try:
         provider = IQOptionReadOnlyProvider(
             email=settings.iqoption_email.get_secret_value(),
@@ -50,6 +53,7 @@ def main(soak=False):
             balance=settings.iqoption_balance,
             product=args.product,
             timeout=settings.iqoption_timeout_seconds,
+            history_observer=tracker.observe,
         )
         emit(
             {
@@ -85,6 +89,10 @@ def main(soak=False):
                 chosen = next((a for a in candidates if a["symbol"] == args.regular_symbol), None)
                 if chosen is None:
                     raise ValueError("IQ_REQUESTED_REGULAR_NOT_OPEN")
+            if market == "OTC" and args.otc_symbol:
+                chosen = next((a for a in candidates if a["symbol"] == args.otc_symbol), None)
+                if chosen is None:
+                    raise ValueError("IQ_REQUESTED_OTC_NOT_OPEN")
             dataset = next(d for d in datasets if d.symbol == chosen["symbol"])
             rows = provider.recent_closed(dataset, 20)
             if len(rows) < 20:
@@ -154,7 +162,7 @@ def main(soak=False):
                     )
                 )
                 session.commit()
-            runtime = ScannerRuntime(factory, lambda *args: provider)
+            runtime = ScannerRuntime(factory, lambda *args: provider, diagnostic_sink=tracker.runtime_conflict)
             reconnected = False
             observations = 0
             stale_observations = 0
@@ -162,6 +170,7 @@ def main(soak=False):
             # Runtime bootstraps once from the same frozen OTC origin, then evaluates actual new closes.
             start = time.monotonic()
             while time.monotonic() - start < args.seconds:
+                tracker.label = {"caller": "SCANNER_RUNTIME"}
                 runtime.cycle()
                 with factory() as session:
                     current_item = session.scalar(select(ScannerWatchItem))
@@ -188,6 +197,7 @@ def main(soak=False):
                             }
                         )
                 for item in selected:
+                    tracker.label = {"caller": "SOAK_DIRECT_OBSERVER"}
                     frame = provider.poll(item["dataset"])
                     if item["clock"] is not None and frame.server_time < item["clock"]:
                         raise ValueError("IQ_SOAK_CLOCK_REGRESSION")
@@ -202,6 +212,8 @@ def main(soak=False):
                             emit(
                                 {
                                     "stage": "DATA_CONFLICT",
+                                    "detection_layer": "SOAK_DIRECT_OBSERVER",
+                                    "observations": tracker.snapshots(item["dataset"], key),
                                     "symbol": item["dataset"].symbol,
                                     "market_type": item["dataset"].market_type,
                                     "candle_open": key,
@@ -227,6 +239,8 @@ def main(soak=False):
                     origin = provider._origin
                     runtime.close()
                     provider.close()
+                    tracker.generation += 1
+                    tracker.label = {"caller": "SOAK_RECONNECT_BOOTSTRAP"}
                     provider = IQOptionReadOnlyProvider(
                         email=settings.iqoption_email.get_secret_value(),
                         password=settings.iqoption_password.get_secret_value(),
@@ -235,10 +249,11 @@ def main(soak=False):
                         product=args.product,
                         timeout=settings.iqoption_timeout_seconds,
                         origin=origin,
+                        history_observer=tracker.observe,
                     )
                     for item in selected:
                         provider.bootstrap(item["dataset"])
-                    runtime = ScannerRuntime(factory, lambda *args: provider)
+                    runtime = ScannerRuntime(factory, lambda *args: provider, diagnostic_sink=tracker.runtime_conflict)
                     runtime.recover_pending()
                     reconnected = True
                     emit({"stage": "CONTROLLED_RECONNECT", "result": "PASS", "mode": "PRACTICE", "orders_sent": 0})
@@ -318,6 +333,7 @@ def main(soak=False):
         emit({"stage": "FINAL", "result": "FAIL", "error_type": type(exc).__name__, "error_code": code, "orders_sent": 0})
         return 1
     finally:
+        tracker.report()
         if runtime:
             try:
                 runtime.close()

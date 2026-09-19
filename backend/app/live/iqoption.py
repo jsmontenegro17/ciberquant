@@ -1,7 +1,7 @@
 """Read-only IQ provider; optional upstream stays private in its dedicated event loop."""
 
 import asyncio
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from threading import Thread
 from time import monotonic
@@ -10,6 +10,7 @@ from ..market_data.normalization import Dataset, utc
 from ..market_data.quality import validate_candle
 from ..market_data.timeframe import duration
 from .providers import CAPABILITIES, ProviderFrame
+from .conflicts import DataConflictError
 
 UPSTREAM_SHA = "acac6e08333466ae188c7dfa7fd2a03174e34ca2"
 
@@ -86,6 +87,7 @@ class IQOptionReadOnlyProvider:
         max_history=250000,
         timeout=15,
         transport_factory=None,
+        history_observer=None,
     ):
         if balance != "PRACTICE":
             raise ValueError("IQ_PRACTICE_REQUIRED")
@@ -98,6 +100,7 @@ class IQOptionReadOnlyProvider:
         self._last = {}
         self._metadata_at = 0
         self._closed = False
+        self._history_observer = history_observer
         if transport_factory is None:
             from .iq_transport import IQTransport
 
@@ -176,12 +179,37 @@ class IQOptionReadOnlyProvider:
         asset = self._asset(dataset)
         now = self._server_time()
         step = int(duration(dataset.timeframe).total_seconds())
-        raw = self._call(self._transport.history(asset["active_id"], step, min(count + 2, 1000), int(now.timestamp())))
+        raw = self._history(dataset, asset, step, min(count + 2, 1000), int(now.timestamp()), now, "RECENT")
         candles = [normalize_candle(r, dataset, asset["active_id"]) for r in raw]
         closed = sorted((c for c in candles if c.close_time <= now), key=lambda c: c.open_time)
         if closed:
             self.capabilities["historical_candles"] = True
         return closed[-count:]
+
+    def _history(self, dataset, asset, step, count, end, clock, phase):
+        raw = self._call(self._transport.history(asset["active_id"], step, count, end))
+        if self._history_observer is not None:
+            exact_clock = self._call(self._clock())
+            response_clock = datetime.fromtimestamp(int(exact_clock), timezone.utc) + timedelta(
+                microseconds=int((exact_clock - int(exact_clock)) * 1000000)
+            )
+            # Opt-in local diagnostics only. Explicit projection, never raw frames/auth.
+            self._history_observer(
+                dataset,
+                [normalize_candle(r, dataset, asset["active_id"]) for r in raw],
+                dict(
+                    provider="IQOPTION",
+                    product=self._product,
+                    active_id=asset["active_id"],
+                    history_request_end=end,
+                    history_request_count=count,
+                    phase=phase,
+                    provider_time=clock,
+                    provider_response_time=response_clock,
+                    received_time=datetime.now(timezone.utc),
+                ),
+            )
+        return raw
 
     def bootstrap(self, dataset):
         asset = self._asset(dataset)
@@ -192,7 +220,7 @@ class IQOptionReadOnlyProvider:
         step = int(duration(dataset.timeframe).total_seconds())
         rows = {}
         while True:
-            raw = self._call(self._transport.history(asset["active_id"], step, 1000, end))
+            raw = self._history(dataset, asset, step, 1000, end, datetime.fromtimestamp(cutoff, timezone.utc), "BOOTSTRAP")
             if not raw:
                 raise ValueError("IQ_CANONICAL_HISTORY_UNAVAILABLE")
             batch = [normalize_candle(r, dataset, asset["active_id"]) for r in raw]
@@ -201,7 +229,9 @@ class IQOptionReadOnlyProvider:
                 if c.open_time >= self._origin and c.close_time.timestamp() <= cutoff:
                     old = rows.get(c.open_time)
                     if old is not None and old != c:
-                        raise ValueError("DATA_CONFLICT")
+                        raise DataConflictError(
+                            dataset, old, c, phase="BOOTSTRAP", detection_layer="PROVIDER_BOOTSTRAP_INTERNAL", provider="IQOPTION"
+                        )
                     rows[c.open_time] = c
             if len(rows) > self._max_history:
                 raise ValueError("IQ_HISTORY_CAP_EXCEEDED")
@@ -229,7 +259,7 @@ class IQOptionReadOnlyProvider:
         count = int((now - self._last[dataset]).total_seconds() // step) + 2
         if count > 1000:
             raise ValueError("IQ_RECONNECT_BOOTSTRAP_REQUIRED")
-        rows = self._call(self._transport.history(asset["active_id"], step, max(3, count), int(now.timestamp())))
+        rows = self._history(dataset, asset, step, max(3, count), int(now.timestamp()), now, "OBSERVED")
         closed = tuple(
             sorted(
                 (
