@@ -46,9 +46,21 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r ../backend/requirements.txt
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
   docker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: docker compose config
       - run: docker compose build
+      - run: docker compose up -d
+      - run: curl --fail --retry 20 --retry-connrefused --retry-delay 2 http://localhost:8000/health
+      - run: curl --fail --retry 20 --retry-connrefused --retry-delay 2 http://localhost:5173
+      - if: always()
+        run: docker compose logs --tail=100
+      - if: always()
+        run: docker compose down

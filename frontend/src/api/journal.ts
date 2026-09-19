@@ -1,1 +1,7 @@
-import {api} from './client'; import type {Journal} from '../types'; export const journalApi={list:()=>api<Journal[]>('/journal'),create:(body:object)=>api<Journal>('/journal',{method:'POST',body:JSON.stringify(body)})};
+import { api } from "./client";
+import type { Journal } from "../types";
+export const journalApi = {
+  list: () => api<Journal[]>("/journal"),
+  create: (body: object) =>
+    api<Journal>("/journal", { method: "POST", body: JSON.stringify(body) }),
+};
