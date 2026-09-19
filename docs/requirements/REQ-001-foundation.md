@@ -83,9 +83,9 @@ SQLite is only a local/test fallback; production configuration is PostgreSQL. Br
 | `python -m pytest` | Windows host | UNVERIFIED | Python is unavailable on this host |
 | `alembic upgrade head` | Windows host | UNVERIFIED | Requires Python and PostgreSQL |
 | `docker compose build/up` | Windows host | UNVERIFIED | Docker is unavailable on this host |
-| GitHub CI workflow | Remote | FAIL (fixed, awaiting rerun) | Run `35414994610` / commit `ac064c6`; Alembic passed, Frontend/Docker passed, Backend failed in seed because floating bcrypt 5 rejected Passlib's compatibility probe. |
+| GitHub CI workflow | Remote | FAIL (fixed, awaiting rerun) | Run `35415145865` / commit `6bff0f6`; Alembic, both seed runs and smoke passed; Frontend/Docker passed; pytest failed during collection because `app` was not on `sys.path`. |
 
-Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification and bcrypt compatibility pin. Commit evidence is recorded in Git.
+Fixes applied during QA: reproducible seed account/risk profile, audit log, idempotent session close, duplicate-candle validation, integration tests, PostgreSQL migration job, Docker CI job, standard Alembic logging configuration, double-seed CI verification, bcrypt compatibility pin and explicit pytest package path. Commit evidence is recorded in Git.
 
 ## Final Result
 Foundation QA corrections implemented. Status remains QA until the corrected remote CI workflow produces a successful run and the bootstrap `main` branch is created from that validated SHA.

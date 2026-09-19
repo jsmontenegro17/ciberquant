@@ -28,7 +28,7 @@ Alembic initial migration; PostgreSQL; Docker Compose.
 REQ-001 is the bootstrap exception. After CI validation, `main` must be created from the final REQ-001 SHA. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-P0: latest CI run `35414994610` passed Alembic but failed during seed because of Passlib/bcrypt incompatibility; bcrypt is pinned in the current branch and CI is awaiting rerun. After a successful run, create `main` from the validated SHA. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
+P0: latest CI run `35415145865` passed Alembic, both seed runs and FastAPI smoke, but pytest collection failed because `app` was not on `sys.path`; pytest path is configured in the current branch and CI is awaiting rerun. After a successful run, create `main` from the validated SHA. P1: frontend is a shell; candle import and aggregate session analytics are pending. P2: full quant engines remain next milestones.
 
 ## Active requirements
 REQ-001 — Foundation (QA).
