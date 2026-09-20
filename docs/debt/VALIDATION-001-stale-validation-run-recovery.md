@@ -1,7 +1,7 @@
 # VALIDATION-001 — Stale Validation Run Recovery
 
 Status: RESOLVED
-REQ-008 implementation update (Human Acceptance PENDING): PostgreSQL guarded recovery permits only abandoned RUNNING_DEVELOPMENT/RUNNING_TEST to FAILED. Consumed reveal timestamp and prior development evidence survive; FAILED cannot reveal/reseal. CI regression verifies irreversible claims. No protocol/math changes.
+REQ-008 implementation update (Human Acceptance PASS on2026-09-19): PostgreSQL guarded recovery permits only abandoned RUNNING_DEVELOPMENT/RUNNING_TEST to FAILED. Consumed reveal timestamp and prior development evidence survive; FAILED cannot reveal/reseal. CI regression verifies irreversible claims. No protocol/math changes.
 
 ## Historical problem and original scope
 

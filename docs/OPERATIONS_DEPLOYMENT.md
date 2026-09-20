@@ -2,7 +2,7 @@
 
 IQ conflict handling: [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md). DATA_CONFLICT is a persisted stop latch, not a recoverable network error. Restarting a worker or pause/resume does not clear it. Inspect sanitized identity/value evidence and preserve original raw/events; no overwrite, delete/reinsert or retrospective reconstruction. No automatic clearing endpoint is provided. Explicit safe operational recovery procedures remain LIVE-001; do not clear the latch merely to restore availability. Worker global RUNNING only describes process liveness, not health of a conflicted subscription.
 
-Implemented safeguards; deployment-specific TLS/firewall verification and Human Acceptance remain pending. Default Compose is **development only**, not a production template: it exposes PostgreSQL, uses development credentials and serves HTTP. Do not deploy it unchanged or claim production readiness from Docker CI.
+Safeguards accepted in REQ-008 / Human Acceptance PASS on2026-09-19; actual deployment-specific TLS/firewall verification remains pending. Default Compose is **development only**, not a production template: it exposes PostgreSQL, uses development credentials and serves HTTP. Do not deploy it unchanged or claim production readiness from Docker CI.
 
 ## Production topology
 

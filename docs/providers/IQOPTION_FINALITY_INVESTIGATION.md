@@ -1,5 +1,7 @@
 # REQ-008 — IQ finality investigation, 2026-09-19 UTC
 
+Release acceptance update2026-09-19 (America/Bogota): REQ-008 DONE / Human Acceptance PASS on implementation618301e84e8a65f2cbe7e2a46bc6384524db2e93 under ADR-006 OPTION A. The investigation and historical pending/no-release assessments below remain preserved as earlier-stage evidence, not current acceptance status. Upstream limitation and absence of immutable-finality guarantee remain unchanged. See [final acceptance](../requirements/REQ-008-integrated-research-workspace.md).
+
 Current decision2026-09-19: human-approved OPTION A — FAIL CLOSED, recorded in [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md). The policy blocker is resolved, not the upstream limitation. No immutable closed-candle finality guarantee; IQ remains unofficial/experimental/PRACTICE-only/read-only. Human Acceptance PENDING; no merge/tag/release. [Final QA correction](../REQ008_QA_UNBLOCK.md).
 
 Historical investigation status at starting HEAD cd67e4b04344174c5081e7bbb956aadc1e161d3d: BLOCKED — UPSTREAM FINALITY POLICY REQUIRED, PR #7 draft. The evidence and alternatives below are preserved; their request for a policy decision is superseded by ADR-006, not erased.

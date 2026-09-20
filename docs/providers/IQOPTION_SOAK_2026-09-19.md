@@ -1,5 +1,7 @@
 # REQ-008 — sanitized local PRACTICE operational probe
 
+Release acceptance update2026-09-19 (America/Bogota): REQ-008 DONE / Human Acceptance PASS under ADR-006 fail-closed policy. The earlier pending/blocked assessments below are historical probe evidence and are not erased or relabeled as conflict-free. See [final acceptance](../requirements/REQ-008-integrated-research-workspace.md). Orders0; immutable finality NOT GUARANTEED.
+
 Current policy update2026-09-19: [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md) adopts fail-closed by human decision. REQ-008 H now requires DATA_CONFLICT SAFELY DETECTED AND FAIL-CLOSED, not a conflict-free soak. The historical blocked assessment and all probe results below are preserved. No upstream repair/finality guarantee is claimed; Human Acceptance PENDING.
 
 Historical overall assessment before the policy decision: BLOCKED by an observed closed-candle DATA_CONFLICT; successful later probes do not erase it. No frozen close semantics or upstream pin changed.

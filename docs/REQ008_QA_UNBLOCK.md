@@ -1,5 +1,7 @@
 # REQ-008 — final QA unblock evidence
 
+Historical QA record. Superseding acceptance2026-09-19: REQ-008 DONE / Human Acceptance PASS on implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93. Implementation push35478263706 and PR35478266262 both PASS (backend219/7 skips, frontend59, E2E7, PostgreSQL, Docker/worker). The pending/no-release language below records the earlier QA stage. See [final acceptance](requirements/REQ-008-integrated-research-workspace.md) and [release handoff](https://github.com/jsmontenegro17/ciberquant/pull/7) for closure SHA/CI/tag evidence.
+
 Decision date2026-09-19 America/Bogota; test execution extends into2026-09-20 UTC. Baseline7b022f963ec14d58360b05c7e88f5afa627f5384 on codex/req-008-integrated-workspace, PR7; accepted main/v0.7.0 remains2f39bdb47d8c44056d905a923d6281246ad8fb43. Human Acceptance PENDING; target1.0.0-dev; no merge/tag/release.
 
 ## IQ policy, not an upstream repair

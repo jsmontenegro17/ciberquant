@@ -56,7 +56,7 @@ def status(user=Depends(current_user), session=Depends(db)):
             ],
         )
     return dict(
-        version="1.0.0-dev",
+        version="1.0.0",
         environment=settings.environment,
         worker=dict(state=worker_state, heartbeat=record(worker) if worker else None),
         subscriptions=providers,

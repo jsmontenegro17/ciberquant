@@ -1,7 +1,7 @@
 # BACKTEST-001 — Stale synchronous run recovery
 
 Status: RESOLVED
-REQ-008 implementation update (Human Acceptance PENDING): PostgreSQL lifecycle ownership and bounded explicit recovery finalize abandoned RUNNING as audited FAILED, never fabricate trades/completion. Active jobs block recovery, completed evidence remains unchanged; explicit retry is a new run.
+REQ-008 implementation update (Human Acceptance PASS on2026-09-19): PostgreSQL lifecycle ownership and bounded explicit recovery finalize abandoned RUNNING as audited FAILED, never fabricate trades/completion. Active jobs block recovery, completed evidence remains unchanged; explicit retry is a new run.
 
 ## Historical problem and original scope
 

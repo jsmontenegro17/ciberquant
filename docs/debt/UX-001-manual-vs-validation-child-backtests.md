@@ -1,7 +1,7 @@
 # UX-001 — Distinguish manual vs validation child backtests
 
 Status: RESOLVED
-REQ-008 implementation update (Human Acceptance PENDING): Strategy list filters MANUAL with bounded batched lookups; Workspace separately exposes latest historical validation and child lineage. API/E2E regressions distinguish manual IDs from validation child IDs. No calculation change.
+REQ-008 implementation update (Human Acceptance PASS on2026-09-19): Strategy list filters MANUAL with bounded batched lookups; Workspace separately exposes latest historical validation and child lineage. API/E2E regressions distinguish manual IDs from validation child IDs. No calculation change.
 
 ## Historical problem and original scope
 

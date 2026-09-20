@@ -1,14 +1,25 @@
 # REQ-008 — Integrated Research Workspace / v1.0
 
-Status: QA — final push/PR CI gate required before READY FOR HUMAN ACCEPTANCE
+Status: DONE
 Human-approved amendment2026-09-19 (America/Bogota): OPTION A — FAIL CLOSED accepted for IQ finality, not Human Acceptance/release. Replace NO DATA_CONFLICT OBSERVED with DATA_CONFLICT SAFELY DETECTED AND FAIL-CLOSED because identical upstream requests demonstrably return revised closed OHLC. [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md) records the policy; original failed evidence remains intact.
-IQ_UPSTREAM_POST_CLOSE_REVISION remains a demonstrated provider limitation, not a repaired upstream bug. The policy blocker is resolved by the human decision. The independent session E2E synchronization race is reproduced and corrected; both final CI events must pass before readiness. See [QA unblock evidence](../REQ008_QA_UNBLOCK.md) and [IQ investigation](../providers/IQOPTION_FINALITY_INVESTIGATION.md).
-Human Acceptance: PENDING
-Target: 1.0.0-dev
+IQ_UPSTREAM_POST_CLOSE_REVISION remains a demonstrated provider limitation, not a repaired upstream bug. The policy blocker is resolved by the human decision. The independent session E2E synchronization race is reproduced and corrected; the implementation QA gate was satisfied by push35478263706 PASS and PR35478266262 PASS. See [QA unblock evidence](../REQ008_QA_UNBLOCK.md) and [IQ investigation](../providers/IQOPTION_FINALITY_INVESTIGATION.md).
+Human Acceptance: PASS
+Release version: 1.0.0
 Base main/tag: 2f39bdb47d8c44056d905a923d6281246ad8fb43 / v0.7.0
 Branch: codex/req-008-integrated-workspace
 
-## Baseline audit
+## Final Human Acceptance
+
+Date: 2026-09-19 (America/Bogota).
+Approved implementation HEAD: 618301e84e8a65f2cbe7e2a46bc6384524db2e93.
+Acceptance A–L: PASS. P0=0; P1=0; orders sent=0.
+Human acceptance explicitly includes ADR-006 / OPTION A — FAIL CLOSED. IQ_UPSTREAM_POST_CLOSE_REVISION remains known; no immutable closed-candle finality guarantee, REAL/digital unsupported, no automatic retry or overwrite.
+Implementation CI: push35478263706 PASS / PR35478266262 PASS, each backend219 PASS/7 skips, frontend59 PASS, E2E7 PASS, PostgreSQL and Docker/worker PASS.
+The sole closure commit is documentation/version only. Its distinct release HEAD, final feature CI, merged main SHA/main CI and annotated v1.0.0 target are recorded in the [PR #7 release handoff](https://github.com/jsmontenegro17/ciberquant/pull/7). Merge requires green final feature CI; tag requires green integrated main CI.
+Resolved accepted scopes: SEC-001, UX-001, DATA-001, BACKTEST-001, VALIDATION-001. Remaining P2: LIVE-001 PARTIAL (stronger finality research, protocol drift, prolonged soak, supervision, operator recovery, digital/capacity); QUANT-001/002, BACKTEST-002, VALIDATION-002, dependency/bundle warnings, real production deployment verification.
+No subsequent requirement is started or authorized. The historical QA sequence below is retained; its earlier pending/no-release statements describe that earlier stage and are superseded by this acceptance.
+
+## Historical baseline audit
 
 Fetched origin/tags; main, origin/main and v0.7.0 resolve to the expected accepted commit. Worktree clean; no partial REQ-008 found. REQ-001–007 DONE/PASS. Existing modules remain authoritative. No automatic merge/tag/release; explicit later human acceptance required.
 
@@ -27,7 +38,7 @@ cq-features-v1, cq-strategy-dsl-v1, cq-binary-backtest-v1, cq-validation-v1, cq-
 
 ## Acceptance A–L
 
-A baseline/regression; B explicit Workspace/pipeline/navigation; C exact ID/version lineage; D descriptive nonpooled comparison/source differences; E safe idempotent concurrent recovery/reveal preservation; F production/development security; G operational diagnostics; H IQ fail-closed boundary (below); I cross-user negatives; J PostgreSQL migration/locks/preservation; K all suites/build/Docker; L human QA readiness including both final push and PR CI. Final automated evidence is recorded in the PR #7 handoff; human acceptance remains pending.
+A baseline/regression; B explicit Workspace/pipeline/navigation; C exact ID/version lineage; D descriptive nonpooled comparison/source differences; E safe idempotent concurrent recovery/reveal preservation; F production/development security; G operational diagnostics; H IQ fail-closed boundary (below); I cross-user negatives; J PostgreSQL migration/locks/preservation; K all suites/build/Docker; L human QA readiness including both final push and PR CI. Final automated evidence is recorded in the PR #7 handoff; human acceptance is PASS as recorded above.
 
 ### H — human-approved fail-closed boundary
 
@@ -52,7 +63,7 @@ A baseline/regression; B explicit Workspace/pipeline/navigation; C exact ID/vers
 
 Workspace/API, pipeline/lineage, paginated histories, descriptive comparisons, manual/validation separation, PostgreSQL guarded recovery, production security validation, heartbeat/diagnostics and local-only soak tooling implemented. See [Workspace semantics and human checklist](../WORKSPACE_SEMANTICS.md), [deployment/recovery](../OPERATIONS_DEPLOYMENT.md), [all real IQ attempts](../providers/IQOPTION_SOAK_2026-09-19.md).
 
-Correction regression: local backend204 PASS/22 explicit skips, frontend59 PASS, isolated session E2E1 PASS, full E2E7 PASS; lint/typecheck/build PASS. PostgreSQL/concurrency and Docker require final CI, not claimed as local executions. Six mathematical engines unchanged; no persisted historical evidence rewritten. PR #7 remains draft until both final CI events pass; no merge/tag.
+Correction regression: local backend204 PASS/22 explicit skips, frontend59 PASS, isolated session E2E1 PASS, full E2E7 PASS; lint/typecheck/build PASS. PostgreSQL/concurrency and Docker passed the implementation CI runs above, not claimed as local executions. Six mathematical engines unchanged; no persisted historical evidence rewritten. PR #7 became ready for review after both implementation CI events passed. Release closure follows the separately authorized sequence above.
 
 Historical blocker: real IQ probe observed `IQ_SOAK_DATA_CONFLICT` after two closes and reconnect, without exact candle attribution. Subsequent independent investigation demonstrated upstream post-close revisions; the original missing identity cannot be reconstructed. Successful bounded probes do not erase failures. The former zero-conflict soak gate is explicitly superseded by the human-approved H amendment, not retroactively marked passed. No incompatible finality change is authorized. Orders0; no v1.0 release approval claimed.
 

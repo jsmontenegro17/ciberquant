@@ -1,6 +1,6 @@
 # Integrated Research Workspace — REQ-008
 
-Implemented, pending human acceptance. Workspace is a read-only projection, not a seventh engine. `/workspace` requires an explicitly chosen canonical dataset (source/broker/symbol/market_type/timeframe) and immutable StrategyVersion ID. No default substitution or ranking. Dataset availability is shared as in the existing Market Data contract; strategies/runs/watch items/events/outcomes are owned. All GETs have no side effects.
+Accepted in REQ-008, Human Acceptance PASS on2026-09-19. Workspace is a read-only projection, not a seventh engine. `/workspace` requires an explicitly chosen canonical dataset (source/broker/symbol/market_type/timeframe) and immutable StrategyVersion ID. No default substitution or ranking. Dataset availability is shared as in the existing Market Data contract; strategies/runs/watch items/events/outcomes are owned. All GETs have no side effects.
 
 ## Pipeline and evidence
 
@@ -30,4 +30,4 @@ Journal/sessions remain separate user-owned evidence accessible beside the resea
 10. Review sanitized real IQ soak and provider health. Confirm PRACTICE/read-only/zero orders.
 11. Test cross-user IDs and error/loading/empty states. No secret/account crossover.
 
-Human Acceptance: PENDING. No merge/tag/release until separately authorized.
+Human Acceptance: PASS on2026-09-19; implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93. Closure authorized with final feature CI → merge → main CI → tag gates. No subsequent requirement authorized.

@@ -1,6 +1,6 @@
 # Context Index
 
-Active: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), 1.0.0-dev / QA / Human Acceptance PENDING. [ADR-006 fail-closed decision](adr/ADR-006-iq-post-close-finality-fail-closed.md), [E2E root cause and final gates](REQ008_QA_UNBLOCK.md), [Workspace semantics](WORKSPACE_SEMANTICS.md), [operations/deployment](OPERATIONS_DEPLOYMENT.md), [real IQ probe](providers/IQOPTION_SOAK_2026-09-19.md), [reproduced IQ finality revisions](providers/IQOPTION_FINALITY_INVESTIGATION.md). IQ is experimental/PRACTICE-only/read-only; no immutable-finality guarantee. Both final CI events gate readiness. `/workspace` and `/operations/status`; backend api/workspace.py, api/operations.py, operations.py; migration007_operations. Historical v0.7.0 statements below remain accepted release context.
+Accepted: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), v1.0.0 / DONE / Human Acceptance PASS on2026-09-19. Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93. [Workspace](WORKSPACE_SEMANTICS.md), [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md), [operations/recovery](OPERATIONS_DEPLOYMENT.md), [QA evidence](REQ008_QA_UNBLOCK.md), [finality investigation](providers/IQOPTION_FINALITY_INVESTIGATION.md), [release handoff](https://github.com/jsmontenegro17/ciberquant/pull/7). IQ remains experimental/PRACTICE-only/read-only/fail-closed with no immutable-finality guarantee; orders0. REQ-001–008 DONE/PASS. Historical release context below is preserved.
 
 REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2026-09-19 real PRACTICE smoke](providers/IQOPTION_SMOKE_2026-09-19.md); `backend/app/live/iqoption.py`, `iq_transport.py`, `backend/tests/test_iqoption.py`, `backend/scripts/smoke_iqoption.py`. Mandatory in this requirement, not deferred to REQ-008.
 
@@ -19,7 +19,7 @@ REQ-007 real IQ: [setup/pinned protocol](providers/IQOPTION_EXPERIMENTAL.md), [2
 | Validation | [VALIDATION](modules/VALIDATION.md), [Protocol](VALIDATION_PROTOCOL.md), [REQ-006](requirements/REQ-006-validation-walk-forward.md) | `backend/app/validation/`, `backend/app/api/validation.py`, `frontend/src/features/validation/`, migration005 |
 | Analytics | [ANALYTICS](modules/ANALYTICS.md) | `backend/app/api/trading.py` |
 
-Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Accepted release: REQ-007, version0.7.0, DONE / Human Acceptance PASS. REQ-001–007 DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #6](https://github.com/jsmontenegro17/ciberquant/pull/6). cq-live-data-v1 and cq-scanner-v1 are frozen with their four existing quant dependencies. REQ-008 Integrated Research Workspace/v1.0 is in QA on PR #7; Human Acceptance pending, not released.
+Machine-readable map: [CONTEXT_MANIFEST.yaml](CONTEXT_MANIFEST.yaml). Previous accepted release: REQ-007, version0.7.0, DONE / Human Acceptance PASS. REQ-001–007 DONE / PASS. Integrated main SHA, CI and tag evidence: [PR #6](https://github.com/jsmontenegro17/ciberquant/pull/6). cq-live-data-v1 and cq-scanner-v1 are frozen with their four existing quant dependencies. REQ-008 Integrated Research Workspace/v1.0 has Human Acceptance PASS; final release metadata and integrated CI/tag evidence are in PR #7.
 
 Provider docs: [MT5](providers/MT5.md), [IQ experimental](providers/IQOPTION_EXPERIMENTAL.md), [Replay](providers/REPLAY.md). Scanner regressions: `test_live_engine.py`, `test_scanner_api.py`, `test_live_migration.py`, `test_mt5_provider.py`, `scanner.test.tsx`, `e2e/scanner.spec.ts`. Benchmark `backend/scripts/benchmark_live.py`; operations debt [LIVE-001](debt/LIVE-001-provider-operations.md).
 
@@ -31,9 +31,9 @@ Research regressions: `backend/tests/test_backtest_engine.py`, `test_research_ap
 
 P2 quant debt: [QUANT-001 — Feature checkpoints](debt/QUANT-001-feature-checkpoints.md), [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md). Official cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 are frozen; full-candle features become available at close_time only. No multi-version dispatcher is implemented in REQ-005.
 
-Future security debt: [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
+Resolved essential REQ-008 security scope (historical debt): [SEC-001 — Production authentication configuration](debt/SEC-001-production-auth-configuration.md), required before production and not a REQ-002 blocker.
 
-P2 data debt: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-processing-import-recovery.md), not a v0.3.0 blocker.
+Resolved essential REQ-008 import recovery scope (historical debt): [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-processing-import-recovery.md), not a v0.3.0 blocker.
 
 Frontend entry: `frontend/src/app/router.tsx`; HTTP client: `frontend/src/api/client.ts`; feature screens: `frontend/src/features/`; regression tests: `frontend/src/features/sessions/workflow.test.tsx`; real API browser QA: `frontend/e2e/session.spec.ts`.
 

@@ -4,7 +4,7 @@ from .deps import db
 from ..config import settings
 router=APIRouter(tags=['system'])
 @router.get('/health')
-def health(): return {'status':'ok','version':'1.0.0-dev','environment':settings.environment}
+def health(): return {'status':'ok','version':'1.0.0','environment':settings.environment}
 @router.get('/ready')
 def ready(session=Depends(db)):
     try:
