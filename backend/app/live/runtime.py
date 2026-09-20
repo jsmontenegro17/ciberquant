@@ -155,6 +155,9 @@ class ScannerRuntime:
                 saved = LiveSubscription(key=key, provider=first.provider, dataset=first.dataset, status="DISCONNECTED")
                 s.add(saved)
                 s.commit()
+            if (saved.health or {}).get("error") == "DATA_CONFLICT":
+                # ADR-006: process restart is not authority to clear a persisted conflict.
+                raise ValueError("DATA_CONFLICT")
             sub = self.subscriptions.get(key)
             if sub is None:
                 provider = self.provider_factory(s, first.provider, dataset)

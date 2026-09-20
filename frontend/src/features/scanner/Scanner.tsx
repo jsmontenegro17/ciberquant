@@ -4,12 +4,14 @@ import {scannerApi,type WatchItem} from '../../api/scanner';
 import {researchApi} from '../../api/research';
 import {marketApi,datasetOnly,type Dataset} from '../../api/marketData';
 import {Failure,Paging} from '../market-data/Shared';
+import {ProviderPolicy} from './ProviderPolicy';
 
 function Json({value}:{value:unknown}){return <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(value,null,2)}</pre>;}
 export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  const e=item.latest;
  return <section className="panel" aria-label={`Watch item ${item.id}`}>
  <h3>{item.dataset.symbol} · {item.dataset.timeframe}</h3><p>{Object.values(item.dataset).join(' / ')}</p>
+ <ProviderPolicy provider={item.provider} error={e?.error}/>
  <p>{item.provider==='REPLAY'?'REPLAY MODE':item.provider} · {item.state} · {item.research_mode?'RESEARCH FILTER — not validated for normal scanning':'Validated scanner'}</p>
  {item.provider==='IQOPTION'&&<p className="researchWarning">UNOFFICIAL COMMUNITY INTEGRATION — Protocol may change without notice. PRACTICE / read-only. Product: {e?.payout_product??'Unverified'}. Observed payout is not a guaranteed executable quote.</p>}
  <h4>{e?.strategy_name??`Version #${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {e?.state==='MATCH'?'CONDITIONS MATCHED':e?.state??'Waiting for closed candles'}</h4>

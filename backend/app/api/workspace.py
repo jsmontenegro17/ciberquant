@@ -228,6 +228,8 @@ def overview(ctx=Depends(context), user=Depends(current_user), session=Depends(d
             "SCANNER",
             "MISSING"
             if not items
+            else "FAILED"
+            if any((h["health"] or {}).get("error") == "DATA_CONFLICT" for h in health)
             else "STALE"
             if any(h["heartbeat_expired"] for h in health)
             else "READY"

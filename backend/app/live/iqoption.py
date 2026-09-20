@@ -13,6 +13,15 @@ from .providers import CAPABILITIES, ProviderFrame
 from .conflicts import DataConflictError
 
 UPSTREAM_SHA = "acac6e08333466ae188c7dfa7fd2a03174e34ca2"
+IQ_OPERATIONAL_POLICY = {
+    "integration": "UNOFFICIAL COMMUNITY INTEGRATION",
+    "experimental": True,
+    "balance_mode": "PRACTICE",
+    "read_only": True,
+    "finality_policy": "FAIL_CLOSED_ON_REVISION",
+    "immutable_finality": "NOT_GUARANTEED",
+    "upstream_sha": UPSTREAM_SHA,
+}
 
 
 def exact_number(value):
@@ -144,9 +153,8 @@ class IQOptionReadOnlyProvider:
     def status_metadata(self):
         return {
             **self._status,
-            "integration": "UNOFFICIAL COMMUNITY INTEGRATION",
+            **IQ_OPERATIONAL_POLICY,
             "product": self._product,
-            "upstream_sha": UPSTREAM_SHA,
             "capabilities": dict(self.capabilities),
         }
 

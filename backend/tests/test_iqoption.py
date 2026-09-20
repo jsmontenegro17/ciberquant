@@ -140,6 +140,9 @@ def test_provider_bootstrap_forming_closed_capabilities_and_disconnect():
         assert all(c.close_time <= frame.server_time for c in frame.closed)
         assert frame.payout == 85 and frame.market_open is True
         assert all(p.capabilities.values())
+        assert p.status_metadata["finality_policy"] == "FAIL_CLOSED_ON_REVISION"
+        assert p.status_metadata["immutable_finality"] == "NOT_GUARANTEED"
+        assert p.status_metadata["balance_mode"] == "PRACTICE" and p.status_metadata["read_only"] is True
         fake.index = 3
         assert p.poll(META).closed[-1].open_time == BASE + timedelta(minutes=2)
         with pytest.raises(ValueError):
@@ -321,7 +324,7 @@ def test_fake_transport_revision_fails_closed_without_overwrite(harness):
     from app.live.runtime import ScannerRuntime
     from app.live.conflicts import DataConflictError
 
-    _, factory, _ = harness
+    client, factory, _ = harness
     fake = FakeTransport()
     p = IQOptionReadOnlyProvider(origin=BASE, transport_factory=lambda *a: fake)
     key = digest(dict(provider="IQOPTION", dataset=META.model_dump()))
@@ -361,6 +364,7 @@ def test_fake_transport_revision_fails_closed_without_overwrite(harness):
             )
         )
         s.commit()
+        version_id = version.id
     captured = []
 
     def sink(exc):
@@ -372,6 +376,9 @@ def test_fake_transport_revision_fails_closed_without_overwrite(harness):
         runtime.cycle(BASE + timedelta(minutes=2, seconds=10))
         fake.index = 3
         runtime.cycle(BASE + timedelta(minutes=3, seconds=10))
+        state_before_conflict = runtime.subscriptions[key]
+        history_size = len(state_before_conflict.history)
+        feature_sizes = {vid: len(state.rows) for vid, (state, _) in state_before_conflict.features.items()}
         with factory() as s:
             assert s.scalar(select(func.count()).select_from(ScannerEvent)) == 1
             before = s.scalar(select(Candle).where(Candle.open_time == BASE + timedelta(minutes=2))).close
@@ -390,11 +397,25 @@ def test_fake_transport_revision_fails_closed_without_overwrite(harness):
         assert captured[0].details["old_close"] == str(before)
         assert captured[0].details["new_close"] == "1.10003"
         assert p._closed and runtime.retry[key][2] is True
+        assert len(state_before_conflict.history) == history_size
+        assert {vid: len(state.rows) for vid, (state, _) in state_before_conflict.features.items()} == feature_sizes
         runtime.cycle(BASE + timedelta(minutes=5))
+        attempts = []
+        restarted = ScannerRuntime(factory, lambda *args: attempts.append(args))
+        restarted.cycle(BASE + timedelta(minutes=6))
+        restarted.cycle(BASE + timedelta(minutes=7))
+        assert attempts == []  # Persisted conflict survives process restart: no reconnect attempt.
+        assert restarted.retry[key][2] is True
         with factory() as s:
             assert s.scalar(select(func.count()).select_from(ScannerEvent)) == 1
             assert s.scalar(select(Candle).where(Candle.open_time == BASE + timedelta(minutes=2))).close == before
             assert s.get(LiveSubscription, key).health["error"] == "DATA_CONFLICT"
+            iid = s.scalar(select(ScannerWatchItem.id))
+        snapshot = client.get("/api/v1/live/snapshot", params={"item_id": iid}).json()
+        assert snapshot["item"]["latest"]["error"] == "DATA_CONFLICT"
+        assert snapshot["subscription"]["health"]["error"] == "DATA_CONFLICT"
+        overview = client.get("/api/v1/workspace/overview", params={**META.model_dump(), "strategy_version_id": version_id}).json()
+        assert next(stage for stage in overview["pipeline"] if stage["name"] == "SCANNER")["status"] == "FAILED"
     finally:
         runtime.close()
         p.close()
