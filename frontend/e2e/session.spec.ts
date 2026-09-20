@@ -2,6 +2,16 @@ import { test, expect } from "@playwright/test";
 test("real API: account selection, WIN/LOSS, limits, closure and persistent journal", async ({
   page,
 }) => {
+  async function saveTrade(expectedStatus = 200) {
+    const response = page.waitForResponse(r => r.request().method() === 'POST' && new URL(r.url()).pathname === '/api/v1/trades');
+    await page.getByRole('button', {name:'Save trade',exact:true}).click();
+    expect((await response).status()).toBe(expectedStatus);
+    if (expectedStatus === 200) {
+      // Saving… removes the old button name BEFORE mutation completion.
+      // Wait for the form lifecycle, not the transient button label.
+      await expect(page.getByRole('heading',{name:'Record trade',exact:true})).toHaveCount(0);
+    }
+  }
   await page.goto("/sessions");
   await expect(page).toHaveURL(/login/);
   await page.getByLabel("Email").fill("qa@example.com");
@@ -39,16 +49,13 @@ test("real API: account selection, WIN/LOSS, limits, closure and persistent jour
       .selectOption(result);
     if (result === "WIN") {
       await page.getByLabel("Stake", { exact: true }).fill("20.01");
-      await page.getByRole("button", { name: "Save trade" }).click();
+      await saveTrade(422);
       await expect(
         page.getByText("Stake exceeds per-trade risk limit", { exact: true }),
       ).toBeVisible();
       await page.getByLabel("Stake", { exact: true }).fill("20.00");
     }
-    await page.getByRole("button", { name: "Save trade" }).click();
-    await expect(page.getByRole("button", { name: "Save trade" })).toHaveCount(
-      0,
-    );
+    await saveTrade();
   }
   await expect(page.getByText(/Loss consumed: 3[.,]37/)).toBeVisible();
   await expect(page.getByText(/Remaining risk: 36[.,]63/)).toBeVisible();
@@ -66,10 +73,7 @@ test("real API: account selection, WIN/LOSS, limits, closure and persistent jour
     await page
       .getByRole("combobox", { name: "Result", exact: true })
       .selectOption(result);
-    await page.getByRole("button", { name: "Save trade" }).click();
-    await expect(page.getByRole("button", { name: "Save trade" })).toHaveCount(
-      0,
-    );
+    await saveTrade();
   }
   const afterLedger = await (
     await page.request.get("http://localhost:8010/api/v1/accounts/1/ledger")

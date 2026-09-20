@@ -7,6 +7,7 @@ import {
   screen,
   waitFor,
   fireEvent,
+  act,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -86,6 +87,21 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("REQ-002 user workflow", () => {
+  it('Save trade label disappears while mutation is pending, before form completion', async () => {
+    let release!: (value: Awaited<ReturnType<typeof tradesApi.create>>) => void;
+    vi.mocked(tradesApi.create).mockImplementation(() => new Promise(resolve => { release = resolve; }));
+    const done = vi.fn();
+    mount(<TradeForm session={session} summary={summary} onDone={done}/>);
+    fireEvent.change(screen.getByLabelText('Symbol'),{target:{value:'EURUSD'}});
+    fireEvent.change(screen.getByLabelText('Opened at'),{target:{value:'2026-09-19T10:00'}});
+    fireEvent.click(screen.getByRole('button',{name:'Save trade'}));
+    await screen.findByRole('button',{name:'Saving…'});
+    expect(screen.queryByRole('button',{name:'Save trade'})).toBeNull();
+    expect(screen.getByRole('heading',{name:'Record trade'})).toBeTruthy();
+    expect(done).not.toHaveBeenCalled();
+    await act(async()=>release({} as Awaited<ReturnType<typeof tradesApi.create>>));
+    await waitFor(()=>expect(done).toHaveBeenCalledOnce());
+  });
   it("disables start when no risk profile is configured", async () => {
     vi.mocked(accountsApi.list).mockResolvedValue([
       {
