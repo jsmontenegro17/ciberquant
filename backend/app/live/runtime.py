@@ -14,6 +14,7 @@ from ..market_data.timeframe import duration
 from ..config import settings
 from .features import IncrementalFeatures
 from .persistence import persist_closed
+from .conflicts import DataConflictError
 from .policy import compatibility
 from .paper import PaperObservation
 from .paper_config import resolve_paper_config
@@ -39,9 +40,10 @@ class Subscription:
 class ScannerRuntime:
     """One worker owner. Exceptions clear incremental state before reconnect/bootstrap."""
 
-    def __init__(self, factory, provider_factory):
+    def __init__(self, factory, provider_factory, diagnostic_sink=None):
         self.factory, self.provider_factory = factory, provider_factory
         self.subscriptions, self.retry = {}, {}
+        self.diagnostic_sink = diagnostic_sink
 
     def recover_pending(self):
         with self.factory() as s:
@@ -103,6 +105,15 @@ class ScannerRuntime:
             try:
                 self.process(key, ids, received_at, attempt)
             except Exception as exc:
+                if isinstance(exc, DataConflictError):
+                    import logging
+                    import json
+                    logging.getLogger('ciberquant.provider').warning('candle_conflict %s', json.dumps(exc.summary))
+                    if self.diagnostic_sink is not None:
+                        try:
+                            self.diagnostic_sink(exc)
+                        except Exception:
+                            logging.getLogger('ciberquant.provider').warning('conflict_diagnostic_sink_failed')
                 sub = self.subscriptions.pop(key, None)
                 if sub:
                     self.abandon(sub)
@@ -117,6 +128,8 @@ class ScannerRuntime:
                     if isinstance(exc, ValueError)
                     else "PROVIDER_UNAVAILABLE"
                 )
+                import logging
+                logging.getLogger('ciberquant.provider').warning('provider_failure code=%s exception_type=%s', code, type(exc).__name__)
                 attempt += 1
                 self.retry[key] = (attempt, received_at + timedelta(seconds=min(60, 2 ** min(attempt, 6))), code == "DATA_CONFLICT")
                 with self.factory() as s:
@@ -142,6 +155,9 @@ class ScannerRuntime:
                 saved = LiveSubscription(key=key, provider=first.provider, dataset=first.dataset, status="DISCONNECTED")
                 s.add(saved)
                 s.commit()
+            if (saved.health or {}).get("error") == "DATA_CONFLICT":
+                # ADR-006: process restart is not authority to clear a persisted conflict.
+                raise ValueError("DATA_CONFLICT")
             sub = self.subscriptions.get(key)
             if sub is None:
                 provider = self.provider_factory(s, first.provider, dataset)

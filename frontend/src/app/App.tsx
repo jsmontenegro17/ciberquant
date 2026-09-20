@@ -46,6 +46,7 @@ export function Layout() {
         <div className="muted">RESEARCH DESK</div>
         {[
           ["Dashboard", "/dashboard"],
+          ["Research Workspace", "/workspace"],
           ["Accounts", "/accounts"],
           ["Sessions", "/sessions"],
           ["Journal", "/journal"],

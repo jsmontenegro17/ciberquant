@@ -1,9 +1,12 @@
 # Project State
 
 ## Current version
+1.0.0 — REQ-008 DONE / Human Acceptance PASS on2026-09-19 (America/Bogota). Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93; REQ-001–008 DONE / PASS. Implementation CI35478263706/35478266262 PASS. Closure is documentation/version only; final release HEAD, integrated main CI and tag evidence are recorded in [PR #7](https://github.com/jsmontenegro17/ciberquant/pull/7). [QA evidence](REQ008_QA_UNBLOCK.md), [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md).
 0.7.0 — REQ-007 DONE / Human Acceptance PASS on 2026-09-19. Approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5, PR #6. REQ-001–007 DONE / PASS. Main SHA, final CI and tag evidence are recorded in the PR #6 release handoff.
 
 ## Functional
+REQ-008 — DONE / Human Acceptance PASS. CiberQuant v1.0 includes authentication/users; accounts/ledger/risk; sessions/journal; market data/provenance/quality; Candle Cataloger; Feature Engine; Strategy DSL/Lab; binary backtesting; historical validation/walk-forward/bootstrap; Live Data/Scanner; IQ Option PRACTICE read-only; paper observations; Integrated Research Workspace; safe stale-job recovery; production auth configuration hardening; operational diagnostics. No auto-trading or paper-to-ledger automatic writes.
+IQ Option: UNOFFICIAL / EXPERIMENTAL / PRACTICE-ONLY / READ-ONLY / FAIL-CLOSED ON REVISION / IMMUTABLE FINALITY NOT GUARANTEED. IQ_UPSTREAM_POST_CLOSE_REVISION remains a demonstrated limitation. DATA_CONFLICT preserves first evidence and stops affected subscription without overwrite/automatic retry. REAL forbidden; digital unsupported; orders sent=0.
 REQ-007 — DONE. Human Acceptance PASS. Adds Live Data Engine, IQ Option Read-Only Integration, OTC Live Data, Strategy Scanner and Live Paper Observations to the accepted authentication/accounts/risk/sessions/journal, market-data/quality/cataloger, features/indicators, strategy lab/DSL, binary outcomes/backtesting and validation/walk-forward/block-bootstrap platform. cq-live-data-v1 and cq-scanner-v1 are frozen together with cq-features-v1, cq-strategy-dsl-v1, cq-binary-backtest-v1 and cq-validation-v1; incompatible semantics require new identifiers. Real IQ PRACTICE/binary smoke accepted, no REAL fallback or auto-trading.
 REQ-006 — DONE, Human Acceptance PASS on 2026-09-19. CiberQuant provides Authentication, Trading Accounts, Risk Engine, Session Manager, Trading Journal, Market Data, Dataset Provenance, Data Quality, Candle Cataloger, Feature Engine, Indicator Engine, Strategy DSL, Strategy Lab, Binary Outcome Engine, Binary Backtesting Engine, Validation Engine, Chronological Holdout, Walk-Forward Evaluation, Block Bootstrap and Historical Validation State. Official cq-validation-v1 and its three v1 dependencies are frozen; incompatible changes require new versions. Historical validation PASS is not a guarantee of future profitability, safety or external blindness.
 REQ-005 — DONE, Human Acceptance PASS on 2026-09-19. CiberQuant provides Authentication, Trading Accounts, Risk Engine, Session Manager, Trading Journal, Market Data Ingestion, Dataset Provenance, Data Quality, Candle Cataloger, Feature Engine, Indicator Engine, Strategy DSL, Strategy Lab, Binary Outcome Engine, Binary Backtesting Engine and Backtest Evidence. cq-features-v1, cq-strategy-dsl-v1 and cq-binary-backtest-v1 are frozen. Research results remain IN-SAMPLE / NOT VALIDATED, using exact unit stake and fixed payout assumptions.
@@ -12,15 +15,16 @@ REQ-003 — DONE, Human Acceptance PASS on 2026-09-19. CiberQuant provides Authe
 REQ-002 is DONE with Human Acceptance PASS. Functional flow: login → account → risk → session → trades → ledger → journal → analytics. Real authentication, accounts, auditable ledger, Risk Engine, session manager, trade journal, connected dashboard, analytics and journal are supported by backend/frontend tests, browser E2E, Docker and CI. Backend health and market-data providers remain functional.
 
 ## Partial
-Behavioural analytics remain future scope. RiskProfile retains the user-scoped Foundation model; profile editing/account-specific assignments are not part of this delivery. Import recovery/background ingestion is separate P2 debt DATA-001.
+Behavioural analytics remain future scope. RiskProfile retains the user-scoped Foundation model; profile editing/account-specific assignments are not part of this delivery. Essential import recovery DATA-001 is accepted/resolved; background ingestion is not implemented.
 
 ## Foundation only
 Historical validation is human-accepted in REQ-006. REQ-007 adds read-only live/replay scanning and separate paper observations; positive in-sample results never automatically confer statistical validation.
 
 ## Planned
-Integrated research workspace (REQ-008, not started).
+No subsequent requirement is started or authorized. Production deployment, digital IQ and new engine semantics are outside release closure.
 
 ## Latest accepted delivery
+REQ-008 Integrated Research Workspace / v1.0, DONE / Human Acceptance PASS. Essential SEC-001, UX-001, DATA-001, BACKTEST-001 and VALIDATION-001 scopes accepted/resolved. LIVE-001 remains PARTIAL. Historical REQ-007 notes follow unchanged.
 REQ-007 final human QA correction: research-mode explicit payout fallback/expiry now take precedence over historical reference assumptions. Pure paper-config resolver and source evidence; truthful research/provider UI; four-case integration regressions verify actual next-open/expiry/Decimal outcomes. Human Acceptance PASS; no REQ-008.
 REQ-007 Live Data & Strategy Scanner: cq-live-data-v1 / cq-scanner-v1; dedicated singleton worker, canonical incremental feature state, private watchlists, exact dataset validation compatibility, payout warning, immutable events and paper outcomes, migration006, SSE/snapshot UI, deterministic Replay/Mock, isolated optional MT5. Evidence and current gates: [REQ-007](requirements/REQ-007-live-scanner.md).
 
@@ -28,6 +32,7 @@ REQ-007 Live Data & Strategy Scanner: cq-live-data-v1 / cq-scanner-v1; dedicated
 MT5, IQ Option and Replay flags default false. IQ has a pinned real PRACTICE-only async read-only transport; real binary REGULAR/OTC history/realtime and OTC scanner smoke PASS on2026-09-19. No OTC fallback. MT5 real terminal smoke remains optional/unperformed. Auto-trading/order sending absent; ML not implemented.
 
 ## Migrations / integrations
+007_operations is the sole REQ-008 migration, adding worker heartbeat. PostgreSQL lifecycle ownership/recovery and preservation checks passed CI; no migration change during closure.
 006_live_scanner adds watchlists/items, provider snapshot cache, live observation provenance, immutable scanner events and outcomes. No financial/raw candle schema change. Downgrade loses scanner/provenance evidence; export/backup first. PostgreSQL migration/tests PASS in CI35468326588/35468338708; final HEAD checks and counts recorded in REQ-007/PR #6 handoff.
 005_validation adds validation_runs/validation_segments and backtest purpose MANUAL/VALIDATION. PostgreSQL migration validation PASS in CI. Downgrade deletes validation plans and loses child-purpose distinction; backup/export first. No raw/financial schema changes.
 Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strategy_versions, backtest_runs, backtest_trades and constraints/indexes. PostgreSQL/JSONB target; SQLite local test harness. Raw candles and financial tables/contracts unchanged. Downgrade004 discards derived research evidence; export/backup first.
@@ -36,7 +41,8 @@ Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strat
 REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-[LIVE-001](debt/LIVE-001-provider-operations.md): provider smoke/operations, bounded canonical history, interrupted-paper recovery and capacity follow-ups. Real IQ OTC is delivered in REQ-007; unofficial protocol drift/digital support/soak testing remain separate future work. REQ-008 is not started.
+Current accepted debt status: SEC-001, UX-001, DATA-001, BACKTEST-001 and VALIDATION-001 are RESOLVED for their essential REQ-008 scopes. The historical release-specific descriptions below preserve origin/context, not current unresolved status. LIVE-001 remains PARTIAL; QUANT-001/002, BACKTEST-002, VALIDATION-002, dependency/bundle warnings and real production deployment verification remain open.
+[LIVE-001](debt/LIVE-001-provider-operations.md): PARTIAL. Real IQ OTC delivered in REQ-007. REQ-008 adopts fail-closed for upstream revisions; stronger finality research, prolonged soak, protocol drift, supervision, operational recovery, digital support and capacity remain future work. A stopped conflicted subscription is expected integrity protection, not an immutable-feed guarantee.
 [UX-001](debt/UX-001-manual-vs-validation-child-backtests.md): Strategy list last_backtest can reference a validation child although GET /backtests correctly defaults to MANUAL. Separate presentation improvement, not a calculation/evidence defect. All listed debts remain nonblocking for v0.6.0; no debt implementation during release closure.
 [VALIDATION-001](debt/VALIDATION-001-stale-validation-run-recovery.md) stale phase recovery and [VALIDATION-002](debt/VALIDATION-002-multiple-testing-research-lineage.md) broader multiple-testing lineage are separate P2 scope. Holdout reuse warnings exist; perfect external blindness is not claimed.
 [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md): future registry/dispatcher must preserve replay of frozen v1 evidence when incompatible engines arrive. P2, not a v0.5.0 blocker; documentation only in REQ-005. All existing debts below remain nonblocking for v0.5.0.
@@ -46,8 +52,8 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
+[REQ-008](requirements/REQ-008-integrated-research-workspace.md): DONE / Human Acceptance PASS. REQ-001–008 DONE/PASS. P0=0, P1=0 within accepted scope.
 [REQ-007](requirements/REQ-007-live-scanner.md): DONE; automated A–J PASS, Human Acceptance PASS. REQ-001–007 DONE / PASS. No optimization, ranking, money management, automatic trading or strategy recommendation.
 
 ## Next milestones
-REQ-008 Integrated Research Workspace / v1.0.
-REQ-007 is closed. Only one principal roadmap requirement remains: REQ-008, which requires independent authorization and has not started.
+REQ-009 NOT STARTED / NOT AUTHORIZED. No production deployment, auto-trading or new engine version is authorized by this closure.

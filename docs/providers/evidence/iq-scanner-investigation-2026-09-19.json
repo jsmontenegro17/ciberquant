@@ -1,0 +1,191 @@
+{
+  "note": "Independent scanner probe; absence of conflict does not resolve reproduced upstream revisions.",
+  "records": [
+    {
+      "stage": "DISCOVERY",
+      "REGULAR": 98,
+      "OTC": 171,
+      "open_REGULAR": 2,
+      "open_OTC": 168
+    },
+    {
+      "stage": "HISTORY",
+      "dataset": {
+        "source": "IQOPTION",
+        "broker": "IQOPTION",
+        "symbol": "BTCUSD-OP",
+        "market_type": "REGULAR",
+        "timeframe": "1m"
+      },
+      "count": 20,
+      "canonical_origin": "2026-09-19 23:23:00+00:00",
+      "result": "PASS"
+    },
+    {
+      "stage": "HISTORY",
+      "dataset": {
+        "source": "IQOPTION",
+        "broker": "IQOPTION",
+        "symbol": "EURUSD-OTC",
+        "market_type": "OTC",
+        "timeframe": "1m"
+      },
+      "count": 20,
+      "canonical_origin": "2026-09-19 23:23:00+00:00",
+      "result": "PASS"
+    },
+    {
+      "stage": "SCANNER",
+      "signal_time": "2026-09-19 23:44:00",
+      "market_type": "OTC",
+      "state": "MATCH",
+      "mode": "LIVE",
+      "payout": "85.000000",
+      "payout_source": "PROVIDER",
+      "expiry_source": "RESEARCH_ASSUMPTION",
+      "feature_fields": [
+        "body_size",
+        "candle_range",
+        "upper_wick",
+        "lower_wick",
+        "body_to_range_ratio",
+        "upper_wick_to_range_ratio",
+        "lower_wick_to_range_ratio",
+        "close_position",
+        "close_return_percent",
+        "ema_3"
+      ],
+      "result": "PASS"
+    },
+    {
+      "stage": "CONTROLLED_RECONNECT",
+      "result": "PASS",
+      "mode": "PRACTICE",
+      "orders_sent": 0
+    },
+    {
+      "stage": "SCANNER",
+      "signal_time": "2026-09-19 23:45:00",
+      "market_type": "OTC",
+      "state": "MATCH",
+      "mode": "LIVE",
+      "payout": "85.000000",
+      "payout_source": "PROVIDER",
+      "expiry_source": "RESEARCH_ASSUMPTION",
+      "feature_fields": [
+        "body_size",
+        "candle_range",
+        "upper_wick",
+        "lower_wick",
+        "body_to_range_ratio",
+        "upper_wick_to_range_ratio",
+        "lower_wick_to_range_ratio",
+        "close_position",
+        "close_return_percent",
+        "ema_3"
+      ],
+      "result": "PASS"
+    },
+    {
+      "stage": "SCANNER",
+      "signal_time": "2026-09-19 23:46:00",
+      "market_type": "OTC",
+      "state": "MATCH",
+      "mode": "LIVE",
+      "payout": "85.000000",
+      "payout_source": "PROVIDER",
+      "expiry_source": "RESEARCH_ASSUMPTION",
+      "feature_fields": [
+        "body_size",
+        "candle_range",
+        "upper_wick",
+        "lower_wick",
+        "body_to_range_ratio",
+        "upper_wick_to_range_ratio",
+        "lower_wick_to_range_ratio",
+        "close_position",
+        "close_return_percent",
+        "ema_3"
+      ],
+      "result": "PASS"
+    },
+    {
+      "stage": "REALTIME",
+      "symbol": "BTCUSD-OP",
+      "market_type": "REGULAR",
+      "forming": true,
+      "new_closed": true,
+      "result": "PASS"
+    },
+    {
+      "stage": "REALTIME",
+      "symbol": "EURUSD-OTC",
+      "market_type": "OTC",
+      "forming": true,
+      "new_closed": true,
+      "result": "PASS"
+    },
+    {
+      "stage": "SOAK",
+      "observations": 54,
+      "reconnect": true,
+      "scanner_counts": {
+        "MATCH": 3
+      },
+      "duplicate_closed_count": 0,
+      "duplicate_event_count": 0,
+      "stale_observations": 0,
+      "datasets": [
+        {
+          "symbol": "BTCUSD-OP",
+          "market_type": "REGULAR",
+          "closed_count": 3,
+          "gaps": 0,
+          "payout_snapshots": [
+            "87"
+          ],
+          "last_provider_clock": "2026-09-19 23:46:01+00:00"
+        },
+        {
+          "symbol": "EURUSD-OTC",
+          "market_type": "OTC",
+          "closed_count": 3,
+          "gaps": 0,
+          "payout_snapshots": [
+            "85"
+          ],
+          "last_provider_clock": "2026-09-19 23:46:01+00:00"
+        }
+      ],
+      "orders_sent": 0,
+      "result": "PASS"
+    },
+    {
+      "stage": "FINAL",
+      "date": "2026-09-19 23:46:02.510159+00:00",
+      "product": "binary",
+      "capabilities": {
+        "historical_candles": true,
+        "live_candles": true,
+        "forming_candle": true,
+        "assets": true,
+        "payout": true,
+        "server_time": true,
+        "market_status": true
+      },
+      "orders_sent": 0,
+      "result": "PASS",
+      "regular_tested": true
+    },
+    {
+      "stage": "DIAGNOSTIC_SUMMARY",
+      "observations": 6372,
+      "queries": 170,
+      "revisions": 0,
+      "reconnect_generation": 1,
+      "result": "NOT_REPRODUCED",
+      "completed_at": "2026-09-19 23:46:02.511164+00:00",
+      "orders_sent": 0
+    }
+  ]
+}

@@ -1,6 +1,12 @@
 # SEC-001 — Production authentication configuration
 
-Status: BACKLOG
+Status: RESOLVED
+REQ-008 implementation update (Human Acceptance PASS on2026-09-19): Environment validation, cookie attributes, explicit CORS, production Origin/HTTPS rejection and trusted-proxy tests implemented in REQ-008. See OPERATIONS_DEPLOYMENT.md and test_production_security.py. Real deployment TLS/firewall/provisioning must still be verified by the operator; default Compose remains development only.
+
+## Historical problem and original scope
+
+
+Original status: BACKLOG
 Recorded: 2026-09-19
 Origin: REQ-002 final human acceptance
 Blocking REQ-002: NO

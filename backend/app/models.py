@@ -320,6 +320,13 @@ class LiveSubscription(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class WorkerHeartbeat(Base):
+    __tablename__ = 'worker_heartbeats'
+    name: Mapped[str] = mapped_column(String(50), primary_key=True)
+    status: Mapped[str] = mapped_column(String(20))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 class LiveObservation(Base):
     __tablename__ = 'live_observations'
     __table_args__ = (UniqueConstraint('provider','candle_id','mode','phase', name='uq_live_observation'),

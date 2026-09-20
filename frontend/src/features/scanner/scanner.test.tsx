@@ -8,6 +8,13 @@ import {marketApi} from '../../api/marketData';
 import {researchApi} from '../../api/research';
 import type {WatchItem} from '../../api/scanner';
 afterEach(()=>{cleanup();vi.restoreAllMocks();});
+it('exposes approved fail-closed policy and stopped conflict without ACTIVE or MATCH',()=>{
+ render(<ScannerCard item={{...item,provider:'IQOPTION',state:'PROVIDER_DOWN',latest:{state:'PROVIDER_DOWN',error:'DATA_CONFLICT'}}} onToggle={()=>{}}/>);
+ expect(screen.getByText(/Immutable closed-candle finality NOT GUARANTEED/)).toBeTruthy();
+ expect(screen.getByText(/DATA CONFLICT — subscription stopped/)).toBeTruthy();
+ expect(screen.queryByText(/CONDITIONS MATCHED/)).toBeNull();
+ expect(screen.queryByText(/ACTIVE/)).toBeNull();
+});
 it('labels unofficial IQ and observed product without claiming execution',()=>{
  render(<ScannerCard item={{...item,provider:'IQOPTION',latest:{...item.latest,payout_product:'binary'}}} onToggle={()=>{}}/>);
  expect(screen.getByText(/UNOFFICIAL COMMUNITY INTEGRATION/)).toBeTruthy();

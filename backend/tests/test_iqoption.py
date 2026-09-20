@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 from app.live.iqoption import IQOptionReadOnlyProvider, map_assets, normalize_candle, exact_number
 from app.market_data.normalization import Dataset
+from test_req003 import harness  # noqa: F401
 
 pytest.importorskip("iqoptionapi")
 from app.live.iq_transport import _ReadOnlySocket, _AsyncReadOnly, IQTransport, IQError, allowed_frame, parse_frame
@@ -139,6 +140,9 @@ def test_provider_bootstrap_forming_closed_capabilities_and_disconnect():
         assert all(c.close_time <= frame.server_time for c in frame.closed)
         assert frame.payout == 85 and frame.market_open is True
         assert all(p.capabilities.values())
+        assert p.status_metadata["finality_policy"] == "FAIL_CLOSED_ON_REVISION"
+        assert p.status_metadata["immutable_finality"] == "NOT_GUARANTEED"
+        assert p.status_metadata["balance_mode"] == "PRACTICE" and p.status_metadata["read_only"] is True
         fake.index = 3
         assert p.poll(META).closed[-1].open_time == BASE + timedelta(minutes=2)
         with pytest.raises(ValueError):
@@ -261,3 +265,206 @@ def test_practice_must_exist_not_real_fallback():
             await t.connect()
 
     asyncio.run(scenario())
+
+
+def test_history_tracker_revisions_exact_identity_and_safe_projection():
+    from scripts.iq_diagnostics import HistoryTracker
+
+    emitted = []
+    tracker = HistoryTracker(emitted.append)
+    fake = FakeTransport()
+    p = IQOptionReadOnlyProvider(origin=BASE, transport_factory=lambda *args: fake, history_observer=tracker.observe)
+    try:
+        p.bootstrap(META)
+        p.poll(META)
+        assert tracker.conflicts == []
+        original = fake.history
+
+        async def revised(*args):
+            rows = await original(*args)
+            rows[1]["close"] = "1.10003"
+            return rows
+
+        fake.history = revised
+        p.poll(META)
+        assert tracker.conflicts[0]["changed_fields"] == ["close"]
+        assert tracker.conflicts[0]["revised"]["active_id"] == 42
+        assert tracker.conflicts[0]["revised"]["history_request_count"] == 3
+        assert tracker.conflicts[0]["revised"]["ohlc"]["close"] == "1.10003"
+        assert all("password" not in json.dumps(e, default=str) for e in emitted)
+        other = META.model_copy(update={"broker": "OTHER"})
+        tracker.observe(other, [normalize_candle(raw(1), other, 42)], {"provider_time": BASE + timedelta(minutes=3)})
+        assert len(tracker.conflicts) == 1
+        from dataclasses import replace
+
+        same = replace(normalize_candle(raw(1), other, 42), close=Decimal("1.1000200000"))
+        tracker.observe(other, [same], {"provider_time": BASE + timedelta(minutes=3)})
+        assert len(tracker.conflicts) == 1  # Decimal equality, not display-scale equality.
+    finally:
+        p.close()
+
+
+def test_numeric_limit_rejects_rounding_and_exact_json_decimal():
+    from app.market_data.quality import validate_candle
+    from dataclasses import replace
+
+    candle = normalize_candle(raw(), META, 42)
+    assert validate_candle(replace(candle, close=Decimal("1.10002000001")))
+    assert not validate_candle(replace(candle, close=Decimal("1.1000200000")))
+    for field in ("open", "high", "low", "close"):
+        assert isinstance(getattr(candle, field), Decimal)
+
+
+def test_fake_transport_revision_fails_closed_without_overwrite(harness):
+    from sqlalchemy import select, func
+    from app.models import Strategy, User, ScannerWatchlist, ScannerWatchItem, ScannerEvent, Candle, LiveSubscription
+    from app.strategies.repository import create_version
+    from app.strategies.schemas import VersionCreate
+    from app.strategies.dsl import digest
+    from app.live.runtime import ScannerRuntime
+    from app.live.conflicts import DataConflictError
+
+    client, factory, _ = harness
+    fake = FakeTransport()
+    p = IQOptionReadOnlyProvider(origin=BASE, transport_factory=lambda *a: fake)
+    key = digest(dict(provider="IQOPTION", dataset=META.model_dump()))
+    with factory() as s:
+        user = s.scalar(select(User))
+        strategy = Strategy(user_id=user.id, name="revision diagnostic", status="TESTING")
+        s.add(strategy)
+        s.commit()
+        version = create_version(
+            s,
+            strategy.id,
+            user.id,
+            VersionCreate(
+                trade_direction="CALL",
+                indicator_specs=[],
+                condition_tree={
+                    "left": {"type": "FIELD", "field": "close", "bars_ago": 0},
+                    "operator": "GT",
+                    "right": {"type": "NUMBER", "value": "0"},
+                },
+            ),
+        )
+        watch = ScannerWatchlist(user_id=user.id, name="revision")
+        s.add(watch)
+        s.flush()
+        s.add(
+            ScannerWatchItem(
+                user_id=user.id,
+                watchlist_id=watch.id,
+                strategy_version_id=version.id,
+                provider="IQOPTION",
+                dataset=META.model_dump(),
+                subscription_key=key,
+                research_mode=True,
+                research_payout=Decimal(84),
+                research_expiry=1,
+            )
+        )
+        s.commit()
+        version_id = version.id
+    captured = []
+
+    def sink(exc):
+        captured.append(exc)
+        raise RuntimeError("Synthetic diagnostic writer failure")
+
+    runtime = ScannerRuntime(factory, lambda *a: p, diagnostic_sink=sink)
+    try:
+        runtime.cycle(BASE + timedelta(minutes=2, seconds=10))
+        fake.index = 3
+        runtime.cycle(BASE + timedelta(minutes=3, seconds=10))
+        state_before_conflict = runtime.subscriptions[key]
+        history_size = len(state_before_conflict.history)
+        feature_sizes = {vid: len(state.rows) for vid, (state, _) in state_before_conflict.features.items()}
+        with factory() as s:
+            assert s.scalar(select(func.count()).select_from(ScannerEvent)) == 1
+            before = s.scalar(select(Candle).where(Candle.open_time == BASE + timedelta(minutes=2))).close
+        original = fake.history
+
+        async def revised(*args):
+            rows = await original(*args)
+            rows[2]["close"] = "1.10003"
+            return rows
+
+        fake.history = revised
+        runtime.cycle(BASE + timedelta(minutes=3, seconds=11))
+        assert len(captured) == 1 and isinstance(captured[0], DataConflictError)
+        assert isinstance(captured[0], ValueError) and str(captured[0]) == "DATA_CONFLICT"
+        assert captured[0].details["detection_layer"] == "RUNTIME_OBSERVED_PERSISTENCE"
+        assert captured[0].details["old_close"] == str(before)
+        assert captured[0].details["new_close"] == "1.10003"
+        assert p._closed and runtime.retry[key][2] is True
+        assert len(state_before_conflict.history) == history_size
+        assert {vid: len(state.rows) for vid, (state, _) in state_before_conflict.features.items()} == feature_sizes
+        runtime.cycle(BASE + timedelta(minutes=5))
+        attempts = []
+        restarted = ScannerRuntime(factory, lambda *args: attempts.append(args))
+        restarted.cycle(BASE + timedelta(minutes=6))
+        restarted.cycle(BASE + timedelta(minutes=7))
+        assert attempts == []  # Persisted conflict survives process restart: no reconnect attempt.
+        assert restarted.retry[key][2] is True
+        with factory() as s:
+            assert s.scalar(select(func.count()).select_from(ScannerEvent)) == 1
+            assert s.scalar(select(Candle).where(Candle.open_time == BASE + timedelta(minutes=2))).close == before
+            assert s.get(LiveSubscription, key).health["error"] == "DATA_CONFLICT"
+            iid = s.scalar(select(ScannerWatchItem.id))
+        snapshot = client.get("/api/v1/live/snapshot", params={"item_id": iid}).json()
+        assert snapshot["item"]["latest"]["error"] == "DATA_CONFLICT"
+        assert snapshot["subscription"]["health"]["error"] == "DATA_CONFLICT"
+        overview = client.get("/api/v1/workspace/overview", params={**META.model_dump(), "strategy_version_id": version_id}).json()
+        assert next(stage for stage in overview["pipeline"] if stage["name"] == "SCANNER")["status"] == "FAILED"
+    finally:
+        runtime.close()
+        p.close()
+
+
+def test_bootstrap_conflict_diagnostics_preserve_first_observation(harness):
+    from app.live.conflicts import DataConflictError
+    from app.live.persistence import persist_closed
+    from dataclasses import replace
+    from sqlalchemy import select, func
+    from app.models import Candle
+
+    _, factory, _ = harness
+    original = normalize_candle(raw(), META, 42)
+    revised = replace(original, close=Decimal("1.10003"))
+    with factory() as s:
+        persist_closed(s, META, [original], "IQOPTION", "LIVE", BASE + timedelta(minutes=1), BASE + timedelta(minutes=1), "BOOTSTRAP")
+        s.commit()
+    with factory() as s:
+        with pytest.raises(DataConflictError) as caught:
+            persist_closed(s, META, [revised], "IQOPTION", "LIVE", BASE + timedelta(minutes=2), BASE + timedelta(minutes=2), "BOOTSTRAP")
+        assert str(caught.value) == "DATA_CONFLICT"
+        assert caught.value.details["detection_layer"] == "RUNTIME_BOOTSTRAP_PERSISTENCE"
+        assert caught.value.details["age_after_close_first_ms"] is None
+        assert caught.value.details["age_after_close_second_ms"] is None
+        assert caught.value.details["first_persisted_clock_source"] == "LOCAL_BOOTSTRAP_RECEIVE"
+        s.rollback()
+        assert s.scalar(select(func.count()).select_from(Candle)) == 1
+        assert s.scalar(select(Candle)).close == original.close
+
+
+def test_repeated_bootstrap_and_poll_do_not_change_request_identity():
+    fake = FakeTransport()
+    requests = []
+    original = fake.history
+
+    async def capture(active, size, count, end):
+        requests.append((active, size, count, end))
+        return await original(active, size, count, end)
+
+    fake.history = capture
+    p = IQOptionReadOnlyProvider(origin=BASE, transport_factory=lambda *a: fake)
+    try:
+        a = p.bootstrap(META)
+        b = p.bootstrap(META)
+        frame = p.poll(META)
+        assert a == b and frame.closed[-1] == a[-1]
+        assert requests[0] == requests[1]
+        assert {r[:2] for r in requests} == {(42, 60)}
+        assert [r[2] for r in requests] == [1000, 1000, 3]
+    finally:
+        p.close()

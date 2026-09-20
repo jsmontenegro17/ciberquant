@@ -1,5 +1,7 @@
 # Runbook
 
+REQ-008: [operational recovery / environment security / trusted proxies / migration007](OPERATIONS_DEPLOYMENT.md), [Workspace / human QA](WORKSPACE_SEMANTICS.md). Drain pre-REQ008 processes before enabling maintenance; never infer abandonment from age alone. Default Compose remains development-only.
+
 ## Read-only scanner (REQ-007)
 
 Real IQ Option local setup: [provider guide](providers/IQOPTION_EXPERIMENTAL.md). Install pinned `backend/requirements-iqoption.txt`, configure ignored `backend/.env` with PRACTICE credentials/product and an available canonical origin, and run the local worker against the API's PostgreSQL database. Default Docker image does not include the optional IQ SDK. Verify safely using `python -m scripts.smoke_iqoption --product binary --seconds 150` from backend; never paste credentials or run REAL/order operations. [Verified smoke](providers/IQOPTION_SMOKE_2026-09-19.md).

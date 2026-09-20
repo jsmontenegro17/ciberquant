@@ -117,6 +117,29 @@ def test_shared_subscription_bounded_reconnect_no_duplicate_events(harness):
     assert client.patch(f"/api/v1/scanner/items/{response.json()['id']}", json={"enabled": False}).json()["latest"]["state"] == "PAUSED"
 
 
+def test_conflict_isolated_from_other_dataset_and_core_modules(harness):
+    client, factory, _ = harness
+    rows, _, _, watch, body, response = setup(client, factory)
+    other_meta = {**META, "broker": "OTHER"}
+    other = client.post(f"/api/v1/scanner/watchlists/{watch['id']}/items", json={**body, "dataset": other_meta})
+    assert other.status_code == 200
+    good_rows = [replace(c, broker="OTHER") for c in rows]
+    bad = MockLiveProvider(rows[:1], [ProviderFrame(rows[1].close_time, (replace(rows[1], close=Decimal("98")),), mode="REPLAY")])
+    good = MockLiveProvider(good_rows[:1], [ProviderFrame(c.close_time, (c,), mode="REPLAY") for c in good_rows[1:3]])
+    runtime = ScannerRuntime(factory, lambda s, p, d: good if d.broker == "OTHER" else bad)
+    runtime.cycle()
+    runtime.cycle()
+    items = {x["id"]: x for x in client.get("/api/v1/scanner/items?include_research=true").json()["items"]}
+    assert items[response.json()["id"]]["latest"]["error"] == "DATA_CONFLICT"
+    assert items[other.json()["id"]]["state"] == "ACTIVE"
+    events = client.get("/api/v1/scanner/events").json()["items"]
+    assert len(events) == 2 and all(e["dataset"]["broker"] == "OTHER" for e in events)
+    assert client.get("/api/v1/accounts").status_code == 200
+    with factory() as s:
+        assert s.scalar(select(func.count()).select_from(LedgerEntry)) == 0
+    runtime.close()
+
+
 @pytest.mark.parametrize("role", ["USER", "ADMIN"])
 def test_ownership_and_validation_compatibility(harness, role):
     client, factory, _ = harness

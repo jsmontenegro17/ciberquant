@@ -17,6 +17,7 @@ from ..strategies.dsl import digest, number
 from ..strategies.repository import owned, audit
 from ..live.policy import compatibility
 from ..live.providers import CAPABILITIES
+from ..live.iqoption import IQ_OPERATIONAL_POLICY
 from ..live import LIVE_DATA_ENGINE_VERSION, SCANNER_ENGINE_VERSION
 from ..features.serialization import serialize
 from ..config import settings
@@ -67,6 +68,7 @@ def provider_definitions():
         ),
         dict(
             provider="IQOPTION",
+            **IQ_OPERATIONAL_POLICY,
             enabled=settings.enable_iqoption_experimental,
             mode="EXPERIMENTAL",
             capabilities={k: False for k in CAPABILITIES},
@@ -79,6 +81,8 @@ def provider_definitions():
 
 def item_view(item):
     data = record(item)
+    if (item.latest or {}).get("error") == "DATA_CONFLICT":
+        return {**data, "state": "PROVIDER_DOWN"}
     if item.enabled and now() - stored_utc(item.updated_at) > timedelta(seconds=settings.live_heartbeat_seconds):
         data.update(state="PROVIDER_DOWN", latest={**(data["latest"] or {}), "state": "PROVIDER_DOWN", "error": "WORKER_HEARTBEAT_EXPIRED"})
     return data
@@ -124,7 +128,11 @@ def snapshot(item_id: int, user=Depends(current_user), session=Depends(db)):
     value = record(sub) if sub else None
     if sub and now() - stored_utc(sub.updated_at) > timedelta(seconds=settings.live_heartbeat_seconds):
         value["status"] = "DISCONNECTED"
-        value["health"] = {**value["health"], "status": "DISCONNECTED", "error": "WORKER_HEARTBEAT_EXPIRED"}
+        value["health"] = {
+            **value["health"],
+            "status": "DISCONNECTED",
+            "error": "DATA_CONFLICT" if (sub.health or {}).get("error") == "DATA_CONFLICT" else "WORKER_HEARTBEAT_EXPIRED",
+        }
         value["snapshot"] = {**(value["snapshot"] or {}), "forming": None, "forming_state": None}
     return dict(item=item_view(item), subscription=value)
 

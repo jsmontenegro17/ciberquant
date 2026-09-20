@@ -13,8 +13,10 @@ from ..market_data.normalization import stored_utc
 from ..config import settings
 from . import BACKTEST_ENGINE_VERSION
 from .engine import simulate
+from ..operations import lifecycle
 
 
+@lifecycle("backtest")
 def run_backtest(session, user_id, request):
     version = session.get(StrategyVersion, request.strategy_version_id)
     if version is None:

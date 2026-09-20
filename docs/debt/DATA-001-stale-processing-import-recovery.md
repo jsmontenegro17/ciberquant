@@ -1,6 +1,12 @@
 # DATA-001 — Market Data Import Recovery
 
-Status: BACKLOG
+Status: RESOLVED
+REQ-008 implementation update (Human Acceptance PASS on2026-09-19): Essential abandoned-import reconciliation implemented with PostgreSQL active lifecycle ownership, exclusive recovery and audited FAILED transition; concurrency/idempotency/active-job tests. Raw candles untouched, explicit reimport remains idempotent. Background queues are not required or introduced.
+
+## Historical problem and original scope
+
+
+Original status: BACKLOG
 Priority: P2
 Recorded: 2026-09-19
 Origin: REQ-003 final human acceptance

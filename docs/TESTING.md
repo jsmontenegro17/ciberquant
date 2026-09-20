@@ -1,5 +1,7 @@
 # Testing
 
+REQ-008 regressions: test_workspace.py, test_production_security.py, test_operations_recovery.py, workspace.test.tsx and e2e/workspace.spec.ts. PostgreSQL ownership/recovery cases run in CI only, explicitly skip SQLite. Real local IQ soak is separate (`python -m scripts.soak_iqoption --product binary --seconds 420`), never broker connectivity in CI. Query-budget regression <=12 overview SQL statements; Workspace code split separately (~7kB), existing main bundle warning retained.
+
 ## REQ-007 live scanner
 
 Final human QA: `test_paper_config.py` covers the four mode/provider combinations and prevents cross-mode fallback for missing assumptions. `test_paper_precedence_with_real_validation_and_observed_outcome` repeats all four cases against actual persisted historical84%/1-bar PASS, research90%/3-bar inputs and provider87%/79%/unavailable, verifying immutable evidence sources, no premature result, exact next-open/expiry and Decimal P&L. Frontend tests distinguish active provider payout from unused research fallback and label historical84%/1-bar evidence as reference only.

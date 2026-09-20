@@ -14,11 +14,11 @@ def login(data:Login,response:Response,session:Session=Depends(db)):
     user=session.scalar(select(User).where(User.email==data.email.lower()))
     if not user or not pwd.verify(data.password,user.password_hash): raise HTTPException(401,'Invalid credentials')
     token=jwt.encode({'sub':str(user.id),'exp':datetime.now(timezone.utc)+timedelta(hours=8)},settings.jwt_secret,algorithm='HS256')
-    response.set_cookie('access_token',token,httponly=True,samesite='lax',secure=False,max_age=28800)
+    response.set_cookie('access_token',token,httponly=True,samesite=settings.cookie_samesite,secure=settings.cookie_secure,max_age=28800)
     return user
 @router.post('/logout')
 def logout(response:Response):
-    response.delete_cookie('access_token')
+    response.delete_cookie('access_token',httponly=True,secure=settings.cookie_secure,samesite=settings.cookie_samesite)
     return {'ok':True}
 @router.get('/me',response_model=UserOut)
 def me(user=Depends(current_user)): return user

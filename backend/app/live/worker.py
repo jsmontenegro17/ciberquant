@@ -6,7 +6,9 @@ from decimal import Decimal
 from dataclasses import asdict
 from sqlalchemy import select, text
 from ..db import SessionLocal, engine
-from ..models import Candle
+from ..models import Candle, WorkerHeartbeat, now
+import logging
+import signal
 from ..features.engine import FeatureCandle
 from ..market_data.repository import dataset_conditions, candle_data
 from ..config import settings
@@ -53,16 +55,27 @@ def provider_factory(session, name, dataset):
 
 
 def main():
+    def stop(signum, frame):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, stop)
     # Session-level global ownership held by one dedicated connection for process lifetime.
     with engine.connect() as lock:
         if engine.dialect.name == "postgresql" and not lock.scalar(text("SELECT pg_try_advisory_lock(707007)")):
             raise SystemExit("Scanner worker already active")
         runtime = ScannerRuntime(SessionLocal, provider_factory)
+        logger = logging.getLogger('ciberquant.worker')
+        def beat(status):
+            with SessionLocal() as session:
+                session.merge(WorkerHeartbeat(name='scanner', status=status, updated_at=now()))
+                session.commit()
+        logger.warning('worker_start name=scanner')
+        beat('RUNNING')
         runtime.recover_pending()
         try:
             while True:
                 started = time.monotonic()
                 runtime.cycle()
+                beat('RUNNING')
                 # Replay pacing is per subscription; keep worker heartbeat/reconnect responsive.
                 interval = settings.live_poll_seconds
                 time.sleep(max(0.1, interval - (time.monotonic() - started)))
@@ -70,6 +83,8 @@ def main():
             pass
         finally:
             runtime.close()
+            beat('STOPPED')
+            logger.warning('worker_stop name=scanner')
 
 
 if __name__ == "__main__":

@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0] - 2026-09-19
+- REQ-008 DONE / Human Acceptance PASS. Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93; acceptance A–L PASS, P0=0, P1=0. Release closure is documentation/version only.
+- ADR-006: IQ Option remains unofficial/experimental/PRACTICE-only/read-only; FAIL_CLOSED_ON_REVISION, immutable finality NOT GUARANTEED. Persistent DATA_CONFLICT, no overwrite/retry, orders0. LIVE-001 remains PARTIAL.
+- REQ-008: explicit dataset/version Research Workspace, bounded pipeline/lineage/history and descriptive separated evidence. Manual backtests no longer show validation children; batched strategy queries.
+- PostgreSQL-owned synchronous lifecycle and audited conservative recovery; consumed validation reveals never resealed. Migration007 adds worker heartbeat only.
+- Validated production cookie/CORS/Origin/HTTPS configuration and trusted proxy boundary; development defaults preserved.
+- Operational health, local PRACTICE multi-close/reconnect tooling, deterministic tests and real sanitized probe evidence. Six engines remain mathematically unchanged, zero orders. Human Acceptance PASS; final feature/main CI and integrated tag evidence recorded in PR #7 release handoff.
+
 ## [0.7.0] - 2026-09-19
 ### Acceptance
 - REQ-007 DONE; Human Acceptance PASS on approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5. No P0/P1 within accepted scope. cq-live-data-v1 / cq-scanner-v1 frozen; existing four quant engines remain frozen.
