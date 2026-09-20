@@ -1,3 +1,5 @@
+decisions:
+  iq_finality: {docs: [docs/adr/ADR-006-iq-post-close-finality-fail-closed.md, docs/providers/IQOPTION_FINALITY_INVESTIGATION.md, docs/REQ008_QA_UNBLOCK.md, docs/debt/LIVE-001-provider-operations.md], policy: FAIL_CLOSED_ON_REVISION, immutable_finality: NOT_GUARANTEED, human_acceptance: PENDING}
 modules:
   workspace: {docs: [docs/WORKSPACE_SEMANTICS.md, docs/requirements/REQ-008-integrated-research-workspace.md], backend: [backend/app/api/workspace.py], frontend: [frontend/src/features/workspace/], tests: [backend/tests/test_workspace.py, frontend/src/features/workspace/workspace.test.tsx, frontend/e2e/workspace.spec.ts], dependencies: [scanner, validation, backtesting, strategies, market_data]}
   operations: {docs: [docs/OPERATIONS_DEPLOYMENT.md], backend: [backend/app/operations.py, backend/app/api/operations.py, backend/app/security_boundary.py, backend/alembic/versions/007_operations.py], tests: [backend/tests/test_operations_recovery.py, backend/tests/test_production_security.py], dependencies: [scanner, validation, backtesting, market_data, auth]}

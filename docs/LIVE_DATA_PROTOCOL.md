@@ -1,5 +1,7 @@
 # cq-live-data-v1
 
+REQ-008 operational amendment: [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md), OPTION A. IQ historical confirmation does not guarantee immutable finality; post-close revisions are demonstrated. Same identity/same values remains idempotent, differing values DATA_CONFLICT. Preserve first raw evidence, latch subscription stopped across restart, no automatic retry/overwrite/reconstruction. Close_time<=provider server_time and mathematical contract are unchanged. IQ is unofficial/experimental/PRACTICE-only/read-only/fail-closed.
+
 Frozen by REQ-007 Human Acceptance PASS on2026-09-19. Incompatible semantic changes require a new engine identifier.
 
 IQ-specific normalization/clock/stream/payout contract and upstream pin: [IQ provider](providers/IQOPTION_EXPERIMENTAL.md). Real PRACTICE/OTC evidence: [dated smoke](providers/IQOPTION_SMOKE_2026-09-19.md). Raw IQ quantity is not tick volume; keep tick_volume/spread null. Missing real provider clock fails closed. Streaming forming is ephemeral; closed values are confirmed against history before persistence/evaluation.

@@ -1,5 +1,7 @@
 # cq-scanner-v1
 
+REQ-008 operational policy [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md): IQ immutable closed-candle finality is NOT GUARANTEED. A differing duplicate stops the affected subscription with persisted DATA_CONFLICT: no second event, further incremental features or new paper observation; no automatic retry/reconstruction, even after restart. Other identities remain isolated. Diagnostic remains visible after heartbeat expiry. This does not change NEXT_CANDLE_OPEN, expiry, candle close criterion or any mathematical engine.
+
 Frozen by REQ-007 Human Acceptance PASS on2026-09-19, including resolve_paper_config and causal paper outcome semantics. Incompatible semantic changes require a new engine identifier; the four existing quant dependencies remain frozen.
 
 IQ event evidence includes `payout_product` (turbo/binary) alongside observed payout/source and provider health. No digital-to-binary substitution. Product payout is an observed metadata snapshot, not a guaranteed executable quote for the paper expiry. PRACTICE/read-only unofficial-provider warnings remain visible; paper configuration precedence below is unchanged.

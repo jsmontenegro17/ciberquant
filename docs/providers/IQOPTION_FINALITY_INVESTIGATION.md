@@ -1,6 +1,8 @@
 # REQ-008 — IQ finality investigation, 2026-09-19 UTC
 
-Status: BLOCKED — UPSTREAM FINALITY POLICY REQUIRED. Human Acceptance PENDING. No merge/tag/release. Starting HEAD cd67e4b04344174c5081e7bbb956aadc1e161d3d; PR #7 remains draft.
+Current decision2026-09-19: human-approved OPTION A — FAIL CLOSED, recorded in [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md). The policy blocker is resolved, not the upstream limitation. No immutable closed-candle finality guarantee; IQ remains unofficial/experimental/PRACTICE-only/read-only. Human Acceptance PENDING; no merge/tag/release. [Final QA correction](../REQ008_QA_UNBLOCK.md).
+
+Historical investigation status at starting HEAD cd67e4b04344174c5081e7bbb956aadc1e161d3d: BLOCKED — UPSTREAM FINALITY POLICY REQUIRED, PR #7 draft. The evidence and alternatives below are preserved; their request for a policy decision is superseded by ADR-006, not erased.
 
 ## Scope and root cause
 

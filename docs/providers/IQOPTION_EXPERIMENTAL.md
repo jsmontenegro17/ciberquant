@@ -1,5 +1,9 @@
 # IQ Option — unofficial community integration / read-only
 
+## Current v1.0 operational policy (REQ-008)
+
+UNOFFICIAL / EXPERIMENTAL / PRACTICE-ONLY / READ-ONLY / FAIL-CLOSED. **IMMUTABLE CLOSED-CANDLE FINALITY NOT GUARANTEED.** REQ-008 subsequently demonstrated upstream post-close OHLC revisions, including identical requests. [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md) records the human-approved policy: preserve first evidence, DATA_CONFLICT on different duplicate, stop affected subscription without automatic retry (including worker restart). No overwrite, second event, incremental feature continuation, new paper observation or retrospective repair. Explicit operational investigation/action is required. Existing close_time<=provider server_time stays unchanged; no stabilization guarantee. REQ-008 Human Acceptance remains PENDING. Historical REQ-007 acceptance below is not rewritten.
+
 REQ-007 includes a working real IQ provider, not an unavailable placeholder. `ENABLE_IQOPTION_EXPERIMENTAL=false` by default. **UNOFFICIAL COMMUNITY INTEGRATION — protocol may change without notice.** Human Acceptance PASS on2026-09-19; this is not an official SDK or execution system.
 
 ## Pinned dependency and isolation

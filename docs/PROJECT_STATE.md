@@ -1,7 +1,7 @@
 # Project State
 
 ## Current version
-1.0.0-dev — REQ-008 BLOCKED — UPSTREAM FINALITY POLICY REQUIRED / Human Acceptance PENDING on codex/req-008-integrated-workspace, PR #7. IQ historical post-close revisions reproduced independently; see [investigation](providers/IQOPTION_FINALITY_INVESTIGATION.md). Accepted release remains v0.7.0; the following release history is preserved. No v1.0 merge/tag authorized.
+1.0.0-dev — REQ-008 QA / Human Acceptance PENDING on codex/req-008-integrated-workspace, PR #7. Human policy decision: OPTION A — FAIL CLOSED ([ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md)). IQ remains PRACTICE-only/read-only/experimental; demonstrated upstream post-close revisions are detected, never overwritten; no immutable-finality guarantee. Session E2E synchronization correction is verified locally; both final CI events gate readiness. See [QA evidence](REQ008_QA_UNBLOCK.md). Accepted release remains v0.7.0; historical release acceptance is preserved. No v1.0 merge/tag authorized.
 0.7.0 — REQ-007 DONE / Human Acceptance PASS on 2026-09-19. Approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5, PR #6. REQ-001–007 DONE / PASS. Main SHA, final CI and tag evidence are recorded in the PR #6 release handoff.
 
 ## Functional
@@ -20,7 +20,7 @@ Historical validation is human-accepted in REQ-006. REQ-007 adds read-only live/
 
 ## Planned
 REQ-008 is now explicitly authorized and implemented in its feature branch: integrated read-only Workspace, essential PostgreSQL job recovery, production configuration safeguards, worker diagnostics and IQ PRACTICE soak tooling. Six engine contracts remain frozen. See WORKSPACE_SEMANTICS.md and OPERATIONS_DEPLOYMENT.md. Earlier statements below that REQ-008 is not authorized describe the prior accepted release, not the active branch.
-Integrated research workspace (REQ-008, not started).
+Integrated research workspace (REQ-008, implemented; QA, not released).
 
 ## Latest accepted delivery
 REQ-007 final human QA correction: research-mode explicit payout fallback/expiry now take precedence over historical reference assumptions. Pure paper-config resolver and source evidence; truthful research/provider UI; four-case integration regressions verify actual next-open/expiry/Decimal outcomes. Human Acceptance PASS; no REQ-008.
@@ -38,7 +38,7 @@ Alembic001–003 stable;004_strategy_backtesting adds accepted strategies, strat
 REQ-001 is the bootstrap exception. `main` was created from the validated REQ-001 branch and configured as the default branch; both branches are synchronized. REQ-002 onward requires feature branch, Pull Request, CI and QA before merge. See [ADR-005](adr/ADR-005-git-development-workflow.md).
 
 ## Known issues
-[LIVE-001](debt/LIVE-001-provider-operations.md): provider smoke/operations, bounded canonical history, interrupted-paper recovery and capacity follow-ups. Real IQ OTC is delivered in REQ-007; unofficial protocol drift/digital support/soak testing remain separate future work. REQ-008 is implemented on its feature branch; acceptance blocked by the real IQ conflict.
+[LIVE-001](debt/LIVE-001-provider-operations.md): PARTIAL. Real IQ OTC delivered in REQ-007. REQ-008 adopts fail-closed for upstream revisions; stronger finality research, prolonged soak, protocol drift, supervision, operational recovery, digital support and capacity remain future work. A stopped conflicted subscription is expected integrity protection, not an immutable-feed guarantee.
 [UX-001](debt/UX-001-manual-vs-validation-child-backtests.md): Strategy list last_backtest can reference a validation child although GET /backtests correctly defaults to MANUAL. Separate presentation improvement, not a calculation/evidence defect. All listed debts remain nonblocking for v0.6.0; no debt implementation during release closure.
 [VALIDATION-001](debt/VALIDATION-001-stale-validation-run-recovery.md) stale phase recovery and [VALIDATION-002](debt/VALIDATION-002-multiple-testing-research-lineage.md) broader multiple-testing lineage are separate P2 scope. Holdout reuse warnings exist; perfect external blindness is not claimed.
 [QUANT-002 — Historical Engine Version Replay](debt/QUANT-002-historical-engine-version-replay.md): future registry/dispatcher must preserve replay of frozen v1 evidence when incompatible engines arrive. P2, not a v0.5.0 blocker; documentation only in REQ-005. All existing debts below remain nonblocking for v0.5.0.
@@ -52,4 +52,4 @@ Final human acceptance PASS on 2026-09-19 verified all four financial correction
 
 ## Next milestones
 REQ-008 Integrated Research Workspace / v1.0.
-REQ-007 is closed. REQ-008 is authorized and implemented on PR #7; human acceptance/release remain blocked. See its requirement and dated soak evidence.
+REQ-007 is closed. REQ-008 is implemented on PR #7, QA; final push/PR CI gate readiness, Human Acceptance remains PENDING. Release is not authorized. See its requirement, QA correction and original dated soak evidence.

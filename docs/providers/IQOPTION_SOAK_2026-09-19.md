@@ -1,8 +1,10 @@
 # REQ-008 — sanitized local PRACTICE operational probe
 
-Overall acceptance: BLOCKED by an observed closed-candle DATA_CONFLICT; successful later probes do not erase it. No frozen close semantics or upstream pin changed. Human Acceptance PENDING.
+Current policy update2026-09-19: [ADR-006](../adr/ADR-006-iq-post-close-finality-fail-closed.md) adopts fail-closed by human decision. REQ-008 H now requires DATA_CONFLICT SAFELY DETECTED AND FAIL-CLOSED, not a conflict-free soak. The historical blocked assessment and all probe results below are preserved. No upstream repair/finality guarantee is claimed; Human Acceptance PENDING.
 
-Investigation update2026-09-19: **IQ_UPSTREAM_POST_CLOSE_REVISION reproduced** independently of ScannerRuntime/DB/reconnect, including identical end/count requests. [Detailed investigation and decision gate](IQOPTION_FINALITY_INVESTIGATION.md). REQ-008 now remains BLOCKED — UPSTREAM FINALITY POLICY REQUIRED. The original uninstrumented candle/layer is still not retrospectively identifiable; the mechanism is demonstrated by new evidence, not guessed from successful retries.
+Historical overall assessment before the policy decision: BLOCKED by an observed closed-candle DATA_CONFLICT; successful later probes do not erase it. No frozen close semantics or upstream pin changed.
+
+Historical investigation update2026-09-19: **IQ_UPSTREAM_POST_CLOSE_REVISION reproduced** independently of ScannerRuntime/DB/reconnect, including identical end/count requests. [Detailed investigation](IQOPTION_FINALITY_INVESTIGATION.md). At that time REQ-008 was BLOCKED — UPSTREAM FINALITY POLICY REQUIRED; the decision above supersedes that gate. The original uninstrumented candle/layer is still not retrospectively identifiable; the mechanism is demonstrated by new evidence, not guessed from successful retries.
 
 Second attempt: PASS (bounded multi-close/reconnect probe), completed2026-09-19T23:06:01.540028Z, exit0. Productbinary. Pin acac6e08333466ae188c7dfa7fd2a03174e34ca2 unchanged. Command: `python -m scripts.soak_iqoption --product binary --seconds 420`.
 
