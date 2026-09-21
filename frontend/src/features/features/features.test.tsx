@@ -28,42 +28,42 @@ afterEach(cleanup);
 async function mount() {
   render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})}><FeatureLab /></QueryClientProvider>);
   await screen.findByRole('option', {name:'FIXTURE / DEMO / EURUSD / REGULAR / 1m'});
-  fireEvent.change(screen.getByLabelText('Dataset'), {target:{value:JSON.stringify(datasetOnly(dataset))}});
+  fireEvent.change(screen.getByLabelText("Conjunto de datos"), {target:{value:JSON.stringify(datasetOnly(dataset))}});
 }
 it('loads definitions and preset; explicit compute feeds actual rows to chart and renders snapshot/null versus zero', async () => {
   await mount();
-  fireEvent.click(screen.getByText('Load Standard Set'));
-  expect(screen.getByLabelText('Period 6')).toBeTruthy();
+  fireEvent.click(screen.getByText("Cargar conjunto estándar"));
+  expect(screen.getByLabelText("Período 6")).toBeTruthy();
   expect(featureApi.compute).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', {name:'Analyze'}));
+  fireEvent.click(screen.getByRole('button', {name:"Analizar"}));
   await screen.findByText('cq-features-v1');
   expect(vi.mocked(featureApi.compute).mock.calls[0][0].indicators).toEqual(definitions.defaults.STANDARD);
-  expect(screen.getByText('As-of candle ID')).toBeTruthy();
+  expect(screen.getByText("ID de vela de corte")).toBeTruthy();
   expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   expect(screen.getAllByText('0').length).toBeGreaterThan(0);
   expect(chart.setData).toHaveBeenCalledWith(candleData(result.rows));
   expect(chart.addSeries.mock.calls.map(c => c[2])).toContain(2);
-  expect(chart.markers).toHaveBeenCalledWith(expect.anything(), [expect.objectContaining({text:'Gap'})]);
+  expect(chart.markers).toHaveBeenCalledWith(expect.anything(), [expect.objectContaining({text:"Hueco de datos"})]);
 });
 it('custom parameters and snapshot are sent; removal updates specs', async () => {
   await mount();
-  fireEvent.click(screen.getByText('Add indicator'));
-  fireEvent.change(screen.getByLabelText('Indicator 1'), {target:{value:'BOLLINGER'}});
-  fireEvent.change(screen.getByLabelText('Period 1'), {target:{value:'5'}});
-  fireEvent.change(screen.getByLabelText('Multiplier 1'), {target:{value:'2.5'}});
-  fireEvent.change(screen.getByLabelText('As-of candle ID (blank = latest)'), {target:{value:'42'}});
-  fireEvent.click(screen.getByRole('button', {name:'Analyze'}));
+  fireEvent.click(screen.getByText("Añadir indicador"));
+  fireEvent.change(screen.getByLabelText("Indicador 1"), {target:{value:'BOLLINGER'}});
+  fireEvent.change(screen.getByLabelText("Período 1"), {target:{value:'5'}});
+  fireEvent.change(screen.getByLabelText("Multiplicador 1"), {target:{value:'2.5'}});
+  fireEvent.change(screen.getByLabelText("ID de vela de corte (vacío = última)"), {target:{value:'42'}});
+  fireEvent.click(screen.getByRole('button', {name:"Analizar"}));
   await waitFor(() => expect(featureApi.compute).toHaveBeenCalled());
   expect(vi.mocked(featureApi.compute).mock.calls[0][0]).toMatchObject({as_of_candle_id:42, indicators:[{type:'BOLLINGER',period:5,stddev_multiplier:'2.5'}]});
-  fireEvent.click(screen.getByText('Remove 1'));
-  expect(screen.queryByLabelText('Period 1')).toBeNull();
+  fireEvent.click(screen.getByText("Quitar 1"));
+  expect(screen.queryByLabelText("Período 1")).toBeNull();
 });
 it('exposes API rejection without showing stale results', async () => {
   vi.mocked(featureApi.compute).mockRejectedValue(new Error('Exact origin calculation exceeds cap'));
   await mount();
-  fireEvent.click(screen.getByRole('button', {name:'Analyze'}));
+  fireEvent.click(screen.getByRole('button', {name:"Analizar"}));
   expect((await screen.findByRole('alert')).textContent).toContain('exceeds cap');
-  expect(screen.queryByRole('region', {name:'Feature results'})).toBeNull();
+  expect(screen.queryByRole('region', {name:"Resultados de indicadores"})).toBeNull();
 });
 it('preserves whitespace warmups and legitimate zero when adapting API data', () => {
   expect(lineData(result.rows,'ema_20')).toEqual([{time:1767225600}]);

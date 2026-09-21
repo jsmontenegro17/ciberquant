@@ -21,7 +21,7 @@ Behavioural analytics remain future scope. RiskProfile retains the user-scoped F
 Historical validation is human-accepted in REQ-006. REQ-007 adds read-only live/replay scanning and separate paper observations; positive in-sample results never automatically confer statistical validation.
 
 ## Planned
-No subsequent requirement is started or authorized. Production deployment, digital IQ and new engine semantics are outside release closure.
+REQ-009 — Español y primeros pasos, autorizado por el usuario el2026-09-21. Implementación de interfaz y orientación inicial; no modifica motores ni autoriza operaciones financieras. La versión integrada estable sigue siendo1.0.0 hasta completar PR/CI/QA/merge.
 
 ## Latest accepted delivery
 REQ-008 Integrated Research Workspace / v1.0, DONE / Human Acceptance PASS. Essential SEC-001, UX-001, DATA-001, BACKTEST-001 and VALIDATION-001 scopes accepted/resolved. LIVE-001 remains PARTIAL. Historical REQ-007 notes follow unchanged.
@@ -52,8 +52,9 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
+[REQ-009](requirements/REQ-009-espanol-primeros-pasos.md): DONE. Titular autoriza revisión final y publicación el2026-09-21; revisión técnica PASS. Evidencia de integración/CI/publicación en PR#8. Solo interfaz, sin nuevas versiones de motores ni cambios de datos.
 [REQ-008](requirements/REQ-008-integrated-research-workspace.md): DONE / Human Acceptance PASS. REQ-001–008 DONE/PASS. P0=0, P1=0 within accepted scope.
 [REQ-007](requirements/REQ-007-live-scanner.md): DONE; automated A–J PASS, Human Acceptance PASS. REQ-001–007 DONE / PASS. No optimization, ranking, money management, automatic trading or strategy recommendation.
 
 ## Next milestones
-REQ-009 NOT STARTED / NOT AUTHORIZED. No production deployment, auto-trading or new engine version is authorized by this closure.
+REQ-009: cierre autorizado con CI final → merge → CI main → publicación estática verificada. Evidencia operativa en PR#8. Sin auto-trading ni nuevas versiones de motores.

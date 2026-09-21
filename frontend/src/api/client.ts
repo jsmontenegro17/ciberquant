@@ -1,3 +1,4 @@
+import { errorMessage } from '../utils/spanish';
 const base =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
 export async function api<T>(path: string, init: RequestInit = {}) {
@@ -16,7 +17,7 @@ export async function api<T>(path: string, init: RequestInit = {}) {
       const body = await response
         .json()
         .catch(() => ({ detail: "Request failed" }));
-      throw new Error(
+      throw new Error(errorMessage(
         typeof body.detail === "string"
           ? body.detail
           : Array.isArray(body.detail)
@@ -24,11 +25,17 @@ export async function api<T>(path: string, init: RequestInit = {}) {
                 .map((item: { msg?: string }) => item.msg || "Invalid input")
                 .join("; ")
             : "Request failed",
-      );
+      ));
     }
     return response.status === 204
       ? (undefined as T)
       : ((await response.json()) as T);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError')
+      throw new Error('La solicitud tardó demasiado. Revisa el estado antes de volver a enviarla.');
+    if (error instanceof TypeError)
+      throw new Error('No se pudo conectar con el servidor. Comprueba tu conexión.');
+    throw error;
   } finally {
     clearTimeout(timer);
   }

@@ -20,55 +20,55 @@ beforeEach(()=>{vi.resetAllMocks();vi.mocked(validationApi.detail).mockResolvedV
 afterEach(cleanup);
 it('shows development and four folds with computationally sealed test, no hidden metrics',async()=>{
  mount(<Routes><Route path='/validation/:id' element={<ValidationDetail/>}/></Routes>);
- await screen.findByText('FINAL TEST — SEALED');
- expect(screen.getByText('PRELIMINARY EVIDENCE')).toBeTruthy();
- expect(screen.getAllByText(/Fold \d · Evaluable/)).toHaveLength(4);
- const card=screen.getByRole('region',{name:'Final test'});
+ await screen.findByText("PRUEBA FINAL — SEALED");
+ expect(screen.getByText("EVIDENCIA PRELIMINAR")).toBeTruthy();
+ expect(screen.getAllByText(/Partición \d · Evaluable/)).toHaveLength(4);
+ const card=screen.getByRole('region',{name:"Prueba final"});
  expect(within(card).queryByRole('table')).toBeNull();
- expect(screen.queryByRole('region',{name:'Bootstrap evidence'})).toBeNull();
+ expect(screen.queryByRole('region',{name:"Evidencia bootstrap"})).toBeNull();
  expect(validationApi.reveal).not.toHaveBeenCalled();
 });
 it.each(['PASS','FAIL','INCONCLUSIVE'])('confirms explicit reveal and explains %s with gates',async verdict=>{
  vi.mocked(validationApi.reveal).mockResolvedValue({...run,status:'COMPLETED',verdict,validation_state:verdict==='PASS'?'HISTORICALLY_VALIDATED':'NOT_VALIDATED',test_revealed_at:'2026-09-19',test_summary:metrics,bootstrap_summary:{point_estimate:'.84',lower_95:'.8',upper_95:'.9',block_count:12,iterations:2000,seed:'seed'},gates:{test_resolved:verdict!=='INCONCLUSIVE',test_pnl:verdict==='PASS'}});
  mount(<Routes><Route path='/validation/:id' element={<ValidationDetail/>}/></Routes>);
- fireEvent.click(await screen.findByRole('button',{name:'Reveal Final Test'}));
+ fireEvent.click(await screen.findByRole('button',{name:"Revelar prueba final"}));
  expect(validationApi.reveal).not.toHaveBeenCalled();
- expect(screen.getByRole('dialog',{name:'Confirm reveal'}).textContent).toContain('no longer be considered unseen');
- fireEvent.click(screen.getByRole('button',{name:'Confirm irreversible reveal'}));
- await screen.findByText('FINAL TEST — REVEALED');
+ expect(screen.getByRole('dialog',{name:"Confirmar revelación"}).textContent).toContain('deja de considerarse no observada');
+ fireEvent.click(screen.getByRole('button',{name:"Confirmar revelación irreversible"}));
+ await screen.findByText("PRUEBA FINAL — REVEALED");
  expect(validationApi.reveal).toHaveBeenCalledTimes(1);
- expect(screen.getByRole('heading',{name:verdict==='PASS'?'Historical validation PASS':verdict})).toBeTruthy();
- expect(screen.getByRole('region',{name:'Bootstrap evidence'})).toBeTruthy();
- expect(screen.queryByRole('button',{name:'Reveal Final Test'})).toBeNull();
+ expect(screen.getByRole('heading',{name:verdict==='PASS'?"Validación histórica aprobada (PASS)":verdict})).toBeTruthy();
+ expect(screen.getByRole('region',{name:"Evidencia bootstrap"})).toBeTruthy();
+ expect(screen.queryByRole('button',{name:"Revelar prueba final"})).toBeNull();
 });
 it('shows reused holdout, replay and degraded state without profitability claim',async()=>{
  vi.mocked(validationApi.detail).mockResolvedValue({...run,validation_state:'DEGRADED',holdout_warnings:{prior_validation_count:2,prior_revealed_holdout_count:2,overlapping_holdout_count:2,replay_count:1}});
  mount(<Routes><Route path='/validation/:id' element={<ValidationDetail/>}/></Routes>);
- await screen.findByText(/REUSED HOLDOUT/);expect(screen.getByText(/REPLAY —/)).toBeTruthy();expect(screen.getByText(/SEALED · DEGRADED/)).toBeTruthy();
+ await screen.findByText(/MUESTRA RESERVADA REUTILIZADA/);expect(screen.getByText(/REPRODUCCIÓN:/)).toBeTruthy();expect(screen.getByText(/Reservada \(SEALED\) · DEGRADED/)).toBeTruthy();
 });
 it('previews exact frozen plan and submits the preview snapshot',async()=>{
  vi.mocked(validationApi.preview).mockResolvedValue({config_snapshot:run.config_snapshot,config_sha256:'hash'});vi.mocked(validationApi.create).mockResolvedValue(run);
  mount(<Routes><Route path='/validation/new' element={<ValidationSetup/>}/><Route path='/validation/:id' element={<p>Created plan</p>}/></Routes>,'/validation/new?version=1');
  await screen.findByRole('option',{name:'FIXTURE / DEMO / EURUSD / REGULAR / 1h'});
- fireEvent.change(screen.getByLabelText('Dataset'),{target:{value:JSON.stringify(dataset)}});
- fireEvent.click(screen.getByRole('button',{name:'Preview frozen plan'}));
- await screen.findByRole('region',{name:'Plan preview'});
- fireEvent.click(screen.getByRole('button',{name:'Create Validation Plan'}));
- await screen.findByText('Created plan');
+ fireEvent.change(screen.getByLabelText("Conjunto de datos"),{target:{value:JSON.stringify(dataset)}});
+ fireEvent.click(screen.getByRole('button',{name:"Revisar plan fijo"}));
+ await screen.findByRole('region',{name:"Vista previa del plan"});
+ fireEvent.click(screen.getByRole('button',{name:"Crear plan de validación"}));
+ await screen.findByText("Created plan");
  expect(validationApi.create).toHaveBeenCalledWith(input,expect.anything());
 });
 it('invalidates preview when inputs change',async()=>{
  vi.mocked(validationApi.preview).mockResolvedValue({config_snapshot:run.config_snapshot,config_sha256:'hash'});
  mount(<ValidationSetup/>,'/validation/new?version=1');await screen.findByRole('option',{name:'FIXTURE / DEMO / EURUSD / REGULAR / 1h'});
- fireEvent.change(screen.getByLabelText('Dataset'),{target:{value:JSON.stringify(dataset)}});fireEvent.click(screen.getByRole('button',{name:'Preview frozen plan'}));await screen.findByRole('region',{name:'Plan preview'});
- fireEvent.change(screen.getByLabelText('Payout %'),{target:{value:'80'}});expect(screen.queryByRole('button',{name:'Create Validation Plan'})).toBeNull();
+ fireEvent.change(screen.getByLabelText("Conjunto de datos"),{target:{value:JSON.stringify(dataset)}});fireEvent.click(screen.getByRole('button',{name:"Revisar plan fijo"}));await screen.findByRole('region',{name:"Vista previa del plan"});
+ fireEvent.change(screen.getByLabelText("Rendimiento %"),{target:{value:'80'}});expect(screen.queryByRole('button',{name:"Crear plan de validación"})).toBeNull();
 });
 it('renders API failure without fabricating results',async()=>{
  vi.mocked(validationApi.detail).mockRejectedValue(new Error('API unavailable'));
  mount(<Routes><Route path='/validation/:id' element={<ValidationDetail/>}/></Routes>);
- await screen.findByText('API unavailable');expect(screen.queryByText('Historical validation PASS')).toBeNull();
+ await screen.findByText('API unavailable');expect(screen.queryByText("Validación histórica aprobada (PASS)")).toBeNull();
 });
 it('lists private validation attempts without ranking',async()=>{
  vi.mocked(validationApi.list).mockResolvedValue({items:[run],total:1,limit:20,offset:0});mount(<ValidationList/>);
- await waitFor(()=>expect(screen.getByRole('link',{name:'Plan #1 / version #1'})).toBeTruthy());
+ await waitFor(()=>expect(screen.getByRole('link',{name:"Plan n.º1 / versión n.º1"})).toBeTruthy());
 });

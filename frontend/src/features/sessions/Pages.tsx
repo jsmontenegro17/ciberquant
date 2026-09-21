@@ -1,3 +1,4 @@
+import { codeLabel } from '../../utils/spanish';
 import { useAccountSelection } from "../accounts/selection";
 import { riskPreview } from "../../api/risk";
 import { FormEvent, useState } from "react";
@@ -20,7 +21,7 @@ export function Sessions() {
   const [status, setStatus] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  if (q.isLoading) return <p>Loading sessions…</p>;
+  if (q.isLoading) return <p>Cargando sesiones…</p>;
   if (q.isError) return <ErrorState />;
   const rows = q.data?.filter(
     (s) =>
@@ -32,16 +33,16 @@ export function Sessions() {
   return (
     <>
       <div className="toolbar">
-        <h2>Session history</h2>
+        <h2>Historial de sesiones</h2>
         <Link className="button" to="/sessions/new">
-          Start session
+          Iniciar sesión de operaciones
         </Link>
       </div>
       <div className="grid compact">
         <label>
-          Account
+          Cuenta
           <select value={account} onChange={(e) => setAccount(e.target.value)}>
-            <option value="">All accounts</option>
+            <option value="">Todas las cuentas</option>
             {accounts.data?.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
@@ -50,16 +51,16 @@ export function Sessions() {
           </select>
         </label>
         <label>
-          Status
+          Estado
           <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="">All statuses</option>
-            <option>OPEN</option>
-            <option>CLOSED</option>
-            <option>STOPPED</option>
+            <option value="">Todos los estados</option>
+            <option value={"OPEN"}>{codeLabel("OPEN")}</option>
+            <option value={"CLOSED"}>{codeLabel("CLOSED")}</option>
+            <option value={"STOPPED"}>{codeLabel("STOPPED")}</option>
           </select>
         </label>
         <label>
-          From
+          Desde
           <input
             type="date"
             value={from}
@@ -67,7 +68,7 @@ export function Sessions() {
           />
         </label>
         <label>
-          To
+          Hasta
           <input
             type="date"
             value={to}
@@ -76,22 +77,22 @@ export function Sessions() {
         </label>
       </div>
       {!rows?.length ? (
-        <p>No sessions for these filters.</p>
+        <p>No hay sesiones para estos filtros.</p>
       ) : (
         <div className="tableWrap">
           <table>
             <thead>
               <tr>
                 {[
-                  "Date",
-                  "Account",
-                  "Status",
-                  "Starting",
-                  "Ending",
-                  "Trades",
+                  "Fecha",
+                  "Cuenta",
+                  "Estado",
+                  "Inicial",
+                  "Final",
+                  "Operaciones",
                   "W",
                   "L",
-                  "Win rate",
+                  "Porcentaje de aciertos",
                   "P&L",
                 ].map((h) => (
                   <th key={h}>{h}</th>
@@ -111,7 +112,7 @@ export function Sessions() {
                       ?.name || s.trading_account_id}{" "}
                     · {s.currency}
                   </td>
-                  <td>{s.status}</td>
+                  <td>{codeLabel(s.status)}</td>
                   <td>{money(s.starting_balance)}</td>
                   <td>{money(s.ending_balance)}</td>
                   <td>{s.total_trades}</td>
@@ -151,7 +152,7 @@ export function NewSession() {
   });
   return (
     <section className="panel formPanel">
-      <h2>Start session</h2>
+      <h2>Iniciar sesión de operaciones</h2>
       <form
         onSubmit={(e: FormEvent) => {
           e.preventDefault();
@@ -159,13 +160,13 @@ export function NewSession() {
         }}
       >
         <label>
-          Trading account
+          Cuenta de operaciones
           <select
             required
             value={account}
             onChange={(e) => setAccount(e.target.value)}
           >
-            <option value="">Select account</option>
+            <option value="">Selecciona una cuenta</option>
             {accounts.data?.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name} · {a.currency}
@@ -173,27 +174,27 @@ export function NewSession() {
             ))}
           </select>
         </label>
-        {accounts.isLoading && <p>Loading accounts…</p>}
+        {accounts.isLoading && <p>Cargando cuentas…</p>}
         {accounts.isError && <ErrorState />}
         {accounts.data?.length === 0 && (
-          <p>No accounts. Create one from Accounts.</p>
+          <p>No tienes cuentas de operaciones asignadas. Esta pantalla no permite crearlas; la investigación está disponible por separado.</p>
         )}
-        {risk.isFetching && account && <p>Loading risk profile…</p>}
+        {risk.isFetching && account && <p>Cargando perfil de riesgo…</p>}
         {risk.isError && <p role="alert">{risk.error.message}</p>}
         {risk.data && (
           <div className="grid compact">
             {[
-              ["Current balance", money(risk.data.current_balance)],
-              ["Risk per trade", percent(risk.data.risk_per_trade_percent)],
-              ["Suggested stake", money(risk.data.suggested_stake)],
-              ["Max session loss", money(risk.data.max_loss_amount)],
-              ["Max operations", String(risk.data.max_operations)],
-              ["Minimum payout", percent(risk.data.minimum_payout_percent)],
+              ["Saldo actual", money(risk.data.current_balance)],
+              ["Riesgo por operación", percent(risk.data.risk_per_trade_percent)],
+              ["Importe sugerido", money(risk.data.suggested_stake)],
+              ["Pérdida máxima por sesión", money(risk.data.max_loss_amount)],
+              ["Máximo de operaciones", String(risk.data.max_operations)],
+              ["Rendimiento mínimo", percent(risk.data.minimum_payout_percent)],
               [
-                "Profit target",
+                "Objetivo de ganancia",
                 risk.data.profit_target_amount
                   ? money(risk.data.profit_target_amount)
-                  : "Not configured",
+                  : "Sin configurar",
               ],
             ].map(([label, value]) => (
               <div key={label}>
@@ -205,7 +206,7 @@ export function NewSession() {
         )}
         {create.error && <p role="alert">{create.error.message}</p>}
         <button disabled={!risk.data || risk.isError || risk.isFetching || create.isPending}>
-          {create.isPending ? "Starting…" : "Start session"}
+          {create.isPending ? "Iniciando…" : "Iniciar sesión de operaciones"}
         </button>
       </form>
     </section>
@@ -224,26 +225,26 @@ export function SessionWorkspace() {
   const [showTrade, setShowTrade] = useState(false);
   const [showNote, setShowNote] = useState(false);
   if (s.isLoading || summary.isLoading)
-    return <div className="state">Loading session…</div>;
+    return <div className="state">Cargando sesión…</div>;
   if (!session || summary.isError)
-    return <ErrorState message="Could not load session." />;
+    return <ErrorState message="No se pudo cargar la sesión." />;
   return (
     <>
       <div className="toolbar">
         <div>
           <span className={`status ${session.status.toLowerCase()}`}>
-            {session.status}
+            {codeLabel(session.status)}
           </span>
           <span className="muted">
             {" "}
-            · started {dateTime(session.started_at)}· Account #
+            · inicio {dateTime(session.started_at)}· Cuenta n.º
             {session.trading_account_id} · {summary.data!.currency}
-            {session.ended_at && ` · closed ${dateTime(session.ended_at)}`}
+            {session.ended_at && ` · cierre ${dateTime(session.ended_at)}`}
           </span>
         </div>
         <div className="actions">
           {session.status !== "OPEN" && (
-            <button onClick={() => setShowNote(true)}>Add note</button>
+            <button onClick={() => setShowNote(true)}>Añadir nota</button>
           )}
           {session.status === "OPEN" && (
             <>
@@ -251,10 +252,10 @@ export function SessionWorkspace() {
                 disabled={summary.data!.limit_reached}
                 onClick={() => setShowTrade(true)}
               >
-                Record trade
+                Registrar operación
               </button>
               <button className="secondary" onClick={() => setShowNote(true)}>
-                Add note
+                Añadir nota
               </button>
               <Close id={sid} summary={summary.data!} />
             </>
@@ -263,41 +264,41 @@ export function SessionWorkspace() {
       </div>
       <section className="grid">
         <div className="card">
-          <span className="muted">Current balance</span>
+          <span className="muted">Saldo actual</span>
           <strong>{money(summary.data!.ending_balance)}</strong>
         </div>
         <div className="card">
-          <span className="muted">Session P&L</span>
+          <span className="muted">Resultado neto de la sesión</span>
           <strong>{money(summary.data!.net_pnl)}</strong>
         </div>
         <div className="card">
-          <span className="muted">Win rate</span>
+          <span className="muted">Porcentaje de aciertos</span>
           <strong>{percent(summary.data!.win_rate)}</strong>
         </div>
         <div className="card">
-          <span className="muted">Operations</span>
+          <span className="muted">Operaciones</span>
           <strong>
             {summary.data!.total_trades} / {session.max_operations}
           </strong>
         </div>
       </section>
       <section className="panel">
-        <h2>Session summary</h2>
+        <h2>Resumen de sesión</h2>
         <div className="grid compact">
           <div>
-            <span>Starting balance</span>
+            <span>Saldo inicial</span>
             <strong>{money(summary.data!.starting_balance)}</strong>
           </div>
           <div>
-            <span>Gross profit</span>
+            <span>Ganancia bruta</span>
             <strong>{money(summary.data!.gross_profit)}</strong>
           </div>
           <div>
-            <span>Gross loss</span>
+            <span>Pérdida bruta</span>
             <strong>{money(summary.data!.gross_loss)}</strong>
           </div>
           <div>
-            <span>Draws / cancelled</span>
+            <span>Empates / canceladas</span>
             <strong>
               {summary.data!.draws} / {summary.data!.cancelled}
             </strong>
@@ -307,30 +308,30 @@ export function SessionWorkspace() {
       <section className="panel">
         <div className="panelhead">
           <div>
-            <div className="eyebrow">RISK PANEL</div>
-            <h2>Session guardrails</h2>
+            <div className="eyebrow">PANEL DE RIESGO</div>
+            <h2>Límites de la sesión</h2>
           </div>
           <span className="pill">
-            {money(session.max_loss_amount)} max loss
+            {money(session.max_loss_amount)} pérdida máxima
           </span>
         </div>
         <div className="grid compact">
           <div>
-            <span className="muted">Risk per trade</span>
+            <span className="muted">Riesgo por operación</span>
             <strong>{percent(session.risk_per_trade_percent)}</strong>
           </div>
           <div>
-            <span className="muted">Minimum payout</span>
+            <span className="muted">Rendimiento mínimo</span>
             <strong>{percent(session.minimum_payout_percent)}</strong>
           </div>
           <div>
-            <span className="muted">Wins / losses</span>
+            <span className="muted">Aciertos / pérdidas</span>
             <strong>
               {summary.data!.wins} / {summary.data!.losses}
             </strong>
           </div>
           <div>
-            <span className="muted">Streaks</span>
+            <span className="muted">Rachas</span>
             <strong>
               {summary.data!.max_win_streak}W / {summary.data!.max_loss_streak}L
             </strong>
@@ -338,12 +339,12 @@ export function SessionWorkspace() {
         </div>
       </section>
       {summary.data!.limit_reached && (
-        <p role="status">Session limit reached: {summary.data!.limit_reason}</p>
+        <p role="status">Límite de sesión alcanzado: {summary.data!.limit_reason}</p>
       )}
       <p>
-        Suggested stake: {money(summary.data!.suggested_stake)} · Loss consumed:{" "}
-        {money(summary.data!.loss_consumed)} · Remaining risk:{" "}
-        {money(summary.data!.remaining_risk)} · Operations remaining:{" "}
+        Importe sugerido: {money(summary.data!.suggested_stake)} · Pérdida acumulada:{" "}
+        {money(summary.data!.loss_consumed)} · Riesgo restante:{" "}
+        {money(summary.data!.remaining_risk)} · Operaciones restantes:{" "}
         {summary.data!.operations_remaining}
       </p>
       <SessionNotes sid={sid} />
@@ -377,19 +378,18 @@ export function Close({ id, summary }: { id: number; summary: Summary }) {
   });
   return (
     <div>
-      <button onClick={() => setConfirming(true)}>Close session</button>
+      <button onClick={() => setConfirming(true)}>Cerrar sesión de operaciones</button>
       {confirming && (
-        <section className="panel" aria-label="Confirm closure">
+        <section className="panel" aria-label="Confirmar cierre de sesión">
           <p>
-            Trades: {summary.total_trades} · P&L: {money(summary.net_pnl)} ·
-            Balance: {money(summary.ending_balance)}
+            Operaciones: {summary.total_trades} · P&L: {money(summary.net_pnl)} · Saldo: {money(summary.ending_balance)}
           </p>
           {m.error && <p role="alert">{m.error.message}</p>}
           <button disabled={m.isPending} onClick={() => m.mutate()}>
-            Confirm close
+            Confirmar cierre
           </button>
           <button disabled={m.isPending} onClick={() => setConfirming(false)}>
-            Cancel
+            Cancelar
           </button>
         </section>
       )}
@@ -403,28 +403,28 @@ function TradeList({ sid }: { sid: number }) {
   });
   return (
     <div className="panel">
-      <div className="eyebrow">SESSION TRADES</div>
-      <h2>Recorded operations</h2>
+      <div className="eyebrow">OPERACIONES DE LA SESIÓN</div>
+      <h2>Operaciones registradas</h2>
       {q.isLoading ? (
-        <div className="muted">Loading trades…</div>
+        <div className="muted">Cargando operaciones…</div>
       ) : q.isError ? (
         <ErrorState />
       ) : !q.data?.length ? (
-        <div className="muted">No trades recorded.</div>
+        <div className="muted">No hay operaciones registradas.</div>
       ) : (
         <div className="tableWrap">
           <table>
             <thead>
               <tr>
                 <th>#</th>
-                <th>Time</th>
-                <th>Symbol</th>
-                <th>Market</th>
+                <th>Hora</th>
+                <th>Símbolo</th>
+                <th>Mercado</th>
                 <th>TF</th>
-                <th>Direction</th>
-                <th>Stake</th>
-                <th>Payout</th>
-                <th>Result</th>
+                <th>Dirección</th>
+                <th>Importe</th>
+                <th>Rendimiento</th>
+                <th>Resultado</th>
                 <th>P&L</th>
               </tr>
             </thead>
@@ -434,9 +434,9 @@ function TradeList({ sid }: { sid: number }) {
                   <td>{i + 1}</td>
                   <td>{dateTime(t.opened_at)}</td>
                   <td>{t.symbol}</td>
-                  <td>{t.market_type}</td>
+                  <td>{codeLabel(t.market_type)}</td>
                   <td>{t.timeframe}</td>
-                  <td>{t.direction}</td>
+                  <td>{codeLabel(t.direction)}</td>
                   <td>{money(t.stake)}</td>
                   <td>{percent(t.payout_percent)}</td>
                   <td>{t.result || "OPEN"}</td>
@@ -497,22 +497,22 @@ export function TradeForm({
           });
         }}
       >
-        <h2>Record trade</h2>
-        <p>Minimum payout: {percent(session.minimum_payout_percent)}</p>
+        <h2>Registrar operación</h2>
+        <p>Rendimiento mínimo: {percent(session.minimum_payout_percent)}</p>
         {Number(f.payout_percent) < Number(session.minimum_payout_percent) && (
-          <p role="alert">Payout is below the minimum.</p>
+          <p role="alert">El rendimiento es inferior al mínimo.</p>
         )}
         {f.stake !== summary.suggested_stake && (
-          <p>Stake differs from the recommendation; backend limits apply.</p>
+          <p>El importe difiere del sugerido; se aplican los límites del servidor.</p>
         )}
         <div className="grid compact">
           {[
-            ["symbol", "Symbol"],
-            ["timeframe", "Timeframe"],
-            ["stake", "Stake"],
-            ["payout_percent", "Payout %"],
-            ["opened_at", "Opened at"],
-            ["expiration_at", "Expiration at"],
+            ["symbol", "Símbolo"],
+            ["timeframe", "Temporalidad"],
+            ["stake", "Importe"],
+            ["payout_percent", "Rendimiento %"],
+            ["opened_at", "Fecha de apertura"],
+            ["expiration_at", "Fecha de vencimiento"],
           ].map(([k, l]) => (
             <label key={k}>
               {l}
@@ -534,42 +534,42 @@ export function TradeForm({
             </label>
           ))}
           <label>
-            Market
+            Mercado
             <select
-              aria-label="Market"
+              aria-label="Mercado"
               value={f.market_type}
               onChange={(e) => setF({ ...f, market_type: e.target.value })}
             >
-              <option>REGULAR</option>
-              <option>OTC</option>
+              <option value={"REGULAR"}>{codeLabel("REGULAR")}</option>
+              <option value={"OTC"}>{codeLabel("OTC")}</option>
             </select>
           </label>
           <label>
-            Direction
+            Dirección
             <select
-              aria-label="Direction"
+              aria-label="Dirección"
               value={f.direction}
               onChange={(e) => setF({ ...f, direction: e.target.value })}
             >
-              <option>CALL</option>
-              <option>PUT</option>
+              <option value={"CALL"}>{codeLabel("CALL")}</option>
+              <option value={"PUT"}>{codeLabel("PUT")}</option>
             </select>
           </label>
           <label>
-            Result
+            Resultado
             <select
-              aria-label="Result"
+              aria-label="Resultado"
               value={f.result}
               onChange={(e) => setF({ ...f, result: e.target.value })}
             >
-              <option>WIN</option>
-              <option>LOSS</option>
-              <option>DRAW</option>
-              <option>CANCELLED</option>
+              <option value={"WIN"}>{codeLabel("WIN")}</option>
+              <option value={"LOSS"}>{codeLabel("LOSS")}</option>
+              <option value={"DRAW"}>{codeLabel("DRAW")}</option>
+              <option value={"CANCELLED"}>{codeLabel("CANCELLED")}</option>
             </select>
           </label>
           <label>
-            Notes
+            Notas
             <textarea
               value={f.notes}
               onChange={(e) => setF({ ...f, notes: e.target.value })}
@@ -581,10 +581,10 @@ export function TradeForm({
         )}
         <div className="actions">
           <button type="button" className="secondary" onClick={onDone}>
-            Cancel
+            Cancelar
           </button>
           <button disabled={m.isPending}>
-            {m.isPending ? "Saving…" : "Save trade"}
+            {m.isPending ? "Guardando…" : "Guardar operación"}
           </button>
         </div>
       </form>
@@ -596,7 +596,7 @@ export function NoteForm({ sid, onDone }: { sid: number; onDone: () => void }) {
   const [content, setContent] = useState("");
   const m = useMutation({
     mutationFn: () =>
-      journalApi.create({ title: "Session note", content, session_id: sid }),
+      journalApi.create({ title: "Nota de sesión", content, session_id: sid }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["journal"] });
       onDone();
@@ -610,10 +610,10 @@ export function NoteForm({ sid, onDone }: { sid: number; onDone: () => void }) {
           m.mutate();
         }}
       >
-        <h2>Add journal note</h2>
+        <h2>Añadir nota al diario</h2>
         {m.error && <p role="alert">{m.error.message}</p>}
         <label>
-          Note
+          Nota
           <textarea
             autoFocus
             id="note"
@@ -625,9 +625,9 @@ export function NoteForm({ sid, onDone }: { sid: number; onDone: () => void }) {
         </label>
         <div className="actions">
           <button type="button" className="secondary" onClick={onDone}>
-            Cancel
+            Cancelar
           </button>
-          <button disabled={m.isPending}>Save note</button>
+          <button disabled={m.isPending}>Guardar nota</button>
         </div>
       </form>
     </section>
@@ -638,9 +638,9 @@ function SessionNotes({ sid }: { sid: number }) {
   const notes = q.data?.filter((n) => n.session_id === sid);
   return (
     <section className="panel">
-      <h2>Session journal</h2>
+      <h2>Diario de la sesión</h2>
       {q.isLoading ? (
-        <p>Loading notes…</p>
+        <p>Cargando notas…</p>
       ) : q.isError ? (
         <ErrorState />
       ) : notes?.length ? (
@@ -651,7 +651,7 @@ function SessionNotes({ sid }: { sid: number }) {
           </article>
         ))
       ) : (
-        <p>No session notes.</p>
+        <p>No hay notas de sesión.</p>
       )}
     </section>
   );

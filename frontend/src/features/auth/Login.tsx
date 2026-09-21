@@ -12,7 +12,7 @@ export function Login() {
     mutationFn: () => authApi.login(email, password),
     onSuccess: (u) => {
       qc.setQueryData(["me"], u);
-      nav("/dashboard");
+      nav("/start");
     },
     onError: (e) => setError((e as Error).message),
   });
@@ -22,10 +22,10 @@ export function Login() {
         <div className="brand">
           CQ<span>•</span>
         </div>
-        <div className="eyebrow">QUANTITATIVE RESEARCH WORKSPACE</div>
-        <h1>Sign in</h1>
+        <div className="eyebrow">ESPACIO DE INVESTIGACIÓN CUANTITATIVA</div>
+        <h1>Iniciar sesión</h1>
         <p className="muted">
-          Access your accounts, sessions and trading journal.
+          Investiga estrategias y lleva un registro de tus operaciones. Sin operaciones automáticas.
         </p>
         <form
           onSubmit={(e: FormEvent) => {
@@ -35,7 +35,7 @@ export function Login() {
           }}
         >
           <label>
-            Email
+            Correo electrónico
             <input
               type="email"
               value={email}
@@ -44,7 +44,7 @@ export function Login() {
             />
           </label>
           <label>
-            Password
+            Contraseña
             <input
               type="password"
               value={password}
@@ -54,7 +54,7 @@ export function Login() {
           </label>
           {error && <div className="state error">{error}</div>}
           <button disabled={login.isPending}>
-            {login.isPending ? "Signing in…" : "Sign in"}
+            {login.isPending ? "Iniciando sesión…" : "Iniciar sesión"}
           </button>
         </form>
       </div>
