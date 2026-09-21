@@ -1,5 +1,9 @@
 # Project State
 
+## Cambio en revisión
+
+REQ-010 — Seguimiento visual: QA. Panel de velas observadas/conexión, configuración plegable y evidencia técnica secundaria. Solo frontend; no modifica motores, estrategias existentes ni datos. 71 pruebas frontend y 8 E2E locales PASS. Integración/publicación pendientes de cierre.
+
 ## Current version
 1.0.0 — REQ-008 DONE / Human Acceptance PASS on2026-09-19 (America/Bogota). Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93; REQ-001–008 DONE / PASS. Implementation CI35478263706/35478266262 PASS. Closure is documentation/version only; final release HEAD, integrated main CI and tag evidence are recorded in [PR #7](https://github.com/jsmontenegro17/ciberquant/pull/7). [QA evidence](REQ008_QA_UNBLOCK.md), [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md).
 0.7.0 — REQ-007 DONE / Human Acceptance PASS on 2026-09-19. Approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5, PR #6. REQ-001–007 DONE / PASS. Main SHA, final CI and tag evidence are recorded in the PR #6 release handoff.

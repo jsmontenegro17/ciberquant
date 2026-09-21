@@ -6,17 +6,25 @@ import {researchApi} from '../../api/research';
 import {marketApi,datasetOnly,type Dataset} from '../../api/marketData';
 import {Failure,Paging} from '../market-data/Shared';
 import {ProviderPolicy} from './ProviderPolicy';
+import {LiveSnapshot,utcTime} from './LiveSnapshot';
 
 function Json({value}:{value:unknown}){return <pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(value,null,2)}</pre>;}
 export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  const e=item.latest;
+ const signalCurrent=item.enabled&&!['PROVIDER_DOWN','STALE','SUSPENDED_DEGRADED','UNAVAILABLE'].includes(item.state)&&e?.error!=='DATA_CONFLICT';
  return <section className="panel" aria-label={`Seguimiento ${item.id}`}>
  <h3>{item.dataset.symbol} · {item.dataset.timeframe}</h3><p>{Object.values(item.dataset).join(' / ')}</p>
  <ProviderPolicy provider={item.provider} error={e?.error}/>
  <p>{item.provider==='REPLAY'?'MODO REPRODUCCIÓN':item.provider} · {codeLabel(item.state)} · {item.research_mode?'INVESTIGACIÓN: sin validar para seguimiento normal':"Seguimiento validado"}</p>
  {item.provider==='IQOPTION'&&<p className="researchWarning">INTEGRACIÓN COMUNITARIA NO OFICIAL: el protocolo puede cambiar sin aviso. PRACTICE / solo lectura. Producto: {e?.payout_product??"Sin verificar"}. El rendimiento observado no garantiza una cotización ejecutable.</p>}
- <h4>{e?.strategy_name??`Versión n.º${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {e?.state==='MATCH'?'CONDICIONES CUMPLIDAS':e?.state??"Esperando velas cerradas"}</h4>
+ <h4>{e?.strategy_name??`Versión n.º${item.strategy_version_id}`} {e?.version?`v${e.version}`:''} · {!item.enabled?'Pausado':e?.state==='MATCH'&&signalCurrent?'CONDICIONES CUMPLIDAS':codeLabel(item.state==='ACTIVE'?(e?.state??'UNAVAILABLE'):item.state)}</h4>
  <p>Dirección de investigación: {e?.research_direction??'—'} · Señal de investigación: no se envió ninguna orden.</p>
+ <div className="scannerQuick"><span>{item.research_mode?'Simulación de aprendizaje':'Seguimiento con validación histórica'}</span><span>Última señal registrada: {utcTime(e?.signal_time)}</span><span>{item.research_mode?`Vencimiento supuesto: ${item.research_expiry??'—'} vela(s)`:'Sin ejecución automática'}</span></div>
+ {e?.payout_warning&&<p role="alert" className="researchWarning">RENDIMIENTO INFERIOR AL SUPUESTO DE VALIDACIÓN</p>}
+ {item.state==='SUSPENDED_DEGRADED'&&<p role="alert">DEGRADADO: seguimiento normal suspendido.</p>}
+ {e?.error&&<p role="alert">{e.error}</p>}
+ <button onClick={onToggle}>{item.enabled?"Pausar seguimiento":"Activar seguimiento"}</button>
+ <details className="scannerAdvanced"><summary>Supuestos y evidencia de la estrategia</summary>
  <p>Validación: {e?.validation_state??"Comprobando"} · Datos: {e?.dataset_validation_state??"Comprobando"}</p>
  <p>Rendimiento actual del proveedor: {e?.current_payout!=null?`${e.current_payout}%`:"No disponible"} · Punto de equilibrio %: {e?.current_break_even??"No disponible"}</p>
  <p>Rendimiento de la validación histórica: {e?.validation_payout!=null?`${e.validation_payout}%`:"No disponible"} · Vencimiento de validación histórica: {e?.validation_expiry??"No disponible"} velas{item.research_mode?' — solo referencia, no configuración de la simulación de investigación.':'.'}</p>
@@ -25,19 +33,16 @@ export function ScannerCard({item,onToggle}:{item:WatchItem;onToggle:()=>void}){
  {e?.current_payout!=null?<p>Supuesto alternativo de investigación: {item.research_payout??"No disponible"}% — no se usa mientras esté disponible el rendimiento del proveedor.</p>:<p>Supuesto de rendimiento de investigación: {item.research_payout??"No disponible"}%</p>}
  </>}
  {e?.payout_source&&<p>Rendimiento fijado de la simulación: {e.payout_snapshot??"No disponible"}% · {e.payout_source}. Vencimiento simulado: {e.expiry_bars??"No disponible"} velas · {e.expiry_source??"No disponible"}.</p>}
- {e?.payout_warning&&<p role="alert" className="researchWarning">RENDIMIENTO INFERIOR AL SUPUESTO DE VALIDACIÓN</p>}
- {item.state==='SUSPENDED_DEGRADED'&&<p role="alert">DEGRADADO: seguimiento normal suspendido.</p>}
  <p>Señal disponible: {e?.signal_time??'—'} · Límite de apertura de la siguiente vela: {e?.next_entry_boundary??'—'}. El precio de entrada futuro se desconoce.</p>
  <p>Vela de señal: {e?.signal_open??'—'} → {e?.signal_time??'—'} · Latencia de recepción en ms: {e?.latency_ms??'No disponible / reproducción lógica'}. La detección no es una cotización ejecutable.</p>
- {e?.error&&<p role="alert">{e.error}</p>}
  <details><summary>Estado del proveedor y contexto exacto de la señal</summary><Json value={e?.health}/><Json value={e?.signal_context}/><Json value={e?.features}/></details>
- <button onClick={onToggle}>{item.enabled?"Pausar seguimiento":"Activar seguimiento"}</button>
+ </details>
  </section>;
 }
 
 function Snapshot({id}:{id:number}){
  const q=useQuery({queryKey:['scanner','snapshot',id],queryFn:()=>scannerApi.snapshot(id),refetchInterval:2000});
- return <section className="panel"><h3>Instantánea en vivo · seguimiento n.º{id}</h3><Failure error={q.error}/><p>La vela en formación es provisional, nunca una señal definitiva. El estado pierde vigencia si se detiene el proceso de seguimiento.</p><Json value={q.data?.subscription}/></section>;
+ return <section className="panel"><h3>Vista en vivo · seguimiento n.º{id}</h3><Failure error={q.error}/>{q.isPending&&<p>Cargando velas observadas…</p>}{q.isError?<p role="alert">No se pudo actualizar la vista. No mostramos datos anteriores como si estuvieran en vivo.</p>:q.data&&<LiveSnapshot item={q.data.item} subscription={q.data.subscription}/>}<details className="scannerAdvanced"><summary>Datos técnicos de la instantánea (JSON)</summary><Json value={q.data?.subscription}/></details></section>;
 }
 
 export function Scanner(){
@@ -68,7 +73,7 @@ export function Scanner(){
  {[providers,lists,items,events,coverage,strategies,versions,createList,createItem,toggle].map((q,i)=><Failure key={i} error={q.error}/>)}
  <label><input type="checkbox" checked={research} onChange={e=>{setResearch(e.target.checked);setOffset(0);}}/>Incluir seguimientos de investigación (modo explícitamente no validado)</label>
  </section>
- <section className="panel formPanel"><h3>Configuración de seguimiento</h3>
+ <details className="panel formPanel scannerAdvanced"><summary>Configurar un nuevo seguimiento</summary><h3>Configuración de seguimiento</h3>
  <form onSubmit={e=>{e.preventDefault();createList.mutate(name);}}><label>Nombre de la lista<input required maxLength={120} value={name} onChange={e=>setName(e.target.value)}/></label><button disabled={createList.isPending}>Crear lista de seguimiento</button></form>
  <form onSubmit={e=>{e.preventDefault();createItem.mutate({list,body:{provider,dataset,strategy_version_id:version,research_mode:research,...(research?{research_payout:payout,research_expiry:expiry}:{})}});}}>
  <label>Lista de seguimiento<select required value={list||''} onChange={e=>setList(Number(e.target.value))}><option value="">Selecciona una lista de seguimiento</option>{lists.data?.items.map(w=><option key={w.id} value={w.id}>{w.name}</option>)}</select></label>
@@ -80,9 +85,9 @@ export function Scanner(){
  <label>Versión inmutable<select required value={version||''} onChange={e=>setVersion(Number(e.target.value))}><option value="">Selecciona una versión</option>{versions.data?.items.map(v=><option key={v.id} value={v.id}>v{v.version} · {v.validation_state??'NOT_VALIDATED'}</option>)}</select></label>{versions.data&&<Paging {...versions.data} change={setVersionOffset}/>}
  <p>El seguimiento normal requiere estado TESTING (en prueba) y validación histórica PASS para la misma fuente, bróker, símbolo, mercado y temporalidad. El servidor comprueba la compatibilidad; una aprobación general no basta.</p>
  {research&&<div className="grid compact"><label>Rendimiento supuesto de simulación %<input required value={payout} onChange={e=>setPayout(e.target.value)}/></label><label>Velas de vencimiento de investigación<input type="number" min={1} max={60} value={expiry} onChange={e=>setExpiry(Number(e.target.value))}/></label></div>}
- <button disabled={!list||!version||createItem.isPending}>Crear seguimiento e iniciar proveedor</button></form></section>
- <section aria-label="Conjuntos de datos en seguimiento"><h2>Conjuntos de datos en seguimiento</h2>{items.data?.total===0&&<p>No hay seguimientos para este filtro.</p>}{items.data?.items.map(item=><div key={item.id}><ScannerCard item={item} onToggle={()=>toggle.mutate({id:item.id,enabled:!item.enabled})}/><button onClick={()=>setSelected(item.id)}>Inspeccionar instantánea n.º{item.id}</button></div>)}{items.data&&<Paging {...items.data} change={setOffset}/>}</section>
+ <button disabled={!list||!version||createItem.isPending}>Crear seguimiento e iniciar proveedor</button></form></details>
+ <section aria-label="Conjuntos de datos en seguimiento"><h2>Conjuntos de datos en seguimiento</h2>{items.data?.total===0&&<p>No hay seguimientos para este filtro. Si creaste un ejemplo de aprendizaje, marca «Incluir seguimientos de investigación».</p>}{items.data?.items.map(item=><div key={item.id}><ScannerCard item={item} onToggle={()=>toggle.mutate({id:item.id,enabled:!item.enabled})}/><button onClick={()=>setSelected(item.id)}>Ver velas y conexión · n.º{item.id}</button></div>)}{items.data&&<Paging {...items.data} change={setOffset}/>}</section>
  {selected>0&&<Snapshot id={selected}/>}
- <section className="panel"><h2>Historial de eventos</h2><div className="tableWrap"><table><thead><tr>{['Hora / modo',"Conjunto de datos",'Estrategia / dirección',"Estado",'Rendimiento / validación',"Observación simulada"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{events.data?.items.map(e=><tr key={e.id}><td>{e.signal_time}<br/>{e.mode==='REPLAY'?'MODO REPRODUCCIÓN':e.mode}</td><td>{Object.values(e.dataset).join(' / ')}</td><td>#{e.strategy_version_id} · {codeLabel(e.direction)}</td><td>{codeLabel(e.state)}</td><td>{e.current_payout??"No disponible"} / {e.validation_state_snapshot}</td><td>{e.paper_outcome?<details><summary>{e.mode==='REPLAY'?'OBSERVACIÓN SIMULADA EN REPRODUCCIÓN':'OBSERVACIÓN SIMULADA EN VIVO'} · {codeLabel(e.paper_outcome.result)}</summary><Json value={e.paper_outcome.evidence}/></details>:e.state==='MATCH'?"Pendiente de futuras velas observadas":'—'}</td></tr>)}</tbody></table></div>{events.data&&<Paging {...events.data} change={setEventOffset}/>}</section>
+ <section className="panel"><h2>Historial de eventos</h2><p>Resultados de observación, no operaciones de tu cuenta. Cada fila conserva el activo y la versión evaluada.</p>{events.data?.total===0&&<p className="scannerEmpty">Todavía no hay eventos. El sistema espera datos utilizables y velas cerradas; no necesitas enviar ninguna operación.</p>}<div className="tableWrap"><table><thead><tr>{['Hora / modo',"Conjunto de datos",'Estrategia / dirección',"Estado",'Rendimiento / validación',"Observación simulada"].map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{events.data?.items.map(e=><tr key={e.id}><td>{utcTime(e.signal_time)}<br/>{e.mode==='REPLAY'?'MODO REPRODUCCIÓN':e.mode}</td><td>{Object.values(e.dataset).join(' / ')}</td><td>#{e.strategy_version_id} · {codeLabel(e.direction)}</td><td>{codeLabel(e.state)}</td><td>{e.current_payout??"No disponible"} / {e.validation_state_snapshot}</td><td>{e.paper_outcome?<details><summary>{e.mode==='REPLAY'?'OBSERVACIÓN SIMULADA EN REPRODUCCIÓN':'OBSERVACIÓN SIMULADA EN VIVO'} · {codeLabel(e.paper_outcome.result)}</summary><dl>{[['Entrada','entry_price'],['Precio al vencimiento','expiry_price'],['Resultado por unidad simulada','unit_pnl']].map(([label,key])=><div key={key}><dt>{label}</dt><dd>{typeof e.paper_outcome?.evidence[key]==='string'?String(e.paper_outcome.evidence[key]):'No disponible'}</dd></div>)}</dl><details><summary>Evidencia técnica (JSON)</summary><Json value={e.paper_outcome.evidence}/></details></details>:e.state==='MATCH'?"Pendiente de futuras velas observadas":'—'}</td></tr>)}</tbody></table></div>{events.data&&<Paging {...events.data} change={setEventOffset}/>}</section>
  </>;
 }
