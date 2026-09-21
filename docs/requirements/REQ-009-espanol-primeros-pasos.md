@@ -1,7 +1,7 @@
 # REQ-009 — Español y primeros pasos
 
-Status: QA
-Human Acceptance: PENDING
+Status: DONE
+Human Acceptance: GO de revisión final y publicación, autorizado por el titular el2026-09-21. Revisión técnica delegada al agente; no se declara una revisión humana independiente.
 Fecha: 2026-09-21
 
 ## Solicitud
@@ -38,6 +38,8 @@ Revisión visual de capturas de escritorio y móvil. Archivos reproducibles en `
 
 Se traduce la presentación, no los nombres del usuario, contratos CSV/API, identificadores de motores ni evidencia JSON. Los detalles técnicos desconocidos se conservan con una introducción en español. La guía no crea datos, estrategias, seguimientos ni cuentas; no se toca producción. Versión estable1.0.0 sin promover ni etiquetar.
 
-## Revisión humana pendiente
+## Cierre autorizado
 
-Validar que «Primeros pasos» permite elegir un camino, que el menú se entiende y que la distinción entre simulación y operación real queda clara. Solo después de CI verde y aceptación proceder con merge/publicación coordinada; no se declara DONE ni aceptación automática.
+El titular autorizó «Go para revision y publicar». Revisión técnica final PASS sobre2ba907b:65 pruebas de interfaz,8 E2E, navegación escritorio/móvil y conservación de contratos. CI push35624740212 y PR35624769889 PASS en backend/frontend/Docker. Sin cambios funcionales adicionales durante el cierre.
+
+Publicación autorizada exclusivamente de los archivos estáticos de interfaz tras CI del cierre e integración validada en main. Backend, worker IQ, secretos y bases existentes permanecen intactos. Sin cambio de versión de motores ni nuevo tag. SHA integrado, CI de main, respaldo y verificación pública se registrarán en la evidencia final de PR#8 y en el manifiesto operativo del servidor.

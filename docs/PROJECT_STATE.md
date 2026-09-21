@@ -52,9 +52,9 @@ REQ-003 P2: [DATA-001 — Market Data Import Recovery](debt/DATA-001-stale-proce
 Final human acceptance PASS on 2026-09-19 verified all four financial corrections: hard per-trade risk cap, net session loss, no DRAW/CANCELLED ledger movements, and backend-only session start requiring RiskProfile. No functional P0/P1 remains within REQ-002. P2: existing authentication dependencies emit deprecation warnings; list pagination is a future scalability improvement. [SEC-001](debt/SEC-001-production-auth-configuration.md) records environment-aware cookie/CORS/HTTPS configuration required before production, not a REQ-002 blocker.
 
 ## Active requirements
-[REQ-009](requirements/REQ-009-espanol-primeros-pasos.md): QA. Interfaz en español, etiquetas de códigos con identidad conservada y guía de inicio. Human Acceptance PENDING; sin despliegue en producción.
+[REQ-009](requirements/REQ-009-espanol-primeros-pasos.md): DONE. Titular autoriza revisión final y publicación el2026-09-21; revisión técnica PASS. Evidencia de integración/CI/publicación en PR#8. Solo interfaz, sin nuevas versiones de motores ni cambios de datos.
 [REQ-008](requirements/REQ-008-integrated-research-workspace.md): DONE / Human Acceptance PASS. REQ-001–008 DONE/PASS. P0=0, P1=0 within accepted scope.
 [REQ-007](requirements/REQ-007-live-scanner.md): DONE; automated A–J PASS, Human Acceptance PASS. REQ-001–007 DONE / PASS. No optimization, ranking, money management, automatic trading or strategy recommendation.
 
 ## Next milestones
-REQ-009: completar CI y revisión humana de la interfaz en español antes del merge y de una publicación coordinada. Sin auto-trading ni nuevas versiones de motores.
+REQ-009: cierre autorizado con CI final → merge → CI main → publicación estática verificada. Evidencia operativa en PR#8. Sin auto-trading ni nuevas versiones de motores.

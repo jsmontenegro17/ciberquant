@@ -1,6 +1,6 @@
 # Context Index
 
-Trabajo actual: [REQ-009 — Español y primeros pasos](requirements/REQ-009-espanol-primeros-pasos.md), autorizado2026-09-21, Human Acceptance PENDING. Guía: `frontend/src/features/start/`; etiquetas/errores: `frontend/src/utils/spanish.ts`. Solo presentación; no modifica contratos ni motores. Versión estable integrada1.0.0.
+Trabajo actual: [REQ-009 — Español y primeros pasos](requirements/REQ-009-espanol-primeros-pasos.md), DONE, GO de revisión final/publicación del titular2026-09-21. Guía: `frontend/src/features/start/`; etiquetas/errores: `frontend/src/utils/spanish.ts`. Solo presentación; no modifica contratos ni motores. Evidencia de integración y publicación en PR#8; versión base1.0.0 sin nuevo tag.
 
 Accepted: [REQ-008](requirements/REQ-008-integrated-research-workspace.md), v1.0.0 / DONE / Human Acceptance PASS on2026-09-19. Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93. [Workspace](WORKSPACE_SEMANTICS.md), [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md), [operations/recovery](OPERATIONS_DEPLOYMENT.md), [QA evidence](REQ008_QA_UNBLOCK.md), [finality investigation](providers/IQOPTION_FINALITY_INVESTIGATION.md), [release handoff](https://github.com/jsmontenegro17/ciberquant/pull/7). IQ remains experimental/PRACTICE-only/read-only/fail-closed with no immutable-finality guarantee; orders0. REQ-001–008 DONE/PASS. Historical release context below is preserved.
 

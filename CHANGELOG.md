@@ -1,9 +1,9 @@
 # Changelog
 
-## Unreleased
+## REQ-009 — 2026-09-21
 - REQ-009: interfaz en español y guía de primeros pasos al iniciar sesión, con rutas separadas para investigación, IQ Option y diario manual.
 - Etiquetas de estados con códigos originales, errores comunes explicados en español y navegación móvil legible. Contratos API, precisión financiera, motores y evidencia originales conservados.
-- Corrección de la indicación de crear cuentas desde una pantalla que solo permite consultarlas. Pendiente de revisión humana y publicación.
+- Corrección de la indicación de crear cuentas desde una pantalla que solo permite consultarlas. Revisión técnica PASS y GO del titular para publicar; integración y evidencia operativa en PR#8. Versión base1.0.0; sin nuevo tag.
 
 ## [1.0.0] - 2026-09-19
 - REQ-008 DONE / Human Acceptance PASS. Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93; acceptance A–L PASS, P0=0, P1=0. Release closure is documentation/version only.
