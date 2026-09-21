@@ -87,17 +87,17 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 describe("REQ-002 user workflow", () => {
-  it('Save trade label disappears while mutation is pending, before form completion', async () => {
+  it("Guardar operación label disappears while mutation is pending, before form completion", async () => {
     let release!: (value: Awaited<ReturnType<typeof tradesApi.create>>) => void;
     vi.mocked(tradesApi.create).mockImplementation(() => new Promise(resolve => { release = resolve; }));
     const done = vi.fn();
     mount(<TradeForm session={session} summary={summary} onDone={done}/>);
-    fireEvent.change(screen.getByLabelText('Symbol'),{target:{value:'EURUSD'}});
-    fireEvent.change(screen.getByLabelText('Opened at'),{target:{value:'2026-09-19T10:00'}});
-    fireEvent.click(screen.getByRole('button',{name:'Save trade'}));
-    await screen.findByRole('button',{name:'Saving…'});
-    expect(screen.queryByRole('button',{name:'Save trade'})).toBeNull();
-    expect(screen.getByRole('heading',{name:'Record trade'})).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Símbolo"),{target:{value:'EURUSD'}});
+    fireEvent.change(screen.getByLabelText("Fecha de apertura"),{target:{value:'2026-09-19T10:00'}});
+    fireEvent.click(screen.getByRole('button',{name:"Guardar operación"}));
+    await screen.findByRole('button',{name:"Guardando…"});
+    expect(screen.queryByRole('button',{name:"Guardar operación"})).toBeNull();
+    expect(screen.getByRole('heading',{name:"Registrar operación"})).toBeTruthy();
     expect(done).not.toHaveBeenCalled();
     await act(async()=>release({} as Awaited<ReturnType<typeof tradesApi.create>>));
     await waitFor(()=>expect(done).toHaveBeenCalledOnce());
@@ -120,14 +120,14 @@ describe("REQ-002 user workflow", () => {
     // A previously valid preview must not allow a start after the profile disappears.
     cache.setQueryData(['risk','3'],{trading_account_id:3,current_balance:'2000',currency:'USD',risk_per_trade_percent:'1',suggested_stake:'20',max_loss_amount:'40',max_operations:4,minimum_payout_percent:'80',profit_target_amount:null});
     await screen.findByText("No profile · USD");
-    fireEvent.change(screen.getByLabelText("Trading account"), {
+    fireEvent.change(screen.getByLabelText("Cuenta de operaciones"), {
       target: { value: "3" },
     });
     await screen.findByText("No risk profile configured");
     expect(
       (
         screen.getByRole("button", {
-          name: "Start session",
+          name: "Iniciar sesión de operaciones",
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(true);
@@ -146,8 +146,8 @@ describe("REQ-002 user workflow", () => {
       </Routes>,
       "/sessions/7",
     );
-    await screen.findByText(/Loss consumed: 3[.,]37/);
-    expect(screen.getByText(/Remaining risk: 36[.,]63/)).toBeTruthy();
+    await screen.findByText(/Pérdida acumulada: 3[.,]37/);
+    expect(screen.getByText(/Riesgo restante: 36[.,]63/)).toBeTruthy();
   });
   it("redirects an unauthenticated protected route", async () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error("Unauthorized"));
@@ -192,33 +192,33 @@ describe("REQ-002 user workflow", () => {
       </Routes>,
     );
     await screen.findByText("Research account · EUR");
-    fireEvent.change(screen.getByLabelText("Trading account"), {
+    fireEvent.change(screen.getByLabelText("Cuenta de operaciones"), {
       target: { value: "3" },
     });
     await screen.findByText(/15[.,]00/);
-    fireEvent.click(screen.getByRole("button", { name: "Start session" }));
+    fireEvent.click(screen.getByRole("button", { name: "Iniciar sesión de operaciones" }));
     await screen.findByText("Workspace ready");
     expect(sessionsApi.create).toHaveBeenCalledWith({ trading_account_id: 3 });
   });
   it("submits a trade with the recommended stake and shows backend rejection", async () => {
     vi.mocked(tradesApi.create).mockRejectedValue(
-      new Error("Stake exceeds per-trade risk limit"),
+      new Error("Importe exceeds per-trade risk limit"),
     );
     mount(<TradeForm session={session} summary={summary} onDone={() => {}} />);
-    expect((screen.getByLabelText("Stake") as HTMLInputElement).value).toBe(
+    expect((screen.getByLabelText("Importe") as HTMLInputElement).value).toBe(
       "20.17",
     );
-    fireEvent.change(screen.getByLabelText("Symbol"), {
+    fireEvent.change(screen.getByLabelText("Símbolo"), {
       target: { value: "EURUSD" },
     });
-    fireEvent.change(screen.getByLabelText("Opened at"), {
+    fireEvent.change(screen.getByLabelText("Fecha de apertura"), {
       target: { value: "2026-09-19T10:00" },
     });
-    fireEvent.change(screen.getByLabelText("Stake"), {
+    fireEvent.change(screen.getByLabelText("Importe"), {
       target: { value: "20.18" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save trade" }));
-    await screen.findByText("Stake exceeds per-trade risk limit");
+    fireEvent.click(screen.getByRole("button", { name: "Guardar operación" }));
+    await screen.findByText("Importe exceeds per-trade risk limit");
     expect(tradesApi.create).toHaveBeenCalledWith(
       expect.objectContaining({
         stake: "20.18",
@@ -231,7 +231,7 @@ describe("REQ-002 user workflow", () => {
     vi.mocked(sessionsApi.summary).mockResolvedValue({
       ...summary,
       limit_reached: true,
-      limit_reason: "Maximum operations reached",
+      limit_reason: "Máximo operations reached",
       operations_remaining: 0,
     });
     mount(
@@ -240,11 +240,11 @@ describe("REQ-002 user workflow", () => {
       </Routes>,
       "/sessions/7",
     );
-    await screen.findByText(/Session limit reached/);
+    await screen.findByText(/Límite de sesión alcanzado/);
     expect(
       (
         screen.getByRole("button", {
-          name: "Record trade",
+          name: "Registrar operación",
         }) as HTMLButtonElement
       ).disabled,
     ).toBe(true);
@@ -263,29 +263,29 @@ describe("REQ-002 user workflow", () => {
       "/sessions/7",
     );
     fireEvent.click(
-      await screen.findByRole("button", { name: "Close session" }),
+      await screen.findByRole("button", { name: "Cerrar sesión de operaciones" }),
     );
     expect(sessionsApi.close).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm close" }));
-    await screen.findByText("CLOSED");
-    expect(screen.queryByRole("button", { name: "Record trade" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar cierre" }));
+    await screen.findByText("Cerrada (CLOSED)");
+    expect(screen.queryByRole("button", { name: "Registrar operación" })).toBeNull();
   });
   it("saves a session note and refreshes the journal cache", async () => {
     const done = vi.fn();
     vi.mocked(journalApi.create).mockResolvedValue({
       id: 1,
       user_id: 1,
-      title: "Session note",
+      title: "Nota de sesión",
       content: "Waited for confirmation",
       session_id: 7,
       created_at: "2026-09-19T10:00:00Z",
     });
     const cache = mount(<NoteForm sid={7} onDone={done} />);
     const invalidate = vi.spyOn(cache, "invalidateQueries");
-    fireEvent.change(screen.getByLabelText("Note"), {
+    fireEvent.change(screen.getByLabelText("Nota"), {
       target: { value: "Waited for confirmation" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save note" }));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar nota" }));
     await waitFor(() => expect(done).toHaveBeenCalledOnce());
     expect(journalApi.create).toHaveBeenCalledWith(
       expect.objectContaining({

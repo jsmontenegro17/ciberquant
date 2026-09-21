@@ -1,0 +1,24 @@
+import {test,expect} from '@playwright/test';
+test('Spanish first login guide and navigation remain usable on mobile',async({page})=>{
+  await page.goto('/login');
+  await expect(page.locator('html')).toHaveAttribute('lang','es');
+  await page.getByLabel('Correo electrónico').fill('qa@example.com');
+  await page.getByLabel('Contraseña').fill('browser-test-only');
+  await page.getByRole('button',{name:'Iniciar sesión'}).click();
+  await expect(page).toHaveURL(/\/start$/);
+  await expect(page.getByRole('heading',{name:'Empieza por aquí'})).toBeVisible();
+  await expect(page.getByText(/No necesitas crear una cuenta de operaciones/)).toBeVisible();
+  await page.setViewportSize({width:390,height:844});
+  await page.getByRole('button',{name:'Abrir menú'}).click();
+  const mobileLink=page.getByRole('navigation',{name:'Navegación principal'}).getByRole('link',{name:'Seguimiento en vivo',exact:true});
+  await expect(mobileLink).toBeVisible();
+  expect(await mobileLink.evaluate(el=>parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThan(0);
+  await page.getByRole('button',{name:'Ocultar menú'}).click();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:'test-results/req009-primeros-pasos-mobile.png',fullPage:true});
+  await page.screenshot({path:'test-results/req009-primeros-pasos-mobile-top.png'});
+  await page.setViewportSize({width:1366,height:768});
+  await page.screenshot({path:'test-results/req009-primeros-pasos-desktop.png',fullPage:true});
+  await page.locator('aside').getByRole('link',{name:'Resumen',exact:true}).click();
+  await expect(page.getByRole('link',{name:'Ver primeros pasos'})).toBeVisible();
+});

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout, Protected } from "./App";
 import { Login } from "../features/auth/Login";
+import { GettingStarted } from "../features/start/GettingStarted";
 import { Dashboard } from "../features/dashboard/Dashboard";
 import { Accounts } from "../features/accounts/Accounts";
 import {
@@ -26,9 +27,10 @@ export function Router() {
         <Route path="/login" element={<Login />} />
         <Route element={<Protected />}>
           <Route element={<Layout />}>
+            <Route path="/start" element={<GettingStarted />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/workspace" element={<Suspense fallback={<p>Loading workspace…</p>}><Workspace/></Suspense>} />
-            <Route path="/workspace/events/:id" element={<Suspense fallback={<p>Loading evidence…</p>}><WorkspaceEvent/></Suspense>} />
+            <Route path="/workspace" element={<Suspense fallback={<p>Cargando área de trabajo…</p>}><Workspace/></Suspense>} />
+            <Route path="/workspace/events/:id" element={<Suspense fallback={<p>Cargando evidencia…</p>}><WorkspaceEvent/></Suspense>} />
             <Route path="/accounts" element={<Accounts />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/sessions/new" element={<NewSession />} />
@@ -53,7 +55,7 @@ export function Router() {
                   element={
                     <section className="panel">
                       <h2>{path}</h2>
-                      <p>Planned for a future requirement.</p>
+                      <p>Previsto para un requerimiento futuro.</p>
                     </section>
                   }
                 />

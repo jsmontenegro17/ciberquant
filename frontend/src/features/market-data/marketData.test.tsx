@@ -28,54 +28,54 @@ function mount(ui: React.ReactNode, role = "USER") {
 it("renders coverage for USER without administrative import controls", async () => {
   mount(<MarketData />);
   await screen.findByText("BROKERA");
-  expect(screen.queryByRole("heading", { name: "Import CSV" })).toBeNull();
+  expect(screen.queryByRole("heading", { name: "Importar CSV" })).toBeNull();
   expect(screen.getByText("EURUSD")).toBeTruthy();
 });
 it("ADMIN confirms metadata and uploads FormData, then sees detailed report", async () => {
   mount(<MarketData />, "ADMIN");
-  await screen.findByText(/Maximum 20 MB/);
-  fireEvent.change(screen.getByLabelText("Source"), { target: { value: "MT5" } });
-  fireEvent.change(screen.getByLabelText("Symbol"), { target: { value: "EURUSD" } });
+  await screen.findByText(/Máximo 20 MB/);
+  fireEvent.change(screen.getByLabelText("Fuente"), { target: { value: "MT5" } });
+  fireEvent.change(screen.getByLabelText("Símbolo"), { target: { value: "EURUSD" } });
   const file = new File(["open_time,..."], "fixture.csv", { type: "text/csv" });
-  await userEvent.upload(screen.getByLabelText("CSV file"), file);
+  await userEvent.upload(screen.getByLabelText("Archivo CSV"), file);
   // Exercise submit handlers directly; real browser file validity is covered by E2E.
-  fireEvent.submit(screen.getByLabelText("CSV file").closest("form")!);
+  fireEvent.submit(screen.getByLabelText("Archivo CSV").closest("form")!);
   expect(marketApi.upload).not.toHaveBeenCalled();
   await screen.findByRole("status");
-  fireEvent.submit(screen.getByLabelText("CSV file").closest("form")!);
-  await screen.findByText("Import COMPLETED");
+  fireEvent.submit(screen.getByLabelText("Archivo CSV").closest("form")!);
+  await screen.findByText("Importación Completada (COMPLETED)");
   const body = vi.mocked(marketApi.upload).mock.calls[0][0];
   expect(body.get("source")).toBe("MT5");
   expect(body.get("file")).toBe(file);
-  expect(screen.getByText("Conflicts")).toBeTruthy();
+  expect(screen.getByText("Conflictos")).toBeTruthy();
 });
 it("displays data conflict evidence, not a generic failure", async () => {
   vi.mocked(marketApi.imports).mockResolvedValue({ items: [{ ...report, status: "FAILED", errors: [{ code: "DATA_CONFLICT", message: "Original candle preserved" }] }], total: 1, offset: 0, limit: 20 });
   mount(<MarketData />);
-  fireEvent.click(await screen.findByRole("button", { name: "View report #1" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Ver informe n.º1" }));
   expect(screen.getByRole("alert").textContent).toContain("DATA_CONFLICT");
 });
 it("catalog analyzes only on request and renders observed results and metadata", async () => {
   mount(<Cataloger />);
   await screen.findByRole("option", { name: /MT5/ });
   expect(marketApi.analyze).not.toHaveBeenCalled();
-  const select = screen.getByLabelText("Dataset") as HTMLSelectElement;
+  const select = screen.getByLabelText("Conjunto de datos") as HTMLSelectElement;
   fireEvent.change(select, { target: { value: select.options[1].value } });
-  fireEvent.change(screen.getByLabelText("Pattern length"), { target: { value: "4" } });
-  fireEvent.click(screen.getByLabelText("Include doji (pattern and outcome)"));
+  fireEvent.change(screen.getByLabelText("Longitud del patrón"), { target: { value: "4" } });
+  fireEvent.click(screen.getByLabelText("Incluir doji (patrón y resultado)"));
   expect(marketApi.analyze).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button", { name: "Analyze" }));
+  fireEvent.click(screen.getByRole("button", { name: "Analizar" }));
   await screen.findByText("CCC");
   expect(marketApi.analyze).toHaveBeenCalledWith(expect.objectContaining({ broker: "BROKERA", market_type: "REGULAR", pattern_length: 4, include_doji: false }));
   expect(screen.getByText("100.00%")).toBeTruthy();
-  expect(screen.getByText("Small sample")).toBeTruthy();
-  expect(screen.getByText("Gap windows skipped")).toBeTruthy();
+  expect(screen.getByText("Muestra pequeña")).toBeTruthy();
+  expect(screen.getByText("Ventanas omitidas por huecos")).toBeTruthy();
 });
 it("supports empty dataset state", async () => {
   vi.mocked(marketApi.coverage).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 100 });
   mount(<Cataloger />);
-  await screen.findByText("No datasets available. Ask an administrator to import a CSV.");
-  expect((screen.getByRole("button", { name: "Analyze" }) as HTMLButtonElement).disabled).toBe(true);
+  await screen.findByText("No hay datos disponibles. Un administrador puede importar un CSV.");
+  expect((screen.getByRole("button", { name: "Analizar" }) as HTMLButtonElement).disabled).toBe(true);
 });
 it("shows coverage API errors", async () => {
   vi.mocked(marketApi.coverage).mockRejectedValue(new Error("Coverage unavailable"));
@@ -86,17 +86,17 @@ it("shows catalog API errors without previous success results", async () => {
   vi.mocked(marketApi.analyze).mockRejectedValue(new Error("Narrow the date range"));
   mount(<Cataloger />);
   await screen.findByRole("option", { name: /MT5/ });
-  const select = screen.getByLabelText("Dataset") as HTMLSelectElement;
+  const select = screen.getByLabelText("Conjunto de datos") as HTMLSelectElement;
   fireEvent.change(select, { target: { value: select.options[1].value } });
-  fireEvent.click(screen.getByRole("button", { name: "Analyze" }));
+  fireEvent.click(screen.getByRole("button", { name: "Analizar" }));
   await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("Narrow the date range"));
 });
 it("shows zero eligible windows without invented patterns", async () => {
   vi.mocked(marketApi.analyze).mockResolvedValue({ ...result, patterns: [], eligible_windows: 0 });
   mount(<Cataloger />);
   await screen.findByRole("option", { name: /MT5/ });
-  const select = screen.getByLabelText("Dataset") as HTMLSelectElement;
+  const select = screen.getByLabelText("Conjunto de datos") as HTMLSelectElement;
   fireEvent.change(select, { target: { value: select.options[1].value } });
-  fireEvent.click(screen.getByRole("button", { name: "Analyze" }));
-  await screen.findByText("No eligible windows in this range.");
+  fireEvent.click(screen.getByRole("button", { name: "Analizar" }));
+  await screen.findByText("No hay ventanas aptas en este intervalo.");
 });

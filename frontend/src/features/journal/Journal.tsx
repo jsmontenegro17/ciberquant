@@ -13,7 +13,7 @@ export function Journal() {
   const m = useMutation({
     mutationFn: () =>
       journalApi.create({
-        title: "Trading note",
+        title: "Nota de operaciones",
         content,
         session_id: session ? Number(session) : null,
         trade_id: trade ? Number(trade) : null,
@@ -32,10 +32,10 @@ export function Journal() {
   return (
     <>
       <section className="panel">
-        <h2>Trading journal</h2>
+        <h2>Diario de operaciones</h2>
         <div className="grid compact">
           <label>
-            Session ID
+            ID de sesión
             <input
               type="number"
               min="1"
@@ -44,7 +44,7 @@ export function Journal() {
             />
           </label>
           <label>
-            Trade ID
+            ID de operación
             <input
               type="number"
               min="1"
@@ -53,7 +53,7 @@ export function Journal() {
             />
           </label>
           <label>
-            Date
+            Fecha
             <input
               type="date"
               value={date}
@@ -61,7 +61,7 @@ export function Journal() {
             />
           </label>
         </div>
-        <p>Session and trade filters also link a new note to those records.</p>
+        <p>Los filtros de sesión y operación también vinculan las notas nuevas a esos registros.</p>
         <form
           onSubmit={(e: FormEvent) => {
             e.preventDefault();
@@ -69,7 +69,7 @@ export function Journal() {
           }}
         >
           <label>
-            Note
+            Nota
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -78,15 +78,15 @@ export function Journal() {
             />
           </label>
           {m.error && <p role="alert">{m.error.message}</p>}
-          <button disabled={m.isPending || !content.trim()}>Add note</button>
+          <button disabled={m.isPending || !content.trim()}>Añadir nota</button>
         </form>
       </section>
       {q.isLoading ? (
-        <p>Loading journal…</p>
+        <p>Cargando diario…</p>
       ) : q.isError ? (
         <ErrorState />
       ) : !rows?.length ? (
-        <p>No journal entries for these filters.</p>
+        <p>No hay notas del diario para estos filtros.</p>
       ) : (
         rows.map((x) => (
           <article className="panel" key={x.id}>
@@ -94,8 +94,8 @@ export function Journal() {
             <h2>{x.title}</h2>
             <p>{x.content}</p>
             <small>
-              {x.session_id ? "Session #" + x.session_id : "General note"}
-              {x.trade_id ? " · Trade #" + x.trade_id : ""}
+              {x.session_id ? "Sesión n.º" + x.session_id : "Nota general"}
+              {x.trade_id ? " · Operación n.º" + x.trade_id : ""}
             </small>
           </article>
         ))
