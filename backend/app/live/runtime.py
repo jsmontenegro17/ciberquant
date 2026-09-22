@@ -133,16 +133,23 @@ class ScannerRuntime:
                 attempt += 1
                 self.retry[key] = (attempt, received_at + timedelta(seconds=min(60, 2 ** min(attempt, 6))), code == "DATA_CONFLICT")
                 with self.factory() as s:
+                    health = s.get(LiveSubscription, key)
+                    # Preserve the first sanitized diagnostic across restart/pause-resume.
+                    # Existing pre-diagnostic latches remain unknown; never invent a revision.
+                    conflict_details = (health.health or {}).get("conflict") if health else None
+                    if conflict_details is None and isinstance(exc, DataConflictError):
+                        conflict_details = serialize(exc.details)
                     for item in s.scalars(select(ScannerWatchItem).where(ScannerWatchItem.id.in_(ids))):
                         item.state = "INSUFFICIENT_HISTORY" if code == "INSUFFICIENT_HISTORY" else "PROVIDER_DOWN"
                         item.latest = {"state": item.state, "error": code, "research_signal": "No order sent"}
                         item.updated_at = received_at
-                    health = s.get(LiveSubscription, key)
                     if health:
                         if health.status != "DISCONNECTED":
                             audit(s, item.user_id, "PROVIDER_STATE_CHANGED", "live_subscription", None)
                         health.status, health.updated_at = "DISCONNECTED", received_at
                         health.health = {"error": code, "reconnect_count": attempt, "last_received": received_at.isoformat()}
+                        if code == "DATA_CONFLICT" and conflict_details is not None:
+                            health.health = {**health.health, "conflict": conflict_details}
                     s.commit()
 
     def process(self, key, ids, received_at, attempt):

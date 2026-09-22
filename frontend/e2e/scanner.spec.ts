@@ -3,6 +3,7 @@ test('validated Replay → NO_MATCH → MATCH → paper outcome → private hist
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/login');await page.getByLabel("Correo electrónico").fill('qa@example.com');await page.getByLabel("Contraseña").fill('browser-test-only');await page.getByRole('button',{name:"Iniciar sesión"}).click();
  await page.locator("aside").getByRole('link',{name:"Seguimiento en vivo",exact:true}).click();
+ await page.getByText('Configurar un nuevo seguimiento',{exact:true}).click();
  await page.getByLabel("Nombre de la lista").fill('Browser Replay');await page.getByRole('button',{name:"Crear lista de seguimiento",exact:true}).click();
  await page.getByLabel("Datos existentes").selectOption({label:'SCANNER_FIXTURE / DEMO / EURUSD / REGULAR / 1h'});
  await page.getByRole('combobox',{name:"Estrategia",exact:true}).selectOption({label:"Scanner validated fixture · En prueba (TESTING)"});
@@ -14,6 +15,15 @@ test('validated Replay → NO_MATCH → MATCH → paper outcome → private hist
  await expect(watched.getByText(/CONDICIONES CUMPLIDAS/)).toBeVisible({timeout:15000});
  await expect(watched.getByText("RENDIMIENTO INFERIOR AL SUPUESTO DE VALIDACIÓN")).toBeVisible();
  await expect(page.getByText('OBSERVACIÓN SIMULADA EN REPRODUCCIÓN · Ganada (WIN)',{exact:true}).first()).toBeVisible();
+ await page.getByText('Configurar un nuevo seguimiento',{exact:true}).click();
+ await page.getByRole('button',{name:/Ver velas y conexión/}).first().click();
+ await expect(page.getByText(/Vista de hasta dos velas/)).toBeVisible();
+ await expect(page.locator('pre:visible')).toHaveCount(0);
+ await page.getByRole('heading',{name:/Vista en vivo/}).scrollIntoViewIfNeeded();
+ await page.screenshot({path:'test-results/req010-scanner-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.screenshot({path:'test-results/req010-scanner-mobile.png',fullPage:true});
  await page.screenshot({path:'test-results/req007-scanner-desktop.png',fullPage:true});
  await page.setViewportSize({width:768,height:1024});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  await page.screenshot({path:'test-results/req007-scanner-tablet.png',fullPage:true});

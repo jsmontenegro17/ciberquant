@@ -1,5 +1,9 @@
 # Project State
 
+## Cambio en revisión
+
+REQ-010 — Seguimiento visual: QA. Panel de velas/conexión, orientación «¿Qué hago ahora?», seguimientos propios visibles automáticamente y diagnóstico persistido de futuras revisiones. Ampliación delegada2026-09-22; no modifica motores, velas ni estrategias existentes. ADR-006 intacto: suscripciones en conflicto siguen bloqueadas. 73 pruebas frontend,204 backend (22 skips locales),8 E2E reales y1 prueba visual controlada PASS. Integración/publicación pendientes de cierre.
+
 ## Current version
 1.0.0 — REQ-008 DONE / Human Acceptance PASS on2026-09-19 (America/Bogota). Approved implementation 618301e84e8a65f2cbe7e2a46bc6384524db2e93; REQ-001–008 DONE / PASS. Implementation CI35478263706/35478266262 PASS. Closure is documentation/version only; final release HEAD, integrated main CI and tag evidence are recorded in [PR #7](https://github.com/jsmontenegro17/ciberquant/pull/7). [QA evidence](REQ008_QA_UNBLOCK.md), [ADR-006](adr/ADR-006-iq-post-close-finality-fail-closed.md).
 0.7.0 — REQ-007 DONE / Human Acceptance PASS on 2026-09-19. Approved HEAD e381084b0cace7eab2fb29b06dfd112131d4a1a5, PR #6. REQ-001–007 DONE / PASS. Main SHA, final CI and tag evidence are recorded in the PR #6 release handoff.
