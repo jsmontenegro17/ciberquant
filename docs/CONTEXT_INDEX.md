@@ -1,6 +1,6 @@
 # Context Index
 
-En revisión: [REQ-010 — Seguimiento visual](requirements/REQ-010-seguimiento-visual.md), QA. Presentación visual de instantáneas del scanner, JSON bajo detalles; solo frontend. Publicación pendiente.
+En revisión: [REQ-010 — Seguimiento visual](requirements/REQ-010-seguimiento-visual.md), QA. Vista sencilla y diagnóstico persistido de futuras revisiones; JSON bajo detalles. Ampliación autorizada2026-09-22: mantiene ADR-006 y no reactiva conflictos. Publicación pendiente.
 
 Trabajo actual: [REQ-009 — Español y primeros pasos](requirements/REQ-009-espanol-primeros-pasos.md), DONE, GO de revisión final/publicación del titular2026-09-21. Guía: `frontend/src/features/start/`; etiquetas/errores: `frontend/src/utils/spanish.ts`. Solo presentación; no modifica contratos ni motores. Evidencia de integración y publicación en PR#8; versión base1.0.0 sin nuevo tag.
 

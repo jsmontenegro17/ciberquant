@@ -33,3 +33,16 @@ it('formats timestamps explicitly in UTC and handles invalid values',()=>{
  expect(utcTime('2026-09-21T17:00:00Z')).toContain('UTC');
  expect(utcTime('bad')).toBe('Sin registro');
 });
+it('shows preserved first and revised prices without offering reactivation',()=>{
+ const stopped={...item,state:'PROVIDER_DOWN',latest:{error:'DATA_CONFLICT'}};
+ render(<><LiveSnapshot item={stopped} subscription={{...subscription,health:{error:'DATA_CONFLICT',conflict:{old_close:'1.1441250000',new_close:'1.144105',open_time:'2026-09-21T17:24:00Z'}}}}/><ScannerCard item={stopped} onToggle={()=>{}}/></>);
+ expect(screen.getByText('1.1441250000')).toBeTruthy();
+ expect(screen.getByText('1.144105')).toBeTruthy();
+ expect(screen.getByText('Detenido para proteger tus resultados')).toBeTruthy();
+ expect((screen.getByRole('button',{name:'Requiere revisión técnica'}) as HTMLButtonElement).disabled).toBe(true);
+ expect(screen.queryByRole('img')).toBeNull();
+});
+it('does not reconstruct missing old conflict evidence',()=>{
+ render(<LiveSnapshot item={{...item,latest:{error:'DATA_CONFLICT'}}} subscription={subscription}/>);
+ expect(screen.getByText(/no se guardó el segundo precio/)).toBeTruthy();
+});

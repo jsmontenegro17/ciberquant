@@ -71,7 +71,10 @@ it('creates a watchlist, selects full dataset/version, surfaces compatibility re
  vi.spyOn(researchApi,'strategies').mockResolvedValue(page([{id:1,name:'Fixed research',description:'',status:'TESTING'}]));
  vi.spyOn(researchApi,'versions').mockResolvedValue(page([{id:1,strategy_id:1,version:1,trade_direction:'PUT',indicator_specs:[],condition_tree:{left:{type:'FIELD',field:'close',bars_ago:0},operator:'GT',right:{type:'NUMBER',value:'0'}},strategy_dsl_version:'cq-strategy-dsl-v1',feature_engine_version:'cq-features-v1',definition_sha256:'hash',created_at:'2026-01-01',validation_state:'HISTORICALLY_VALIDATED'}]));
  render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false},mutations:{retry:false}}})}><Scanner/></QueryClientProvider>);
+ await waitFor(()=>expect(scannerApi.items).toHaveBeenCalledWith(true,0));
+ await waitFor(()=>expect(scannerApi.snapshot).toHaveBeenCalledWith(1));
  fireEvent.click(screen.getByText('Configurar un nuevo seguimiento'));
+ expect((screen.getByRole('checkbox',{name:'Crear en modo investigación (sin validación histórica)'}) as HTMLInputElement).checked).toBe(false);
  fireEvent.change(screen.getByLabelText("Nombre de la lista"),{target:{value:'Research desk'}});
  fireEvent.click(screen.getByRole('button',{name:"Crear lista de seguimiento"}));
  await waitFor(()=>expect(scannerApi.createList).toHaveBeenCalledWith('Research desk',expect.anything()));

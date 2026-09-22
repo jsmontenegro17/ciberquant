@@ -410,10 +410,17 @@ def test_fake_transport_revision_fails_closed_without_overwrite(harness):
             assert s.scalar(select(func.count()).select_from(ScannerEvent)) == 1
             assert s.scalar(select(Candle).where(Candle.open_time == BASE + timedelta(minutes=2))).close == before
             assert s.get(LiveSubscription, key).health["error"] == "DATA_CONFLICT"
+            details = s.get(LiveSubscription, key).health["conflict"]
+            assert details["old_close"] == str(before)
+            assert details["new_close"] == "1.10003"
+            assert details["changed_fields"] == ["close"]
+            assert details["detection_layer"] == "RUNTIME_OBSERVED_PERSISTENCE"
+            assert not {"password", "ssid", "email", "token"}.intersection(details)
             iid = s.scalar(select(ScannerWatchItem.id))
         snapshot = client.get("/api/v1/live/snapshot", params={"item_id": iid}).json()
         assert snapshot["item"]["latest"]["error"] == "DATA_CONFLICT"
         assert snapshot["subscription"]["health"]["error"] == "DATA_CONFLICT"
+        assert snapshot["subscription"]["health"]["conflict"] == details
         overview = client.get("/api/v1/workspace/overview", params={**META.model_dump(), "strategy_version_id": version_id}).json()
         assert next(stage for stage in overview["pipeline"] if stage["name"] == "SCANNER")["status"] == "FAILED"
     finally:

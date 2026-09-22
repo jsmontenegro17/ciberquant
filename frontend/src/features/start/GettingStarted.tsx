@@ -13,6 +13,8 @@ export function GettingStarted() {
     <section className="panel">
       <div className="eyebrow">BIENVENIDO A CIBERQUANT</div>
       <h2>Empieza por aquí</h2>
+      <p><Link className="button" to="/scanner">Ver mis estrategias y su estado</Link></p>
+      <p>Si ya creaste una estrategia, empieza por ese botón: verás qué ocurre y qué hacer a continuación, sin configurar nada de nuevo.</p>
       <p>Esta es una herramienta para investigar: observar precios, definir una idea y comprobar qué ocurrió con ella. No es un robot que compra o vende y no promete ganancias.</p>
       <p>Si acabas de entrar y ves pantallas vacías, no significa que algo esté roto. Todavía necesitas elegir datos y definir qué quieres estudiar.</p>
     </section>
